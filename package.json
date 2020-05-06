@@ -1,0 +1,24 @@
+{
+  "name": "react-use-websockets",
+  "version": "0.1.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nils-drechsel/react-use-websockets.git"
+  },
+  "author": "Nils J. D. Drechsel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nils-drechsel/react-use-websockets/issues"
+  },
+  "homepage": "https://github.com/nils-drechsel/react-use-websockets#readme",
+  "devDependencies": {
+    "@types/react": "^16.9.34",
+    "typescript": "^3.8.3"
+  }
+}
