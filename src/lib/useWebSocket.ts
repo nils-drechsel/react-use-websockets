@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
-import { WebSocketManager, ListenerCallback, UnsubscribeCallback } from './WebSocketManager';
+import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback } from './WebSocketManager';
 
 
 
@@ -18,6 +18,10 @@ export const useWebSocket = () => {
         if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
         return manager.isConnected();
     }
+    const connectivity = (callback: ConnectivityCallback): UnsubscribeCallback => {
+        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
+        return manager.addConnectivityListener(callback);
+    }
 
-    return { send, listen, isConnected };
+    return { send, listen, isConnected, connectivity };
 }

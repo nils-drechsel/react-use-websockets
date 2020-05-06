@@ -1,5 +1,8 @@
 export interface ListenerCallback {
-    (message: string, payload: any, id: number | null | undefined): void;
+    (payload: any): void;
+}
+export interface ConnectivityCallback {
+    (isConnected: boolean): void;
 }
 export interface UnsubscribeCallback {
     (): void;
@@ -10,6 +13,7 @@ export declare class WebSocketManager {
     messageToListeners: Map<string, Set<number>>;
     listenerToCallback: Map<number, any>;
     listenerToMessage: Map<number, any>;
+    connectivityListeners: Set<number>;
     listenerIdCount: number;
     noReconnectOn: Set<number>;
     queue: Array<string>;
@@ -30,4 +34,6 @@ export declare class WebSocketManager {
     createId(): number;
     removeListener(id: number): void;
     addListener(message: string, callback: ListenerCallback): UnsubscribeCallback;
+    removeConnectivityListener(id: number): void;
+    addConnectivityListener(callback: ListenerCallback): UnsubscribeCallback;
 }
