@@ -46,7 +46,6 @@ export class WebSocketManager {
     }
 
     isConnected() {
-        console.log("THIS: ", this);
         return this.ws.readyState === 1;
     }
 
@@ -159,7 +158,7 @@ export class WebSocketManager {
         this.listenerToMessage.set(id, message);
 
         const returnRemoveCallback = () => this.removeListener(id);
-        return returnRemoveCallback;
+        return returnRemoveCallback.bind(this);
     }
 
 
@@ -177,6 +176,6 @@ export class WebSocketManager {
 
 
         const returnRemoveCallback = () => this.removeConnectivityListener(id);
-        return returnRemoveCallback;
+        return returnRemoveCallback.bind(this);
     }
 }
