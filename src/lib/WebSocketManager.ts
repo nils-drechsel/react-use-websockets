@@ -18,10 +18,11 @@ export class WebSocketManager {
     listenerIdCount: number;
     noReconnectOn: Set<number>;
     queue: Array<string>;
+    messageIdent: string;
+    payloadIdent: string;
 
-    constructor(url: string) {
+    constructor(url: string, messageIdent = "message", payloadIdent = "payload") {
         this.url = url
-        this.ws = new WebSocket(url);
         this.listenerIdCount = 0;
         this.messageToListeners = new Map();
         this.listenerToCallback = new Map();
@@ -30,6 +31,9 @@ export class WebSocketManager {
         this.noReconnectOn.add(1000);
         this.noReconnectOn.add(1001);
         this.queue = [];
+        this.messageIdent = messageIdent;
+        this.payloadIdent = payloadIdent;
+        this.ws = new WebSocket(url);
         this.ws.onmessage = this.onMessage.bind(this);
         this.ws.onopen = this.onConnect.bind(this);
         this.ws.onclose = this.onClose.bind(this);
@@ -57,15 +61,18 @@ export class WebSocketManager {
 
     onMessage(event: MessageEvent) {
         const data = JSON.parse(event.data);
-        const message = data.msg;
+        const message = data[this.messageIdent];
+        const payload = data[this.payloadIdent];
+        console.log("received message", message, "with payload", data.payload, "raw:", event.data);
+
         if (!this.messageToListeners.has(message)) return;
         const listeners = this.messageToListeners.get(message);
 
-        console.log("received message", message, "with payload", data.payload, " listeners:", listeners);
+        console.log("message", message, "with payload", payload, " has listeners:", listeners);
 
-        const callbacks = Array.from(listeners!.values()).map((listener: number) => this.listenerToMessage.get(listener));
+        const callbacks = Array.from(listeners!.values()).map((listener: number) => this.listenerToCallback.get(listener));
 
-        callbacks?.forEach(callback => callback());
+        callbacks?.forEach(callback => callback(payload));
 
     }
 
@@ -80,9 +87,10 @@ export class WebSocketManager {
 
 
     send(message: string, payload: any = null) {
-        const data = {
-            msg: message,
-            pl: payload
+        const data: any = {}
+        data[this.messageIdent] = message;
+        if (payload) {
+            data[this.payloadIdent] = payload
         }
 
         const raw = JSON.stringify(data);

@@ -3,17 +3,18 @@ import { WebSocketManager } from "./WebSocketManager";
 import { WebSocketContext } from "./WebSocketContext";
 
 type Props = {
-    url: string
-    children: any
+    url: string,
+    messageIdent?: string,
+    payloadIdent?: string,
 }
 
 
-export const WebSocketProvider: FunctionComponent<Props> = ({ url, children }) => {
+export const WebSocketProvider: FunctionComponent<Props> = ({ url, messageIdent, payloadIdent, children }) => {
 
     const managerRef = useRef<WebSocketManager>();
 
     if (!managerRef.current) {
-        managerRef.current = new WebSocketManager(url);
+        managerRef.current = new WebSocketManager(url, messageIdent || "message", payloadIdent || "payload");
     }
 
 

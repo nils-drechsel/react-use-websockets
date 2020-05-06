@@ -13,7 +13,9 @@ export declare class WebSocketManager {
     listenerIdCount: number;
     noReconnectOn: Set<number>;
     queue: Array<string>;
-    constructor(url: string);
+    messageIdent: string;
+    payloadIdent: string;
+    constructor(url: string, messageIdent?: string, payloadIdent?: string);
     isConnected(): boolean;
     reinit(): void;
     onConnect(_event: Event): void;
