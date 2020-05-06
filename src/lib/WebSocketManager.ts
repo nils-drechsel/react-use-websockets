@@ -20,9 +20,11 @@ export class WebSocketManager {
     queue: Array<string>;
     messageIdent: string;
     payloadIdent: string;
+    reconnect: boolean;
 
-    constructor(url: string, messageIdent = "message", payloadIdent = "payload") {
+    constructor(url: string, messageIdent = "message", payloadIdent = "payload", reconnect = false) {
         this.url = url
+        this.reconnect = reconnect;
         this.listenerIdCount = 0;
         this.messageToListeners = new Map();
         this.listenerToCallback = new Map();
@@ -34,18 +36,28 @@ export class WebSocketManager {
         this.messageIdent = messageIdent;
         this.payloadIdent = payloadIdent;
         this.ws = new WebSocket(url);
-        this.ws.onmessage = this.onMessage.bind(this);
-        this.ws.onopen = this.onConnect.bind(this);
-        this.ws.onclose = this.onClose.bind(this);
+        this.initListeners();
     }
 
     isConnected() {
         return this.ws.readyState === 1;
     }
 
-    reinit() {
+    sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async reinit() {
+        await this.sleep(1000);
         console.log("reinit");
         this.ws = new WebSocket(this.url);
+        this.initListeners();
+    }
+
+    initListeners() {
+        this.ws.onmessage = this.onMessage.bind(this);
+        this.ws.onopen = this.onConnect.bind(this);
+        this.ws.onclose = this.onClose.bind(this);
     }
 
     onConnect(_event: Event) {
@@ -55,15 +67,15 @@ export class WebSocketManager {
 
 
     onClose(event: CloseEvent) {
-        console.log("close connection");
-        if (!this.noReconnectOn.has(event.code)) this.reinit();
+        console.log("close connection", event);
+        if (!this.noReconnectOn.has(event.code) && this.reconnect) this.reinit();
     }
 
     onMessage(event: MessageEvent) {
         const data = JSON.parse(event.data);
         const message = data[this.messageIdent];
         const payload = data[this.payloadIdent];
-        console.log("received message", message, "with payload", data.payload, "raw:", event.data);
+        console.log("received message", message, "with payload", payload, "raw:", event.data);
 
         if (!this.messageToListeners.has(message)) return;
         const listeners = this.messageToListeners.get(message);

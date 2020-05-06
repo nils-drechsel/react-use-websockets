@@ -15,9 +15,12 @@ export declare class WebSocketManager {
     queue: Array<string>;
     messageIdent: string;
     payloadIdent: string;
-    constructor(url: string, messageIdent?: string, payloadIdent?: string);
+    reconnect: boolean;
+    constructor(url: string, messageIdent?: string, payloadIdent?: string, reconnect?: boolean);
     isConnected(): boolean;
-    reinit(): void;
+    sleep(ms: number): Promise<unknown>;
+    reinit(): Promise<void>;
+    initListeners(): void;
     onConnect(_event: Event): void;
     onClose(event: CloseEvent): void;
     onMessage(event: MessageEvent): void;
