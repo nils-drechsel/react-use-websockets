@@ -4,17 +4,15 @@ import { WebSocketContext } from "./WebSocketContext";
 
 type Props = {
     url: string,
-    messageIdent?: string,
-    payloadIdent?: string,
 }
 
 
-export const WebSocketProvider: FunctionComponent<Props> = ({ url, messageIdent, payloadIdent, children }) => {
+export const WebSocketProvider: FunctionComponent<Props> = ({ url, children }) => {
 
     const managerRef = useRef<WebSocketManager>();
 
     if (!managerRef.current) {
-        managerRef.current = new WebSocketManager(url, messageIdent || "message", payloadIdent || "payload");
+        managerRef.current = new WebSocketManager(url);
     }
 
 

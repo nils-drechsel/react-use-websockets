@@ -1,14 +1,14 @@
 import { useContext } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
-import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback } from './WebSocketManager';
+import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
 
 
 
 export const useWebSocket = () => {
     const manager = useContext(WebSocketContext) as unknown as WebSocketManager;
-    const send = (message: string, payload: any) => {
+    const send = (message: string, payload: any, toSid: any = null) => {
         if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
-        manager.send(message, payload);
+        manager.send(message, payload, toSid);
     };
     const listen = (message: string, callback: ListenerCallback): UnsubscribeCallback => {
         if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
@@ -22,6 +22,10 @@ export const useWebSocket = () => {
         if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
         return manager.addConnectivityListener(callback);
     }
+    const setDefaultCallback = (callback: DefaultListenerCallback): void => {
+        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
+        return manager.setDefaultCallback(callback);
+    }
 
-    return { send, listen, isConnected, connectivity };
+    return { send, listen, isConnected, connectivity, setDefaultCallback };
 }
