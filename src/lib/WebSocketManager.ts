@@ -141,7 +141,7 @@ export class WebSocketManager {
 
 
     send(message: string, payload: any = null, toSid: string | null = null) {
-        const data: any = [message, toSid, JSON.stringify(payload)]
+        const data: any = [message, toSid, typeof (payload) !== "object" ? payload : JSON.stringify(payload)]
 
         const raw = data.join("\t");
 
