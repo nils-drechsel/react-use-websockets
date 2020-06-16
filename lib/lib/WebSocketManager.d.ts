@@ -21,10 +21,10 @@ export declare class WebSocketManager {
     listenerIdCount: number;
     noReconnectOn: Set<number>;
     queue: Array<string>;
-    separator: string;
+    delimiter: string;
     reconnect: boolean;
     logging: boolean;
-    constructor(url: string, separator?: string, reconnect?: boolean, logging?: boolean);
+    constructor(url: string, delimiter?: string, reconnect?: boolean, logging?: boolean);
     isConnected(): boolean;
     sleep(ms: number): Promise<unknown>;
     reinit(): Promise<void>;

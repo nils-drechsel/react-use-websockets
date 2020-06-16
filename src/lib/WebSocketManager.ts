@@ -29,11 +29,11 @@ export class WebSocketManager {
     listenerIdCount: number;
     noReconnectOn: Set<number>;
     queue: Array<string>;
-    separator: string;
+    delimiter: string;
     reconnect: boolean;
     logging: boolean;
 
-    constructor(url: string, separator = "\t", reconnect = false, logging = true) {
+    constructor(url: string, delimiter = "\t", reconnect = false, logging = true) {
         this.url = url
         this.reconnect = reconnect;
         this.defaultCallback = null;
@@ -46,7 +46,7 @@ export class WebSocketManager {
         this.noReconnectOn.add(1000);
         this.noReconnectOn.add(1001);
         this.queue = [];
-        this.separator = separator;
+        this.delimiter = delimiter;
         this.logging = logging;
         this.ws = new WebSocket(url);
         this.initListeners();
@@ -92,7 +92,7 @@ export class WebSocketManager {
 
     onMessage(event: MessageEvent) {
         const raw: string = event.data;
-        const parts = raw.split(this.separator);
+        const parts = raw.split(this.delimiter);
 
         const message = parts[0];
         const fromSid = this.getSid(parts[1]);
