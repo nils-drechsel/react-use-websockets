@@ -1,3 +1,7 @@
+// This file is auto-generated. Do not modify
+
+// @ts-ignore: unused
+import { validateNotEmpty, errorNotEmpty, validateRegex, errorRegex, validateLength, errorLength, validateSize, errorSize, validateComparison, errorComparison } from "react-use-websockets/lib/lib/store/beans/StoreBeanUtils"
 export enum StoreMessage {
     CONNECT = "CONNECT",
     DISCONNECT = "DISCONNECT",
@@ -17,7 +21,7 @@ export type NullBean = {
 }
 
 export type DisconnectPayload = {
-    storeId: string,
+    path: Array<string>,
 }
 
 export enum Comparator {

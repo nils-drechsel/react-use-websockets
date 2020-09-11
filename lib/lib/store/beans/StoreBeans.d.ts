@@ -12,7 +12,7 @@ export declare type ConnectPayload = {
 };
 export declare type NullBean = {};
 export declare type DisconnectPayload = {
-    storeId: string;
+    path: Array<string>;
 };
 export declare enum Comparator {
     EQUAL = "EQUAL",

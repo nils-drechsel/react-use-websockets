@@ -1,6 +1,6 @@
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
 export declare class RemoteStore {
-    store: Map<string, Map<string, any> | null>;
+    store: Map<string, Map<string, any> | undefined>;
     subscribers: Map<string, Map<string, ((data: any) => void)>>;
     websocketManager: WebSocketManager;
     unsubscribeListener: UnsubscribeCallback;
@@ -8,8 +8,9 @@ export declare class RemoteStore {
     initRemoteStore(): UnsubscribeCallback;
     releaseRemoteStore(): void;
     openRemoteStore(path: Array<string>): void;
-    closeRemoteStore(storeId: string): void;
+    closeRemoteStore(path: Array<string>): void;
+    getData(path: Array<string>): Map<string, any> | undefined;
     register(path: Array<string>, setData: (data: any) => void): (() => void);
-    deregister(storeId: string, id: string): void;
+    deregister(path: Array<string>, id: string): void;
     update(storeId: string, data: Map<string, any>): void;
 }

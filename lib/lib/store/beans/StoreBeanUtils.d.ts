@@ -10,7 +10,7 @@ export interface UpdateFunction<TYPE> {
     (changeset: Partial<TYPE>): void;
 }
 export declare const updateBean: <TYPE>(setBean: SetFunction<TYPE>) => UpdateFunction<TYPE>;
-export declare const validateNotEmpty: (value?: string | undefined) => boolean;
+export declare const validateNotEmpty: (value?: any) => boolean;
 export declare const errorNotEmpty: (fieldName: string) => string;
 export declare const validateComparison: (cmp: Comparator, baseValue: number, value?: number | undefined) => boolean;
 export declare const errorComparison: (cmp: Comparator, baseValue: number, fieldName: string) => string;

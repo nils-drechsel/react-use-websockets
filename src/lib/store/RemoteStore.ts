@@ -9,7 +9,7 @@ import { createStoreId } from "./beans/StoreBeanUtils";
 
 export class RemoteStore {
 
-    store: Map<string, Map<string, any> | null>;
+    store: Map<string, Map<string, any> | undefined>;
     subscribers: Map<string, Map<string, ((data: any) => void)>>;
     websocketManager: WebSocketManager;
     unsubscribeListener: UnsubscribeCallback;
@@ -34,7 +34,7 @@ export class RemoteStore {
     openRemoteStore(path: Array<string>) {
         const storeId = createStoreId(path);
         if (!this.store.has(storeId)) {
-            this.store.set(storeId, null);
+            this.store.set(storeId, undefined);
             const payload: ConnectPayload = {
                 path,
             }
@@ -42,12 +42,19 @@ export class RemoteStore {
         }
     }
 
-    closeRemoteStore(storeId: string) {
+    closeRemoteStore(path: Array<string>) {
+        const storeId = createStoreId(path);
         this.store.delete(storeId);
         const payload: DisconnectPayload = {
-            storeId,
+            path,
         }
         this.websocketManager.send(StoreMessage.DISCONNECT, payload);
+    }
+
+    getData(path: Array<string>) {
+        const storeId = createStoreId(path);
+        if (!this.store.has(storeId)) return undefined;
+        return this.store.get(storeId);
     }
 
 
@@ -64,18 +71,19 @@ export class RemoteStore {
 
         this.openRemoteStore(path);
 
-        const returnDeregisterCallback = () => this.deregister(storeId, id);
+        const returnDeregisterCallback = () => this.deregister(path, id);
 
         return returnDeregisterCallback.bind(this);
     }
 
-    deregister(storeId: string, id: string) {
+    deregister(path: Array<string>, id: string) {
+        const storeId = createStoreId(path);
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) return;
         storeSubscribers.delete(id);
         if (storeSubscribers.size === 0) {
             storeSubscribers.delete(storeId);
-            this.closeRemoteStore(storeId);
+            this.closeRemoteStore(path);
         }
     }
 

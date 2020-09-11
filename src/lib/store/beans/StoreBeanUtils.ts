@@ -31,7 +31,7 @@ export const updateBean = <TYPE>(setBean: SetFunction<TYPE>): UpdateFunction<TYP
 
 
 
-export const validateNotEmpty = (value?: string): boolean => {
+export const validateNotEmpty = (value?: any): boolean => {
     return !!value;
 }
 
