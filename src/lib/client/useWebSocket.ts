@@ -2,11 +2,11 @@ import { useContext } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
 
-
+export type SendFunction = (message: string, payload: any, toSid: string | null) => void;
 
 export const useWebSocket = () => {
     const manager = useContext(WebSocketContext) as unknown as WebSocketManager;
-    const send = (message: string, payload: any, toSid: any = null) => {
+    const send: SendFunction = (message: string, payload: any, toSid: string | null = null) => {
         if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
         manager.send(message, payload, toSid);
     };

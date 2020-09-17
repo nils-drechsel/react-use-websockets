@@ -23,7 +23,7 @@ export class RemoteStore {
 
     initRemoteStore(): UnsubscribeCallback {
         return this.websocketManager.addListener(StoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, fromSid?: string | null) => {
-            this.update(payload.id, payload.payload);
+            this.update(payload.id, payload.payload, this.store);
         })
     }
 
@@ -88,13 +88,14 @@ export class RemoteStore {
     }
 
 
-    update(storeId: string, data: Map<string, any>) {
+    update(storeId: string, data: { [key: string]: any; }, lol: any) {
+
         if (!this.store.has(storeId)) {
-            console.log("received data from store " + storeId + " without being subscribed to the store");
+            console.log("received data from store " + storeId + " without being subscribed to the store", this.store);
             return;
         }
         const newStore = new Map(this.store.get(storeId)!);
-        data.forEach((value: any, key: string) => {
+        for (const [key, value] of Object.entries(data)) {
             if (value === null || value === undefined) {
                 newStore.delete(key);
             } else {
@@ -104,7 +105,7 @@ export class RemoteStore {
                     newStore.set(key, value);
                 }
             }
-        })
+        }
         this.store.set(storeId, newStore);
 
         const storeSubscribers = this.subscribers.get(storeId);

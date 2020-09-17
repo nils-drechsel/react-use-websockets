@@ -12,5 +12,7 @@ export declare class RemoteStore {
     getData(path: Array<string>): Map<string, any> | undefined;
     register(path: Array<string>, setData: (data: any) => void): (() => void);
     deregister(path: Array<string>, id: string): void;
-    update(storeId: string, data: Map<string, any>): void;
+    update(storeId: string, data: {
+        [key: string]: any;
+    }, lol: any): void;
 }

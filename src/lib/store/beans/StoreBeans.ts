@@ -1,6 +1,7 @@
 // This file is auto-generated. Do not modify
 
 // @ts-ignore: unused
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { validateNotEmpty, errorNotEmpty, validateRegex, errorRegex, validateLength, errorLength, validateSize, errorSize, validateComparison, errorComparison } from "react-use-websockets/lib/lib/store/beans/StoreBeanUtils"
 export enum StoreMessage {
     CONNECT = "CONNECT",
@@ -9,7 +10,7 @@ export enum StoreMessage {
 }
 
 export type StoreUpdateBean = {
-    payload: Map<string,any>,
+    payload: { [key: string]: any; },
     id: string,
 }
 

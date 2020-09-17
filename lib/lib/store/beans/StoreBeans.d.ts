@@ -4,7 +4,9 @@ export declare enum StoreMessage {
     STORE_UPDATE = "STORE_UPDATE"
 }
 export declare type StoreUpdateBean = {
-    payload: Map<string, any>;
+    payload: {
+        [key: string]: any;
+    };
     id: string;
 };
 export declare type ConnectPayload = {
