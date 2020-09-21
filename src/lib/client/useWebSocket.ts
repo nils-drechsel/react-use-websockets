@@ -1,8 +1,8 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
 
-export type SendFunction = (message: string, payload: any, toSid: string | null) => void;
+export type SendFunction = (message: string, payload: any, toSid?: string | null) => void;
 
 export const useWebSocket = () => {
     const manager = useContext(WebSocketContext) as unknown as WebSocketManager;

@@ -1,4 +1,7 @@
 export { useWebSocket } from "./lib/client/useWebSocket";
+export { useListen } from "./lib/client/helpers";
+export { useListenEffect } from "./lib/client/helpers";
+export { useValidation } from "./lib/client/helpers";
 export { WebSocketContext } from "./lib/client/WebSocketContext";
 export { WebSocketManager } from "./lib/client/WebSocketManager";
 export { WebSocketProvider } from "./lib/client/WebSocketProvider";
