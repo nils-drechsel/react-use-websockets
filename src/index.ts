@@ -1,7 +1,13 @@
 export { useWebSocket } from "./lib/client/useWebSocket";
 export { useListen } from "./lib/client/helpers";
 export { useListenEffect } from "./lib/client/helpers";
-export { useValidation } from "./lib/client/helpers";
+export { useServerValidation } from "./lib/client/helpers";
+export { useClientValidation } from "./lib/client/helpers";
+export { ValidationType } from "./lib/store/beans/StoreBeanUtils";
+export { ValidationCallback } from "./lib/store/beans/StoreBeanUtils";
+export { FailureCallback } from "./lib/store/beans/StoreBeanUtils";
+export { SuccessCallback } from "./lib/store/beans/StoreBeanUtils";
+
 export { WebSocketContext } from "./lib/client/WebSocketContext";
 export { WebSocketManager } from "./lib/client/WebSocketManager";
 export { WebSocketProvider } from "./lib/client/WebSocketProvider";

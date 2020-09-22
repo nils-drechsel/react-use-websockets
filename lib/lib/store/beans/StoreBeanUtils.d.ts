@@ -20,13 +20,16 @@ export declare const validateLength: (length: number, value?: string | undefined
 export declare const errorLength: (length: number, fieldName: string) => string;
 export declare const validateSize: (size: number, value?: any[] | undefined) => boolean;
 export declare const errorSize: (size: number, fieldName: string) => string;
-export interface ValidationCallback<TYPE> {
-    (bean: TYPE): any;
+export interface ValidationType {
+    originId?: string | null;
+    success?: boolean | null;
 }
-export interface ErrorCallback {
-    (validation: any): void;
+export interface ValidationCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+    (bean: BEAN_TYPE): VALIDATION_TYPE;
 }
-export interface SuccessCallback<TYPE> {
-    (validation: any, bean: TYPE): void;
+export interface FailureCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void;
 }
-export declare const validate: <TYPE>(bean: TYPE, validationCallback: ValidationCallback<TYPE>, onError: ErrorCallback, onSuccess: SuccessCallback<TYPE>) => any;
+export interface SuccessCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void;
+}

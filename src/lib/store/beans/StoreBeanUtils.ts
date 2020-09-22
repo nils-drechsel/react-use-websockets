@@ -108,24 +108,19 @@ export const errorSize = (size: number, fieldName: string): string => {
     return fieldName + " needs at least " + size + " characters";
 }
 
-export interface ValidationCallback<TYPE> {
-    (bean: TYPE): any
+export interface ValidationType {
+    originId?: string | null,
+    success?: boolean | null
 }
 
-export interface ErrorCallback {
-    (validation: any): void
+export interface ValidationCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+    (bean: BEAN_TYPE): VALIDATION_TYPE
 }
 
-export interface SuccessCallback<TYPE> {
-    (validation: any, bean: TYPE): void
+export interface FailureCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void
 }
 
-export const validate = <TYPE>(bean: TYPE, validationCallback: ValidationCallback<TYPE>, onError: ErrorCallback, onSuccess: SuccessCallback<TYPE>): any => {
-    const validation = validationCallback(bean);
-    if (validation?.success) {
-        onSuccess(validation, bean);
-    } else {
-        onError(validation);
-    }
-    return validation;
+export interface SuccessCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void
 }
