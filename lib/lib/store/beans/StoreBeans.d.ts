@@ -1,8 +1,3 @@
-export declare enum StoreMessage {
-    CONNECT = "CONNECT",
-    DISCONNECT = "DISCONNECT",
-    STORE_UPDATE = "STORE_UPDATE"
-}
 export declare type StoreUpdateBean = {
     payload: {
         [key: string]: any;
@@ -16,6 +11,12 @@ export declare type NullBean = {};
 export declare type DisconnectPayload = {
     path: Array<string>;
 };
+export declare enum CoreMessage {
+    CONNECT = "CONNECT",
+    DISCONNECT = "DISCONNECT",
+    STORE_UPDATE = "STORE_UPDATE",
+    VALIDATION = "VALIDATION"
+}
 export declare enum Comparator {
     EQUAL = "EQUAL",
     NOT_EQUAL = "NOT_EQUAL",

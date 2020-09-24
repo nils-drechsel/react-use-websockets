@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { StoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload } from "./beans/StoreBeans";
+import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload } from "./beans/StoreBeans";
 import { createStoreId } from "./beans/StoreBeanUtils";
 
 
@@ -22,7 +22,7 @@ export class RemoteStore {
     }
 
     initRemoteStore(): UnsubscribeCallback {
-        return this.websocketManager.addListener(StoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, fromSid?: string | null) => {
+        return this.websocketManager.addListener(CoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, fromSid?: string | null) => {
             this.update(payload.id, payload.payload, this.store);
         })
     }
@@ -38,7 +38,7 @@ export class RemoteStore {
             const payload: ConnectPayload = {
                 path,
             }
-            this.websocketManager.send(StoreMessage.CONNECT, payload);
+            this.websocketManager.send(CoreMessage.CONNECT, payload);
         }
     }
 
@@ -48,7 +48,7 @@ export class RemoteStore {
         const payload: DisconnectPayload = {
             path,
         }
-        this.websocketManager.send(StoreMessage.DISCONNECT, payload);
+        this.websocketManager.send(CoreMessage.DISCONNECT, payload);
     }
 
     getData(path: Array<string>) {
