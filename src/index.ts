@@ -4,7 +4,7 @@ export { useListenEffect } from "./lib/client/helpers";
 export { useServerValidation } from "./lib/client/helpers";
 export { useServerValidationEffect } from "./lib/client/helpers";
 export { performClientValidation } from "./lib/client/helpers";
-export { ValidationType } from "./lib/store/beans/StoreBeanUtils";
+export { ValidationBean } from "./lib/store/beans/StoreBeans";
 export { ValidationCallback } from "./lib/store/beans/StoreBeanUtils";
 export { FailureCallback } from "./lib/store/beans/StoreBeanUtils";
 export { SuccessCallback } from "./lib/store/beans/StoreBeanUtils";
@@ -26,10 +26,14 @@ export { RemoteStoreContext } from "./lib/store/RemoteStoreContext";
 export { RemoteStore } from "./lib/store/RemoteStore";
 export { RemoteStoreProvider } from "./lib/store/RemoteStoreProvider";
 
+export { useRemoteStoreUpdate } from "./lib/store/useRemoteStoreUpdate";
+
 
 
 export { SetFunction } from "./lib/store/beans/StoreBeanUtils"
 export { StateSetFunction } from "./lib/store/beans/StoreBeanUtils"
 export { UpdateFunction } from "./lib/store/beans/StoreBeanUtils"
 export { updateBean } from "./lib/store/beans/StoreBeanUtils"
+export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils"
+export { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils"
 

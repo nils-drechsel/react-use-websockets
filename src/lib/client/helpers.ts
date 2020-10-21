@@ -1,8 +1,10 @@
 import { useEffect, Dispatch, SetStateAction } from 'react';
-import { CoreMessage } from '../store/beans/StoreBeans';
-import { FailureCallback, SuccessCallback, ValidationCallback, ValidationType } from '../store/beans/StoreBeanUtils';
+import { AbstractWebSocketBean, CoreMessage } from '../store/beans/StoreBeans';
+import { FailureCallback, SuccessCallback, ValidationCallback, EditRemoteStoreFunction, PostValidationCallback } from '../store/beans/StoreBeanUtils';
+import { ValidationBean } from '../store/beans/StoreBeans';
 import { useWebSocket } from './useWebSocket';
 import { ListenerCallback, UnsubscribeCallback } from './WebSocketManager';
+import useRemoteStoreUpdate from '../store/useRemoteStoreUpdate';
 
 export const useListenEffect = (message: string, callback: (payload: any, fromSid?: string | null) => void, onInit?: () => void): void => {
     const { listen } = useWebSocket();
@@ -29,7 +31,7 @@ export const useListen = (message: string): ((callback: (payload: any, fromSid?:
 
 }
 
-export const useServerValidationEffect = <VALIDATION_TYPE extends ValidationType>(componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void, onInit?: () => void) => {
+export const useServerValidationEffect = <VALIDATION_TYPE extends ValidationBean>(componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void, onInit?: () => void) => {
 
     useListenEffect(CoreMessage.VALIDATION,
 
@@ -46,7 +48,7 @@ export const useServerValidationEffect = <VALIDATION_TYPE extends ValidationType
 }
 
 
-export const useServerValidation = <VALIDATION_TYPE extends ValidationType>(componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>): ((onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void) => UnsubscribeCallback) => {
+export const useServerValidation = <VALIDATION_TYPE extends ValidationBean>(componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>): ((onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void) => UnsubscribeCallback) => {
     const { listen } = useWebSocket();
 
     return (onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void) => {
@@ -70,7 +72,7 @@ export const useServerValidation = <VALIDATION_TYPE extends ValidationType>(comp
 };
 
 
-export const performClientValidation = <BEAN_TYPE, VALIDATION_TYPE extends ValidationType>(bean: BEAN_TYPE, validationCallback: ValidationCallback<BEAN_TYPE, VALIDATION_TYPE>, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess: SuccessCallback<BEAN_TYPE, VALIDATION_TYPE>, onFailure: FailureCallback<BEAN_TYPE, VALIDATION_TYPE>): void => {
+export const performClientValidation = <BEAN_TYPE extends AbstractWebSocketBean, VALIDATION_TYPE extends ValidationBean>(bean: BEAN_TYPE, validationCallback: ValidationCallback<BEAN_TYPE, VALIDATION_TYPE>, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess: SuccessCallback<BEAN_TYPE, VALIDATION_TYPE>, onFailure: FailureCallback<BEAN_TYPE, VALIDATION_TYPE>): void => {
     const validation = validationCallback(bean);
     setValidation(validation);
     if (validation?.success) {
@@ -79,5 +81,3 @@ export const performClientValidation = <BEAN_TYPE, VALIDATION_TYPE extends Valid
         onFailure(validation, bean);
     }
 }
-
-

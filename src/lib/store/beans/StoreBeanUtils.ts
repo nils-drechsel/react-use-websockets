@@ -1,23 +1,24 @@
-import { Comparator } from "./StoreBeans";
+import { Comparator, ValidationBean, AbstractWebSocketBean } from "./StoreBeans";
 import { WebSocketManager } from "../../client/WebSocketManager";
 
-export const createStoreId = (path: Array<string>) => {
+export const createStoreId = (path: Array<string>, params: Array<string>) => {
+    path = [...path, ...params];
     return path.join("/");
 }
 
-export interface SetFunction<TYPE> {
+export interface SetFunction<TYPE extends AbstractWebSocketBean> {
     (f: StateSetFunction<TYPE>): void;
 }
 
-export interface StateSetFunction<TYPE> {
+export interface StateSetFunction<TYPE extends AbstractWebSocketBean> {
     (old: TYPE): TYPE;
 }
 
-export interface UpdateFunction<TYPE> {
+export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
     (changeset: Partial<TYPE>): void
 }
 
-export const updateBean = <TYPE>(setBean: SetFunction<TYPE>): UpdateFunction<TYPE> => {
+export const updateBean = <TYPE extends AbstractWebSocketBean>(setBean: SetFunction<TYPE>): UpdateFunction<TYPE> => {
 
     const result: UpdateFunction<TYPE> = (changeset: Partial<TYPE>): void => {
         setBean((old: TYPE) => {
@@ -108,19 +109,25 @@ export const errorSize = (size: number, fieldName: string): string => {
     return fieldName + " needs at least " + size + " characters";
 }
 
-export interface ValidationType {
-    originId?: string | null,
-    success?: boolean | null
+export interface FailureCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
+    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void
 }
 
-export interface ValidationCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
+export interface SuccessCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
+    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void
+}
+
+
+
+export interface ValidationCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
     (bean: BEAN_TYPE): VALIDATION_TYPE
 }
 
-export interface FailureCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
-    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void
+export interface EditRemoteStoreFunction<BEAN_TYPE extends AbstractWebSocketBean> {
+    (payload: BEAN_TYPE) : void
 }
 
-export interface SuccessCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationType> {
-    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void
+export interface PostValidationCallback<VALIDATION_TYPE extends ValidationBean> {
+    (validationBean: VALIDATION_TYPE): void
 }
+
