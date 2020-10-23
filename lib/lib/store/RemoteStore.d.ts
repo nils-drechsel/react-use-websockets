@@ -1,5 +1,5 @@
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { AbstractWebSocketBean } from "./beans/StoreBeans";
+import { AbstractWebSocketBean, StoreParametersBean } from "./beans/StoreBeans";
 export declare class RemoteStore {
     store: Map<string, Map<string, AbstractWebSocketBean> | undefined>;
     subscribers: Map<string, Map<string, ((data: Map<string, AbstractWebSocketBean>) => void)>>;
@@ -8,12 +8,12 @@ export declare class RemoteStore {
     constructor(websocketManager: WebSocketManager);
     initRemoteStore(): UnsubscribeCallback;
     releaseRemoteStore(): void;
-    openRemoteStore(path: Array<string>, params: Array<string>): void;
-    closeRemoteStore(path: Array<string>, params: Array<string>): void;
-    getData(path: Array<string>, params: Array<string>): Map<string, AbstractWebSocketBean> | undefined;
-    register(path: Array<string>, params: Array<string>, setData: (data: Map<string, AbstractWebSocketBean>) => void): (() => void);
-    deregister(path: Array<string>, id: string, params: Array<string>): void;
-    editRemoteStore(path: Array<string>, params: Array<string>, payload: AbstractWebSocketBean, originId: string): void;
+    openRemoteStore(path: Array<string>, params: StoreParametersBean | null): void;
+    closeRemoteStore(path: Array<string>, params: StoreParametersBean | null): void;
+    getData(path: Array<string>, params: StoreParametersBean | null): Map<string, AbstractWebSocketBean> | undefined;
+    register(path: Array<string>, params: StoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void): (() => void);
+    deregister(path: Array<string>, id: string, params: StoreParametersBean | null): void;
+    editRemoteStore(msg: string, path: Array<string>, params: StoreParametersBean | null, payload: AbstractWebSocketBean, originId: string): void;
     update(storeId: string, data: {
         [key: string]: AbstractWebSocketBean;
     }): void;

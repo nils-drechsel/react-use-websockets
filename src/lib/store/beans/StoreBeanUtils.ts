@@ -1,8 +1,9 @@
-import { Comparator, ValidationBean, AbstractWebSocketBean } from "./StoreBeans";
+import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./StoreBeans";
 import { WebSocketManager } from "../../client/WebSocketManager";
 
-export const createStoreId = (path: Array<string>, params: Array<string>) => {
-    path = [...path, ...params];
+export const createStoreId = (path: Array<string>, params: StoreParametersBean | null) => {
+    path = [...path];
+    if (params && params.key) path.push(params.key);
     return path.join("/");
 }
 

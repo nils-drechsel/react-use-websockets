@@ -3,18 +3,18 @@ import RemoteStoreContext from "./RemoteStoreContext";
 import { RemoteStore } from "./RemoteStore";
 import { useWebSocket } from "../client/useWebSocket";
 import { UpdateFunction, SetFunction, EditRemoteStoreFunction } from "./beans/StoreBeanUtils";
-import { ValidationBean, CoreMessage, AbstractWebSocketBean } from "./beans/StoreBeans";
+import { ValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/StoreBeans";
 import { v4 as uuidv4 } from 'uuid';
 
 class RemoteStoreAccessor {
 
     path: Array<string>;
-    params: Array<string> = [];
+    params: StoreParametersBean | null = null;
     dataCallbackFunction?: (data: Map<string, AbstractWebSocketBean> | undefined) => void = undefined;
     dependencyItem?: any = undefined;
     dependentFunction?: SetFunction<AbstractWebSocketBean>
 
-    constructor(path: Array<string>, params?: Array<string>) {
+    constructor(path: Array<string>, params?: StoreParametersBean | null) {
         this.path = path;
         if (params) this.params = params;
     }
@@ -54,7 +54,7 @@ class RemoteStoreAccessor {
 
 }
 
-export const useRemoteStoreAccess = (path: Array<string>, params: Array<string>): RemoteStoreAccessor => {
+export const useRemoteStoreAccess = (path: Array<string>, params: StoreParametersBean | null): RemoteStoreAccessor => {
 
     const [accessor] = useState(new RemoteStoreAccessor(path, params));
     return accessor;
@@ -62,13 +62,13 @@ export const useRemoteStoreAccess = (path: Array<string>, params: Array<string>)
 
 
 
-export const useRemoteStore = (path: Array<string>, params?: Array<string>, callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void, dependency?: any):
-    Map<string, AbstractWebSocketBean> | undefined => {
+export const useRemoteStore = (path: Array<string>, params?: StoreParametersBean | null, callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void, dependency?: any):
+    Map<string, any> | undefined => {
 
     const remoteStore = useContext(RemoteStoreContext) as unknown as RemoteStore;
     const { listen, send } = useWebSocket();
 
-    const [data, setData] = useState(remoteStore.getData(path, params || []));
+    const [data, setData] = useState(remoteStore.getData(path, params || null));
     const [validation, setValidation] = useState(null as ValidationBean | null);
 
     const dependencyFulfilled = dependency === undefined || !!dependency;
@@ -88,7 +88,7 @@ export const useRemoteStore = (path: Array<string>, params?: Array<string>, call
                 };
             }
 
-            const deregister = remoteStore.register(path, params || [], setIncomingData);
+            const deregister = remoteStore.register(path, params || null, setIncomingData);
 
 
             return () => {
@@ -109,8 +109,8 @@ export const useRemoteStore = (path: Array<string>, params?: Array<string>, call
 
 }
 
-export const useRemoteSingleStore = (path: Array<string>, params?: Array<string>, updateDependent?: SetFunction<AbstractWebSocketBean>, dependency?: any):
-    AbstractWebSocketBean | undefined => {
+export const useRemoteSingleStore = (path: Array<string>, params?: StoreParametersBean | null, updateDependent?: SetFunction<AbstractWebSocketBean>, dependency?: any):
+    any | undefined => {
 
     let callback = undefined;
 
@@ -136,8 +136,8 @@ export const useRemoteSingleStore = (path: Array<string>, params?: Array<string>
 
 
 
-export const useRemoteStoreArray = (path: Array<string>, params?: Array<string>, dependency?: any):
-    Array<AbstractWebSocketBean> | undefined => {
+export const useRemoteStoreArray = (path: Array<string>, params?: StoreParametersBean | null, dependency?: any):
+    Array<any> | undefined => {
 
     const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(path, params, dependency);
 

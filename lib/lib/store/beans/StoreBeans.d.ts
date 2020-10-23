@@ -1,12 +1,15 @@
 export interface ConnectPayload extends AbstractWebSocketBean {
     path: Array<string>;
-    params: Array<string>;
+    params?: StoreParametersBean | null;
 }
 export interface NullBean extends AbstractWebSocketBean {
 }
 export interface ServerMessageBean extends AbstractWebSocketBean {
     originId?: string | null;
     bean?: string;
+}
+export interface StoreParametersBean extends AbstractWebSocketBean {
+    key: string | null;
 }
 export interface DataBaseBean extends AbstractWebSocketBean {
 }
@@ -15,14 +18,15 @@ export interface ClientMessageBean extends AbstractWebSocketBean {
 }
 export interface DisconnectPayload extends AbstractWebSocketBean {
     path: Array<string>;
-    params: Array<string>;
+    params?: StoreParametersBean | null;
 }
 export declare enum CoreMessage {
     STORE_CONNECT = "STORE_CONNECT",
     STORE_DISCONNECT = "STORE_DISCONNECT",
     STORE_UPDATE = "STORE_UPDATE",
     VALIDATION = "VALIDATION",
-    STORE_EDIT = "STORE_EDIT"
+    STORE_EDIT = "STORE_EDIT",
+    STORE_CREATE = "STORE_CREATE"
 }
 export declare enum Comparator {
     EQUAL = "EQUAL",
@@ -35,7 +39,7 @@ export declare enum Comparator {
 export interface StoreUpdateBean extends AbstractWebSocketBean {
     initial?: boolean | null;
     payload: {
-        [key: string]: any;
+        [key: string]: AbstractWebSocketBean;
     };
     id: string;
 }
@@ -49,6 +53,6 @@ export interface ValidationBean extends ServerMessageBean {
 export interface StoreEditBean extends AbstractWebSocketBean {
     path: Array<string>;
     originId: string;
-    payload: any;
-    params: Array<string>;
+    payload: AbstractWebSocketBean;
+    params?: StoreParametersBean | null;
 }

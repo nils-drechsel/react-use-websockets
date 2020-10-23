@@ -7,7 +7,7 @@ import { validateNotEmpty, errorNotEmpty, validateRegex, errorRegex, validateLen
 
 export interface ConnectPayload extends AbstractWebSocketBean {
     path: Array<string>,
-    params: Array<string>,
+    params?: StoreParametersBean | null,
 }
 
 export interface NullBean extends AbstractWebSocketBean {
@@ -16,6 +16,10 @@ export interface NullBean extends AbstractWebSocketBean {
 export interface ServerMessageBean extends AbstractWebSocketBean {
     originId?: string | null,
     bean?: string,
+}
+
+export interface StoreParametersBean extends AbstractWebSocketBean {
+    key: string | null,
 }
 
 export interface DataBaseBean extends AbstractWebSocketBean {
@@ -27,7 +31,7 @@ export interface ClientMessageBean extends AbstractWebSocketBean {
 
 export interface DisconnectPayload extends AbstractWebSocketBean {
     path: Array<string>,
-    params: Array<string>,
+    params?: StoreParametersBean | null,
 }
 
 export enum CoreMessage {
@@ -50,7 +54,7 @@ export enum Comparator {
 
 export interface StoreUpdateBean extends AbstractWebSocketBean {
     initial?: boolean | null,
-    payload: { [key: string]: any; },
+    payload: { [key: string]: AbstractWebSocketBean; },
     id: string,
 }
 
@@ -66,7 +70,7 @@ export interface ValidationBean extends ServerMessageBean {
 export interface StoreEditBean extends AbstractWebSocketBean {
     path: Array<string>,
     originId: string,
-    payload: StoreKeyContainingBean,
-    params: Array<string>,
+    payload: AbstractWebSocketBean,
+    params?: StoreParametersBean | null,
 }
 
