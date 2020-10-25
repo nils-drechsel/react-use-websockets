@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
-import { AbstractWebSocketBean } from '../store/beans/StoreBeans';
+import { AbstractWebSocketBean, ValidationBean } from '../store/beans/Beans';
 import { FailureCallback, SuccessCallback, ValidationCallback } from '../store/beans/StoreBeanUtils';
-import { ValidationBean } from '../store/beans/StoreBeans';
 import { UnsubscribeCallback } from './WebSocketManager';
 export declare const useListenEffect: (message: string, callback: (payload: any, fromSid?: string | null | undefined) => void, onInit?: (() => void) | undefined) => void;
 export declare const useListen: (message: string) => (callback: (payload: any, fromSid?: string | null | undefined) => void) => UnsubscribeCallback;

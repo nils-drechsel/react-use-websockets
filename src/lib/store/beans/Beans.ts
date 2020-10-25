@@ -5,6 +5,11 @@
 import { validateNotEmpty, errorNotEmpty, validateRegex, errorRegex, validateLength, errorLength, validateSize, errorSize, validateComparison, errorComparison } from "react-use-websockets/lib/lib/store/beans/StoreBeanUtils"
 
 
+export interface MessageBean extends AbstractWebSocketBean {
+    type: MessageType,
+    message: string,
+}
+
 export interface ConnectPayload extends AbstractWebSocketBean {
     path: Array<string>,
     params?: StoreParametersBean | null,
@@ -41,6 +46,7 @@ export enum CoreMessage {
     VALIDATION = "VALIDATION",
     STORE_EDIT = "STORE_EDIT",
     STORE_CREATE = "STORE_CREATE",
+    MESSAGE = "MESSAGE",
 }
 
 export enum Comparator {
@@ -72,5 +78,12 @@ export interface StoreEditBean extends AbstractWebSocketBean {
     originId: string,
     payload: AbstractWebSocketBean,
     params?: StoreParametersBean | null,
+}
+
+export enum MessageType {
+    ERROR = "ERROR",
+    WARNING = "WARNING",
+    INFO = "INFO",
+    SUCCESS = "SUCCESS",
 }
 

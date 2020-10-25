@@ -3,7 +3,7 @@ import RemoteStoreContext from "./RemoteStoreContext";
 import { RemoteStore } from "./RemoteStore";
 import { useWebSocket } from "../client/useWebSocket";
 import { EditRemoteStoreFunction, PostValidationCallback, ValidationCallback } from "./beans/StoreBeanUtils";
-import { ValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/StoreBeans";
+import { ValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
 import { v4 as uuidv4 } from 'uuid';
 
 

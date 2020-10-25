@@ -1,7 +1,6 @@
 import { useEffect, Dispatch, SetStateAction } from 'react';
-import { AbstractWebSocketBean, CoreMessage } from '../store/beans/StoreBeans';
+import { AbstractWebSocketBean, CoreMessage, ValidationBean } from '../store/beans/Beans';
 import { FailureCallback, SuccessCallback, ValidationCallback, EditRemoteStoreFunction, PostValidationCallback } from '../store/beans/StoreBeanUtils';
-import { ValidationBean } from '../store/beans/StoreBeans';
 import { useWebSocket } from './useWebSocket';
 import { ListenerCallback, UnsubscribeCallback } from './WebSocketManager';
 import useRemoteStoreUpdate from '../store/useRemoteStoreUpdate';

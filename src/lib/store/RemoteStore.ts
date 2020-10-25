@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreParametersBean} from "./beans/StoreBeans";
+import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreParametersBean} from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
 
 

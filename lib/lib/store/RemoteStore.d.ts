@@ -1,5 +1,5 @@
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { AbstractWebSocketBean, StoreParametersBean } from "./beans/StoreBeans";
+import { AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
 export declare class RemoteStore {
     store: Map<string, Map<string, AbstractWebSocketBean> | undefined>;
     subscribers: Map<string, Map<string, ((data: Map<string, AbstractWebSocketBean>) => void)>>;

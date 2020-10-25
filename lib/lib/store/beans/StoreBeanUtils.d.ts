@@ -1,4 +1,4 @@
-import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./StoreBeans";
+import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./Beans";
 export declare const createStoreId: (path: string[], params: StoreParametersBean | null) => string;
 export interface SetFunction<TYPE extends AbstractWebSocketBean> {
     (f: StateSetFunction<TYPE>): void;
