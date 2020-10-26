@@ -32,5 +32,6 @@ export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils";
 export { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils";
 export { useListenForMessage } from "./lib/store/beans/Messages";
 export { useListenForMessageEffect } from "./lib/store/beans/Messages";
+export { useSendClientError } from "./lib/store/beans/Messages";
 export { MessageBean } from "./lib/store/beans/Beans";
 export { MessageType } from "./lib/store/beans/Beans";

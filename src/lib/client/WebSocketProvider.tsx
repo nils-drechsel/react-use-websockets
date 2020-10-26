@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useRef } from "react";
 import { WebSocketManager } from "./WebSocketManager";
 import { WebSocketContext } from "./WebSocketContext";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import { ClientErrorBean, CoreMessage } from "../store/beans/Beans";
 
 type Props = {
     url: string,
@@ -18,9 +20,23 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, lo
     }
 
 
+    const onError = (error: any, info: any) => {
+        const errorBean: ClientErrorBean = {
+            message: "" + error,
+            componentStack: info?.componentStack
+        }
+        managerRef.current!.send(CoreMessage.CLIENT_ERROR, errorBean);
+    };
+
+    const errorFallback = ({}: FallbackProps) => {
+        return <div>An error has occurred and was submitted to the helpdesk</div>;
+    };    
+
     return (
-        <WebSocketContext.Provider value={managerRef.current as any}>
-            {children}
+        <WebSocketContext.Provider value= { managerRef.current as any } >
+            <ErrorBoundary onError={onError} fallbackRender={errorFallback}>
+                { children }
+            </ErrorBoundary>
         </WebSocketContext.Provider>
     )
 }

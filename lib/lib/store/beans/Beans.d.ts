@@ -2,7 +2,15 @@ export interface MessageBean extends AbstractWebSocketBean {
     type: MessageType;
     message: string;
 }
-export interface ConnectPayload extends AbstractWebSocketBean {
+export interface ClientErrorBean extends AbstractWebSocketBean {
+    message: string;
+    componentStack?: string | null;
+}
+export interface AbstractStoreBean extends AbstractWebSocketBean {
+    path: Array<string>;
+    params?: StoreParametersBean | null;
+}
+export interface ConnectPayload extends AbstractStoreBean {
     path: Array<string>;
     params?: StoreParametersBean | null;
 }
@@ -20,7 +28,7 @@ export interface DataBaseBean extends AbstractWebSocketBean {
 export interface ClientMessageBean extends AbstractWebSocketBean {
     originId?: string;
 }
-export interface DisconnectPayload extends AbstractWebSocketBean {
+export interface DisconnectPayload extends AbstractStoreBean {
     path: Array<string>;
     params?: StoreParametersBean | null;
 }
@@ -31,7 +39,8 @@ export declare enum CoreMessage {
     VALIDATION = "VALIDATION",
     STORE_EDIT = "STORE_EDIT",
     STORE_CREATE = "STORE_CREATE",
-    MESSAGE = "MESSAGE"
+    MESSAGE = "MESSAGE",
+    CLIENT_ERROR = "CLIENT_ERROR"
 }
 export declare enum Comparator {
     EQUAL = "EQUAL",
@@ -55,7 +64,7 @@ export interface ValidationBean extends ServerMessageBean {
     success?: boolean;
     bean?: string;
 }
-export interface StoreEditBean extends AbstractWebSocketBean {
+export interface StoreEditBean extends AbstractStoreBean {
     path: Array<string>;
     originId: string;
     payload: AbstractWebSocketBean;

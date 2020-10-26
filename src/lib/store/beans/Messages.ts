@@ -6,7 +6,7 @@ import { useListen, useListenEffect, useWebSocket, useServerValidation, useServe
 // @ts-ignore: unused
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Dispatch, SetStateAction } from 'react';
-import { MessageBean } from './Beans';
+import { ClientErrorBean, MessageBean } from './Beans';
 
 
 export const useListenForMessage =  () : (callback: (payload: MessageBean, fromSid?: string | null) => void) => UnsubscribeCallback => {
@@ -15,5 +15,12 @@ export const useListenForMessage =  () : (callback: (payload: MessageBean, fromS
 
 export const useListenForMessageEffect = (callback: (payload: MessageBean, fromSid?: string | null) => void): void => {
     useListenEffect("MESSAGE", callback);
+}
+
+export const useSendClientError = (): (payload: ClientErrorBean, toSid?: string | null) => void => {
+    const { send } = useWebSocket();
+    return (payload: ClientErrorBean, toSid?: string | null): void => {
+        send("CLIENT_ERROR", payload, toSid);
+    }
 }
 
