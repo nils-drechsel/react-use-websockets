@@ -1,8 +1,8 @@
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext, Dispatch, SetStateAction } from "react"
 import RemoteStoreContext from "./RemoteStoreContext";
 import { RemoteStore } from "./RemoteStore";
 import { useWebSocket } from "../client/useWebSocket";
-import { UpdateFunction, SetFunction, EditRemoteStoreFunction } from "./beans/StoreBeanUtils";
+import { UpdateFunction, EditRemoteStoreFunction } from "./beans/StoreBeanUtils";
 import { ValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,7 +12,7 @@ class RemoteStoreAccessor {
     params: StoreParametersBean | null = null;
     dataCallbackFunction?: (data: Map<string, AbstractWebSocketBean> | undefined) => void = undefined;
     dependencyItem?: any = undefined;
-    dependentFunction?: SetFunction<AbstractWebSocketBean>
+    dependentFunction?: Dispatch<SetStateAction<AbstractWebSocketBean>>
 
     constructor(path: Array<string>, params?: StoreParametersBean | null) {
         this.path = path;
@@ -29,7 +29,7 @@ class RemoteStoreAccessor {
         return this;
     }
 
-    dependent(dependentFunction?: SetFunction<AbstractWebSocketBean>) {
+    dependent(dependentFunction?: Dispatch<SetStateAction<AbstractWebSocketBean>>) {
         this.dependentFunction = dependentFunction;
     }
 
@@ -109,7 +109,7 @@ export const useRemoteStore = (path: Array<string>, params?: StoreParametersBean
 
 }
 
-export const useRemoteSingleStore = (path: Array<string>, params?: StoreParametersBean | null, updateDependent?: SetFunction<AbstractWebSocketBean>, dependency?: any):
+export const useRemoteSingleStore = (path: Array<string>, params?: StoreParametersBean | null, updateDependent?: Dispatch<SetStateAction<AbstractWebSocketBean>>, dependency?: any):
     any => {
 
     let callback = undefined;

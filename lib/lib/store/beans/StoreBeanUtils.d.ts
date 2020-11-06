@@ -1,15 +1,10 @@
 import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./Beans";
+import { Dispatch, SetStateAction } from "react";
 export declare const createStoreId: (path: string[], params: StoreParametersBean | null) => string;
-export interface SetFunction<TYPE extends AbstractWebSocketBean> {
-    (f: StateSetFunction<TYPE>): void;
-}
-export interface StateSetFunction<TYPE extends AbstractWebSocketBean> {
-    (old: TYPE): TYPE;
-}
 export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
     (changeset: Partial<TYPE>): void;
 }
-export declare const updateBean: <TYPE extends AbstractWebSocketBean>(setBean: SetFunction<TYPE>) => UpdateFunction<TYPE>;
+export declare const updateBean: <TYPE extends AbstractWebSocketBean>(setBean: Dispatch<SetStateAction<TYPE>>) => UpdateFunction<TYPE>;
 export declare const validateNotEmpty: (value?: any) => boolean;
 export declare const errorNotEmpty: (fieldName: string) => string;
 export declare const validateComparison: (cmp: Comparator, baseValue: number, value?: number | undefined) => boolean;

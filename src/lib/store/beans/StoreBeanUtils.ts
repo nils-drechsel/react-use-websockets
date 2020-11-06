@@ -1,5 +1,6 @@
 import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./Beans";
 import { WebSocketManager } from "../../client/WebSocketManager";
+import { Dispatch, SetStateAction } from "react";
 
 export const createStoreId = (path: Array<string>, params: StoreParametersBean | null) => {
     path = [...path];
@@ -7,19 +8,11 @@ export const createStoreId = (path: Array<string>, params: StoreParametersBean |
     return path.join("/");
 }
 
-export interface SetFunction<TYPE extends AbstractWebSocketBean> {
-    (f: StateSetFunction<TYPE>): void;
-}
-
-export interface StateSetFunction<TYPE extends AbstractWebSocketBean> {
-    (old: TYPE): TYPE;
-}
-
 export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
     (changeset: Partial<TYPE>): void
 }
 
-export const updateBean = <TYPE extends AbstractWebSocketBean>(setBean: SetFunction<TYPE>): UpdateFunction<TYPE> => {
+export const updateBean = <TYPE extends AbstractWebSocketBean>(setBean: Dispatch<SetStateAction<TYPE>>): UpdateFunction<TYPE> => {
 
     const result: UpdateFunction<TYPE> = (changeset: Partial<TYPE>): void => {
         setBean((old: TYPE) => {

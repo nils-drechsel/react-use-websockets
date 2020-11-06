@@ -5,19 +5,22 @@
 import { validateNotEmpty, errorNotEmpty, validateRegex, errorRegex, validateLength, errorLength, validateSize, errorSize, validateComparison, errorComparison } from "react-use-websockets/lib/lib/store/beans/StoreBeanUtils"
 
 
-export interface MessageBean extends AbstractWebSocketBean {
-    type: MessageType,
-    message: string,
-}
-
 export interface ClientErrorBean extends AbstractWebSocketBean {
     message: string,
     componentStack?: string | null,
 }
 
+export interface MessageBean extends AbstractWebSocketBean {
+    type: MessageType,
+    message: string,
+}
+
 export interface AbstractStoreBean extends AbstractWebSocketBean {
     path: Array<string>,
     params?: StoreParametersBean | null,
+}
+
+export interface UIDContainingBean {
 }
 
 export interface ConnectPayload extends AbstractStoreBean {
@@ -40,8 +43,7 @@ export interface StoreParametersBean extends AbstractWebSocketBean {
 export interface DataBaseBean extends AbstractWebSocketBean {
 }
 
-export interface ClientMessageBean extends AbstractWebSocketBean {
-    originId?: string,
+export interface ClientMessageBean {
 }
 
 export interface DisconnectPayload extends AbstractStoreBean {
@@ -69,6 +71,10 @@ export enum Comparator {
     SMALLER_OR_EQUAL = "SMALLER_OR_EQUAL",
 }
 
+export interface ClientOriginatedBean extends AbstractWebSocketBean {
+    originId?: string,
+}
+
 export interface StoreUpdateBean extends AbstractWebSocketBean {
     initial?: boolean | null,
     payload: { [key: string]: AbstractWebSocketBean; },
@@ -82,6 +88,9 @@ export interface ValidationBean extends ServerMessageBean {
     originId?: string | null,
     success?: boolean,
     bean?: string,
+}
+
+export interface AnnotationContainingBean {
 }
 
 export interface StoreEditBean extends AbstractStoreBean {

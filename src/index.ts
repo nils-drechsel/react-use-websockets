@@ -30,8 +30,6 @@ export { useRemoteStoreUpdate } from "./lib/store/useRemoteStoreUpdate";
 
 
 
-export { SetFunction } from "./lib/store/beans/StoreBeanUtils"
-export { StateSetFunction } from "./lib/store/beans/StoreBeanUtils"
 export { UpdateFunction } from "./lib/store/beans/StoreBeanUtils"
 export { updateBean } from "./lib/store/beans/StoreBeanUtils"
 export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils"
