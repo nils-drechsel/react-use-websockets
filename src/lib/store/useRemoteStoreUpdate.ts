@@ -3,21 +3,21 @@ import RemoteStoreContext from "./RemoteStoreContext";
 import { RemoteStore } from "./RemoteStore";
 import { useWebSocket } from "../client/useWebSocket";
 import { EditRemoteStoreFunction, PostValidationCallback, ValidationCallback } from "./beans/StoreBeanUtils";
-import { ValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
+import { ValidationBean, StoreValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
 import { v4 as uuidv4 } from 'uuid';
 
 
 
 
 
-export const useRemoteStoreUpdate = <BEAN_TYPE extends AbstractWebSocketBean, VALIDATION_TYPE extends ValidationBean>(path: Array<string>, params?: StoreParametersBean | null, validationFunction?: ValidationCallback<BEAN_TYPE, VALIDATION_TYPE>, postServerValidationCallback?: PostValidationCallback<VALIDATION_TYPE>, postClientValidationCallback?: PostValidationCallback<VALIDATION_TYPE>, onInitCallback?: () => void):
-    [EditRemoteStoreFunction<BEAN_TYPE>, VALIDATION_TYPE | null] => {
+export const useRemoteStoreUpdate = <BEAN_TYPE extends AbstractWebSocketBean, SERVER_VALIDATION_TYPE extends StoreValidationBean, CLIENT_VALIDATION_TYPE extends ValidationBean>(path: Array<string>, params?: StoreParametersBean | null, validationFunction?: ValidationCallback<BEAN_TYPE, CLIENT_VALIDATION_TYPE>, postServerValidationCallback?: PostValidationCallback<SERVER_VALIDATION_TYPE>, postClientValidationCallback?: PostValidationCallback<CLIENT_VALIDATION_TYPE>, onInitCallback?: () => void):
+    [EditRemoteStoreFunction<BEAN_TYPE>, CLIENT_VALIDATION_TYPE | SERVER_VALIDATION_TYPE | null] => {
     
     const [componentId] = useState(uuidv4());
     const remoteStore = useContext(RemoteStoreContext) as unknown as RemoteStore;
     const { listen, send } = useWebSocket();
 
-    const [validation, setValidation] = useState(null as VALIDATION_TYPE | null);
+    const [validation, setValidation] = useState(null as CLIENT_VALIDATION_TYPE | SERVER_VALIDATION_TYPE | null);
 
     const pathId = path.join("/");
 
@@ -39,7 +39,7 @@ export const useRemoteStoreUpdate = <BEAN_TYPE extends AbstractWebSocketBean, VA
 
     useEffect(() => {
 
-        const deregisterValidationListener = listen(CoreMessage.VALIDATION, (payload: VALIDATION_TYPE, fromSid?: string | null) => {
+        const deregisterValidationListener = listen(CoreMessage.VALIDATION, (payload: SERVER_VALIDATION_TYPE, fromSid?: string | null) => {
             if (payload.originId !== componentId) return;
             setValidation(payload);
             if (postServerValidationCallback) postServerValidationCallback(payload);
