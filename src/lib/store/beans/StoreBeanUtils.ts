@@ -30,7 +30,8 @@ export const validateNotEmpty = (value?: any): boolean => {
     return !!value;
 }
 
-export const errorNotEmpty = (fieldName: string): string => {
+export const errorNotEmpty = (fieldName: string, errorMessage: string | null): string => {
+    if (errorMessage) return errorMessage;
     return fieldName + " cannot be left empty";
 }
 
@@ -55,7 +56,8 @@ export const validateComparison = (cmp: Comparator, baseValue: number, value?: n
     }
 }
 
-export const errorComparison = (cmp: Comparator, baseValue: number, fieldName: string): string => {
+export const errorComparison = (cmp: Comparator, baseValue: number, fieldName: string, errorMessage: string | null): string => {
+    if (errorMessage) return errorMessage;
     switch (cmp) {
         case Comparator.EQUAL:
             return fieldName + " must be equal to " + baseValue;
@@ -81,7 +83,8 @@ export const validateRegex = (regex: string, value?: string): boolean => {
     return expr.test(value);
 }
 
-export const errorRegex = (fieldName: string): string => {
+export const errorRegex = (fieldName: string, errorMessage: string | null): string => {
+    if (errorMessage) return errorMessage;
     return fieldName + " is not valid";
 }
 
@@ -90,7 +93,8 @@ export const validateLength = (length: number, value?: string): boolean => {
     return value.length >= length;
 }
 
-export const errorLength = (length: number, fieldName: string): string => {
+export const errorLength = (length: number, fieldName: string, errorMessage: string | null): string => {
+    if (errorMessage) return errorMessage;
     return fieldName + " needs at least " + length + " characters";
 }
 
@@ -99,7 +103,8 @@ export const validateSize = (size: number, value?: Array<any>): boolean => {
     return value.length >= size;
 }
 
-export const errorSize = (size: number, fieldName: string): string => {
+export const errorSize = (size: number, fieldName: string, errorMessage: string | null): string => {
+    if (errorMessage) return errorMessage;
     return fieldName + " needs at least " + size + " characters";
 }
 

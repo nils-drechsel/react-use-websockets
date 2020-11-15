@@ -19,6 +19,20 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, lo
         managerRef.current = new WebSocketManager(url, delimiter || "\t", logging || false);
     }
 
+    // window.onerror = (message: string | Event, source: string | undefined, lineno: number | undefined, colno: number | undefined, error: Error | undefined) => {
+    //     if (typeof(message) === "string" && message.startsWith("ResizeObserver")) return;
+    //     const errorBean: ClientErrorBean = {
+    //         message: "message: " + message + "\n"
+    //             + "source: "+ source + "\n"
+    //             + "lineno: "+ source + "\n"
+    //             + "colno: "+ source + "\n"
+    //             + "error name : "+ error?.name
+    //             + "error message: " + error?.message,
+    //         componentStack: error?.stack
+    //     }
+    //     managerRef.current!.send(CoreMessage.CLIENT_ERROR, errorBean);
+    // }
+
 
     const onError = (error: any, info: any) => {
         const errorBean: ClientErrorBean = {
@@ -29,7 +43,7 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, lo
     };
 
     const errorFallback = ({}: FallbackProps) => {
-        return <div>An error has occurred and was submitted to the helpdesk</div>;
+        return <div>An error has occurred and was registered</div>;
     };    
 
     return (

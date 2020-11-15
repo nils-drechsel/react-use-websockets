@@ -6,15 +6,15 @@ export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
 }
 export declare const updateBean: <TYPE extends AbstractWebSocketBean>(setBean: Dispatch<SetStateAction<TYPE>>) => UpdateFunction<TYPE>;
 export declare const validateNotEmpty: (value?: any) => boolean;
-export declare const errorNotEmpty: (fieldName: string) => string;
+export declare const errorNotEmpty: (fieldName: string, errorMessage: string | null) => string;
 export declare const validateComparison: (cmp: Comparator, baseValue: number, value?: number | undefined) => boolean;
-export declare const errorComparison: (cmp: Comparator, baseValue: number, fieldName: string) => string;
+export declare const errorComparison: (cmp: Comparator, baseValue: number, fieldName: string, errorMessage: string | null) => string;
 export declare const validateRegex: (regex: string, value?: string | undefined) => boolean;
-export declare const errorRegex: (fieldName: string) => string;
+export declare const errorRegex: (fieldName: string, errorMessage: string | null) => string;
 export declare const validateLength: (length: number, value?: string | undefined) => boolean;
-export declare const errorLength: (length: number, fieldName: string) => string;
+export declare const errorLength: (length: number, fieldName: string, errorMessage: string | null) => string;
 export declare const validateSize: (size: number, value?: any[] | undefined) => boolean;
-export declare const errorSize: (size: number, fieldName: string) => string;
+export declare const errorSize: (size: number, fieldName: string, errorMessage: string | null) => string;
 export interface FailureCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
     (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void;
 }
