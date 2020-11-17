@@ -4,9 +4,10 @@ export declare class RemoteStore {
     store: Map<string, Map<string, AbstractWebSocketBean> | undefined>;
     subscribers: Map<string, Map<string, ((data: Map<string, AbstractWebSocketBean>) => void)>>;
     websocketManager: WebSocketManager;
-    unsubscribeListener: UnsubscribeCallback;
+    unsubscribeUpdateListener: UnsubscribeCallback;
+    unsubscribeDisconnectListener: UnsubscribeCallback;
     constructor(websocketManager: WebSocketManager);
-    initRemoteStore(): UnsubscribeCallback;
+    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback];
     releaseRemoteStore(): void;
     openRemoteStore(path: Array<string>, params: StoreParametersBean | null): void;
     closeRemoteStore(path: Array<string>, params: StoreParametersBean | null): void;

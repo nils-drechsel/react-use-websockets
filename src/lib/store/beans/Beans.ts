@@ -10,6 +10,9 @@ export interface ClientErrorBean extends AbstractWebSocketBean {
     componentStack?: string | null,
 }
 
+export interface AssignedKeyContainingBean {
+}
+
 export interface StoreEditFragment extends StoreBean {
     timestamp?: TimestampBean,
 }
@@ -27,6 +30,7 @@ export interface StoreParametersBean extends AbstractWebSocketBean {
 }
 
 export interface TimestampBean extends AbstractWebSocketBean {
+    touched: number,
     edited: number,
     created: number,
 }
@@ -102,6 +106,10 @@ export interface AbstractStoreBean extends AbstractWebSocketBean {
 export interface ConnectPayload extends AbstractStoreBean {
     path: Array<string>,
     params?: StoreParametersBean | null,
+}
+
+export interface StoreForcefulDisconnectBean extends AbstractWebSocketBean {
+    id: string,
 }
 
 export enum CoreMessage {

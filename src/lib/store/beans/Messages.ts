@@ -6,7 +6,7 @@ import { useListen, useListenEffect, useWebSocket, useServerValidation, useServe
 // @ts-ignore: unused
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Dispatch, SetStateAction } from 'react';
-import { ClientErrorBean, MessageBean } from './Beans';
+import { MessageBean, ClientErrorBean } from './Beans';
 
 
 export const useListenForMessage =  () : (callback: (payload: MessageBean, fromSid?: string | null) => void) => UnsubscribeCallback => {

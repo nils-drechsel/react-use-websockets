@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreParametersBean} from "./beans/Beans";
+import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreParametersBean, StoreForcefulDisconnectBean} from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
 
 
@@ -12,23 +12,28 @@ export class RemoteStore {
     store: Map<string, Map<string, AbstractWebSocketBean> | undefined>;
     subscribers: Map<string, Map<string, ((data: Map<string, AbstractWebSocketBean>) => void)>>;
     websocketManager: WebSocketManager;
-    unsubscribeListener: UnsubscribeCallback;
+    unsubscribeUpdateListener: UnsubscribeCallback;
+    unsubscribeDisconnectListener: UnsubscribeCallback;
 
     constructor(websocketManager: WebSocketManager) {
         this.store = new Map();
         this.subscribers = new Map();
         this.websocketManager = websocketManager;
-        this.unsubscribeListener = this.initRemoteStore();
+        [this.unsubscribeUpdateListener, this.unsubscribeDisconnectListener] = this.initRemoteStore();
     }
 
-    initRemoteStore(): UnsubscribeCallback {
-        return this.websocketManager.addListener(CoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, fromSid?: string | null) => {
+    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback] {
+        return [this.websocketManager.addListener(CoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, fromSid?: string | null) => {
             this.update(payload.id, payload.payload);
-        })
+        }),
+            this.websocketManager.addListener(CoreMessage.STORE_DISCONNECT, (payload: StoreForcefulDisconnectBean, fromSid?: string | null) => {
+                this.subscribers.delete(payload.id);
+                this.store.delete(payload.id);
+        })];
     }
 
     releaseRemoteStore() {
-        this.unsubscribeListener();
+        this.unsubscribeUpdateListener();
     }
 
     openRemoteStore(path: Array<string>, params:  StoreParametersBean | null) {
