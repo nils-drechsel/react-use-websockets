@@ -1,3 +1,4 @@
+import { CoreMessage } from "../store/beans/Beans";
 
 export interface ListenerCallback {
     (payload: any, fromSid?: string | null): void;
@@ -9,7 +10,7 @@ export interface DefaultListenerCallback {
 }
 
 export interface ConnectivityCallback {
-    (isConnected: boolean): void;
+    (isConnected: boolean, isReady: boolean, sid: string | null): void;
 }
 
 export interface UnsubscribeCallback {
@@ -23,6 +24,7 @@ export class WebSocketManager {
     url: string;
     messageToListeners: Map<string, Set<number>>;
     listenerToCallback: Map<number, ListenerCallback>;
+    connectivityListenerToCallback: Map<number, ConnectivityCallback>;
     listenerToMessage: Map<number, string>;
     defaultCallback: DefaultListenerCallback | null;
     connectivityListeners: Set<number>;
@@ -32,6 +34,7 @@ export class WebSocketManager {
     delimiter: string;
     reconnect: boolean;
     logging: boolean;
+    sid: string;
 
     constructor(url: string, delimiter = "\t", reconnect = false, logging = true) {
         this.url = url
@@ -41,6 +44,7 @@ export class WebSocketManager {
         this.messageToListeners = new Map();
         this.listenerToCallback = new Map();
         this.listenerToMessage = new Map();
+        this.connectivityListenerToCallback = new Map();
         this.connectivityListeners = new Set();
         this.noReconnectOn = new Set();
         this.noReconnectOn.add(1000);
@@ -50,11 +54,16 @@ export class WebSocketManager {
         this.logging = logging;
         this.ws = new WebSocket(url);
         this.initListeners();
+        this.sid = null as any;
     }
 
-    isConnected() {
+    isConnected(): boolean {
         return this.ws.readyState === 1;
     }
+
+    isReady(): boolean {
+        return this.ws.readyState === 1 && !!this.sid;
+    }    
 
     sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -67,36 +76,49 @@ export class WebSocketManager {
         this.initListeners();
     }
 
-    initListeners() {
+    private initListeners() {
         this.ws.onmessage = this.onMessage.bind(this);
         this.ws.onopen = this.onConnect.bind(this);
         this.ws.onclose = this.onClose.bind(this);
     }
 
-    onConnect(_event: Event) {
-        if (this.logging) console.log("connection established");
-        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.listenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(true) : null);
+    private onConnect(_event?: Event) {
+        if (this.logging) console.log("ws connection established");
+        this.send(CoreMessage.SID);
+        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
+        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid) : null);        
+    }
+
+    private facilitateConnect() {
+        if (this.logging) console.log("connection established with sid ", this.sid);
+        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
+        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid) : null);
         this.resolveQueue();
     }
 
 
-    onClose(event: CloseEvent) {
+    private onClose(event: CloseEvent) {
         if (this.logging) console.log("close connection", event);
 
-        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.listenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(false) : null);
+        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
+        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), null) : null);
 
         if (!this.noReconnectOn.has(event.code) && this.reconnect) this.reinit();
     }
 
-    onMessage(event: MessageEvent) {
+    private onMessage(event: MessageEvent) {
         const raw: string = event.data;
         const parts = raw.split(this.delimiter);
 
         const message = parts[0];
-        const fromSid = this.getSid(parts[1]);
-        const payload = this.getJSONPayload(parts[2]);
+        const fromSid = this.extractSid(parts[1]);
+        const payload = this.extractJSONPayload(parts[2]);
+
+        if (message === CoreMessage.SID) {
+            this.sid = payload;
+            this.facilitateConnect();
+            return;
+        }
 
 
         if (this.logging) console.log("received message", message, "from", fromSid, "with payload", payload, "raw:", event.data);
@@ -117,12 +139,12 @@ export class WebSocketManager {
         callbacks?.forEach(callback => callback ? callback(payload, fromSid) : null);
     }
 
-    getSid(value: string | null | undefined) {
+    private extractSid(value: string | null | undefined) {
         if (!value) return null;
         return value;
     }
 
-    getJSONPayload(payload: any) {
+    private extractJSONPayload(payload: any) {
         try {
             return JSON.parse(payload) || null;
         } catch (e) {
@@ -130,7 +152,7 @@ export class WebSocketManager {
         }
     }
 
-    resolveQueue() {
+    private resolveQueue() {
         while (this.isConnected && this.queue.length > 0) {
             const item = this.queue.shift();
             if (!item) continue;
@@ -163,7 +185,7 @@ export class WebSocketManager {
         }
     }
 
-    createId() {
+    private createId() {
         return this.listenerIdCount++;
     }
 
@@ -191,15 +213,16 @@ export class WebSocketManager {
     removeConnectivityListener(id: number) {
         if (this.logging) console.log("removing connectivity listener with id", id);
         this.connectivityListeners.delete(id);
-        this.listenerToCallback.delete(id);
+        this.connectivityListenerToCallback.delete(id);
     }
 
-    addConnectivityListener(callback: ListenerCallback): UnsubscribeCallback {
+    addConnectivityListener(callback: ConnectivityCallback): UnsubscribeCallback {
         const id = this.createId();
         if (this.logging) console.log("adding connectivity listener with id", id);
-        this.listenerToCallback.set(id, callback);
+        this.connectivityListenerToCallback.set(id, callback);
         this.connectivityListeners.add(id);
 
+        callback(this.isConnected(), this.isReady(), this.sid);
 
         const returnRemoveCallback = () => this.removeConnectivityListener(id);
         return returnRemoveCallback.bind(this);

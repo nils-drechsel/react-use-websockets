@@ -1,17 +1,18 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState, cloneElement, ReactElement } from "react";
 import { WebSocketManager } from "./WebSocketManager";
 import { WebSocketContext } from "./WebSocketContext";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { ClientErrorBean, CoreMessage } from "../store/beans/Beans";
 
-type Props = {
-    url: string,
-    delimiter?: string,
-    logging?: boolean,
+interface Props {
+    url: string;
+    delimiter?: string;
+    logging?: boolean;
+    ElementWhileConnecting?: ReactElement<any, any>;
 }
 
 
-export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, logging, children }) => {
+export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, logging, ElementWhileConnecting, children }) => {
 
     const managerRef = useRef<WebSocketManager>();
 
@@ -45,6 +46,23 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, lo
     const errorFallback = ({}: FallbackProps) => {
         return <div>An error has occurred and was registered</div>;
     };    
+
+    const [isSocketConnected, setSocketConnected] = useState(false);
+    
+    useEffect(() => {
+        const unsubscribe = managerRef.current!.addConnectivityListener((isConnected, isReady, sid) => {
+            setSocketConnected(isReady);
+        });
+
+        return () => {
+            unsubscribe();
+        }
+
+    }, []);
+
+    if (!isSocketConnected && ElementWhileConnecting) {
+        return (<div>{cloneElement(ElementWhileConnecting)}</div>);
+    }
 
     return (
         <WebSocketContext.Provider value= { managerRef.current as any } >

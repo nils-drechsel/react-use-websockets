@@ -113,6 +113,7 @@ export interface StoreForcefulDisconnectBean extends AbstractWebSocketBean {
 }
 
 export enum CoreMessage {
+    SID = "SID",
     STORE_CONNECT = "STORE_CONNECT",
     STORE_DISCONNECT = "STORE_DISCONNECT",
     STORE_UPDATE = "STORE_UPDATE",
