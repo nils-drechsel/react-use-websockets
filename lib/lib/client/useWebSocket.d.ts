@@ -1,6 +1,7 @@
-import { ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
+import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
 export declare type SendFunction = (message: string, payload: any, toSid?: string | null) => void;
 export declare const useWebSocket: () => {
+    manager: WebSocketManager;
     send: SendFunction;
     listen: (message: string, callback: ListenerCallback) => UnsubscribeCallback;
     isConnected: () => boolean;

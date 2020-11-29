@@ -1,5 +1,4 @@
 import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./Beans";
-import { WebSocketManager } from "../../client/WebSocketManager";
 import { Dispatch, SetStateAction } from "react";
 
 export const createStoreId = (path: Array<string>, params: StoreParametersBean | null) => {

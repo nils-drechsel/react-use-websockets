@@ -23,10 +23,10 @@ export class RemoteStore {
     }
 
     initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback] {
-        return [this.websocketManager.addListener(CoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, fromSid?: string | null) => {
+        return [this.websocketManager.addListener(CoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, _fromSid?: string | null) => {
             this.update(payload.id, payload.payload);
         }),
-            this.websocketManager.addListener(CoreMessage.STORE_DISCONNECT, (payload: StoreForcefulDisconnectBean, fromSid?: string | null) => {
+            this.websocketManager.addListener(CoreMessage.STORE_DISCONNECT, (payload: StoreForcefulDisconnectBean, _fromSid?: string | null) => {
                 this.subscribers.delete(payload.id);
                 this.store.delete(payload.id);
         })];
@@ -70,8 +70,6 @@ export class RemoteStore {
         if (!this.subscribers.has(storeId)) {
             this.subscribers.set(storeId, new Map());
         }
-
-        const storeSubscribers = this.subscribers.get(storeId);
 
         const id = uuidv4();
         this.subscribers.get(storeId)!.set(id, setData);
@@ -129,7 +127,7 @@ export class RemoteStore {
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");
 
-        storeSubscribers.forEach((setData, id) => {
+        storeSubscribers.forEach((setData) => {
             setData(newStore);
         });
     }

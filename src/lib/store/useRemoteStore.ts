@@ -1,10 +1,7 @@
 import { useEffect, useState, useContext, Dispatch, SetStateAction } from "react"
 import RemoteStoreContext from "./RemoteStoreContext";
 import { RemoteStore } from "./RemoteStore";
-import { useWebSocket } from "../client/useWebSocket";
-import { UpdateFunction, EditRemoteStoreFunction } from "./beans/StoreBeanUtils";
-import { ValidationBean, CoreMessage, AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
-import { v4 as uuidv4 } from 'uuid';
+import { AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
 
 class RemoteStoreAccessor {
 
@@ -66,10 +63,8 @@ export const useRemoteStore = (path: Array<string>, params?: StoreParametersBean
     Map<string, any> => {
 
     const remoteStore = useContext(RemoteStoreContext) as unknown as RemoteStore;
-    const { listen, send } = useWebSocket();
 
     const [data, setData] = useState(remoteStore.getData(path, params || null));
-    const [validation, setValidation] = useState(null as ValidationBean | null);
 
     const dependencyFulfilled = dependency === undefined || !!dependency;
 

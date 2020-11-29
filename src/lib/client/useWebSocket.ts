@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
 
@@ -27,5 +27,5 @@ export const useWebSocket = () => {
         return manager.setDefaultCallback(callback);
     }
 
-    return { send, listen, isConnected, connectivity, setDefaultCallback };
+    return { manager, send, listen, isConnected, connectivity, setDefaultCallback };
 }

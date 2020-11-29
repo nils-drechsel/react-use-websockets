@@ -50,7 +50,7 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, lo
     const [isSocketConnected, setSocketConnected] = useState(false);
     
     useEffect(() => {
-        const unsubscribe = managerRef.current!.addConnectivityListener((isConnected, isReady, sid) => {
+        const unsubscribe = managerRef.current!.addConnectivityListener((_isConnected, isReady, _sid) => {
             setSocketConnected(isReady);
         });
 

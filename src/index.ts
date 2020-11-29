@@ -4,21 +4,21 @@ export { useListenEffect } from "./lib/client/helpers";
 export { useServerValidation } from "./lib/client/helpers";
 export { useServerValidationEffect } from "./lib/client/helpers";
 export { performClientValidation } from "./lib/client/helpers";
-export { AbstractWebSocketBean } from "./lib/store/beans/Beans";
-export { ValidationBean } from "./lib/store/beans/Beans";
-export { StoreValidationBean } from "./lib/store/beans/Beans";
-export { ValidationCallback } from "./lib/store/beans/StoreBeanUtils";
-export { FailureCallback } from "./lib/store/beans/StoreBeanUtils";
-export { SuccessCallback } from "./lib/store/beans/StoreBeanUtils";
+export type { AbstractWebSocketBean } from "./lib/store/beans/Beans";
+export type { ValidationBean } from "./lib/store/beans/Beans";
+export type { StoreValidationBean } from "./lib/store/beans/Beans";
+export type { ValidationCallback } from "./lib/store/beans/StoreBeanUtils";
+export type { FailureCallback } from "./lib/store/beans/StoreBeanUtils";
+export type { SuccessCallback } from "./lib/store/beans/StoreBeanUtils";
 
 export { WebSocketContext } from "./lib/client/WebSocketContext";
 export { WebSocketManager } from "./lib/client/WebSocketManager";
 export { WebSocketProvider } from "./lib/client/WebSocketProvider";
-export { ListenerCallback } from "./lib/client/WebSocketManager";
-export { UnsubscribeCallback } from "./lib/client/WebSocketManager";
-export { ConnectivityCallback } from "./lib/client/WebSocketManager";
-export { DefaultListenerCallback } from "./lib/client/WebSocketManager";
-export { SendFunction } from "./lib/client/useWebSocket";
+export type { ListenerCallback } from "./lib/client/WebSocketManager";
+export type { UnsubscribeCallback } from "./lib/client/WebSocketManager";
+export type { ConnectivityCallback } from "./lib/client/WebSocketManager";
+export type { DefaultListenerCallback } from "./lib/client/WebSocketManager";
+export type { SendFunction } from "./lib/client/useWebSocket";
 
 export { connectStore } from "./lib/store/connectStore";
 export { useRemoteStore } from "./lib/store/useRemoteStore";
@@ -32,18 +32,18 @@ export { useRemoteStoreUpdate } from "./lib/store/useRemoteStoreUpdate";
 
 
 
-export { UpdateFunction } from "./lib/store/beans/StoreBeanUtils"
+export type { UpdateFunction } from "./lib/store/beans/StoreBeanUtils"
 export { updateBean } from "./lib/store/beans/StoreBeanUtils"
-export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils"
-export { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils"
+export type { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils"
+export type { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils"
 
 export { useListenForMessage } from "./lib/store/beans/Messages";
 export { useListenForMessageEffect } from "./lib/store/beans/Messages";
 export { useSendClientError } from "./lib/store/beans/Messages";
 
-export { MessageBean } from "./lib/store/beans/Beans";
-export { MessageType } from "./lib/store/beans/Beans";
-export { TimestampBean } from "./lib/store/beans/Beans";
+export type { MessageBean } from "./lib/store/beans/Beans";
+export type { MessageType } from "./lib/store/beans/Beans";
+export type { TimestampBean } from "./lib/store/beans/Beans";
 
 export { validateNotEmpty } from "./lib/store/beans/StoreBeanUtils";
 export { errorNotEmpty } from "./lib/store/beans/StoreBeanUtils";

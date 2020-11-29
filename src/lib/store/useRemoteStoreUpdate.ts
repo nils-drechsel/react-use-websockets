@@ -15,7 +15,7 @@ export const useRemoteStoreUpdate = <BEAN_TYPE extends AbstractWebSocketBean, SE
     
     const [componentId] = useState(uuidv4());
     const remoteStore = useContext(RemoteStoreContext) as unknown as RemoteStore;
-    const { listen, send } = useWebSocket();
+    const { listen } = useWebSocket();
 
     const [validation, setValidation] = useState(null as CLIENT_VALIDATION_TYPE | SERVER_VALIDATION_TYPE | null);
 
@@ -39,7 +39,7 @@ export const useRemoteStoreUpdate = <BEAN_TYPE extends AbstractWebSocketBean, SE
 
     useEffect(() => {
 
-        const deregisterValidationListener = listen(CoreMessage.VALIDATION, (payload: SERVER_VALIDATION_TYPE, fromSid?: string | null) => {
+        const deregisterValidationListener = listen(CoreMessage.VALIDATION, (payload: SERVER_VALIDATION_TYPE, _fromSid?: string | null) => {
             if (payload.originId !== componentId) return;
             setValidation(payload);
             if (postServerValidationCallback) postServerValidationCallback(payload);
