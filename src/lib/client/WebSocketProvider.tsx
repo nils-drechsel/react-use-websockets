@@ -17,7 +17,7 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ url, delimiter, lo
     const managerRef = useRef<WebSocketManager>();
 
     if (!managerRef.current) {
-        managerRef.current = new WebSocketManager(url, delimiter || "\t", logging || false);
+        managerRef.current = new WebSocketManager(url, delimiter || "\t", false, logging || false);
     }
 
     // window.onerror = (message: string | Event, source: string | undefined, lineno: number | undefined, colno: number | undefined, error: Error | undefined) => {

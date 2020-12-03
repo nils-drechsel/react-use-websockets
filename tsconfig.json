@@ -15,7 +15,6 @@
         "esModuleInterop": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
-        "isolatedModules": true,
     },
     "include": [
         "src"

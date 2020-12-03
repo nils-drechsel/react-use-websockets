@@ -1,6 +1,6 @@
 {
   "name": "react-use-websockets",
-  "version": "1.4.8",
+  "version": "1.4.10",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
