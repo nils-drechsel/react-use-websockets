@@ -134,7 +134,7 @@ export const useRemoteSingleStore = (path: Array<string>, params?: StoreParamete
 export const useRemoteStoreArray = (path: Array<string>, params?: StoreParametersBean | null, dependency?: any):
     Array<any> => {
 
-    const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(path, params, dependency);
+    const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(path, params, undefined, dependency);
 
     return data ? Array.from(data.values()) : undefined as any;
 

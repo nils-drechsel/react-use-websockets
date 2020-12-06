@@ -21,6 +21,7 @@ export { DefaultListenerCallback } from "./lib/client/WebSocketManager";
 export { SendFunction } from "./lib/client/useWebSocket";
 
 export { connectStore } from "./lib/store/connectStore";
+export { ConnectionStateSetter} from "./lib/store/connectStore";
 export { useRemoteStore } from "./lib/store/useRemoteStore";
 export { useRemoteSingleStore } from "./lib/store/useRemoteStore";
 export { useRemoteStoreArray } from "./lib/store/useRemoteStore";
@@ -30,6 +31,9 @@ export { RemoteStoreProvider } from "./lib/store/RemoteStoreProvider";
 
 export { useRemoteStoreUpdate } from "./lib/store/useRemoteStoreUpdate";
 
+export { useRemoteStoreRef } from "./lib/store/useRemoteStoreRef";
+export { useRemoteSingleStoreRef } from "./lib/store/useRemoteStoreRef";
+export { useRemoteStoreArrayRef } from "./lib/store/useRemoteStoreRef";
 
 
 export { UpdateFunction } from "./lib/store/beans/StoreBeanUtils"
