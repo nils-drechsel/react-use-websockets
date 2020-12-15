@@ -17,13 +17,15 @@ export const useRemoteStoreRef = (path: Array<string>, params?: StoreParametersB
 
     const pathId = path.join("/");
 
+    if (connectionStateRef && connectionStateRef.current && !connectionStateRef.current.has(pathId)) {
+        connectionStateRef.current.set(pathId, dataRef.current !== undefined);
+    }
+
     useEffect(() => {
 
         const setThisConnectionState = (s: boolean) => {
             if (connectionStateRef && connectionStateRef.current.get(pathId) !== s) {
                 if (setConnectionState) setConnectionState((state: Map<string, boolean>) => {
-                    console.log("Setting new connection state", pathId, s);
-
                     const newState = new Map(state);
                     newState.set(pathId, s);
                     return newState;
