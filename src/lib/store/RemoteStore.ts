@@ -3,14 +3,21 @@ import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManage
 import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreParametersBean, StoreForcefulDisconnectBean} from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
 
+enum SubscriberType {
+    FULL,
+    UPDATE,
+}
 
-
+interface Subscriber {
+    type: SubscriberType;
+    callback: ((data: Map<string, AbstractWebSocketBean>) => void);
+}
 
 
 export class RemoteStore {
 
     store: Map<string, Map<string, AbstractWebSocketBean> | undefined>;
-    subscribers: Map<string, Map<string, ((data: Map<string, AbstractWebSocketBean>) => void)>>;
+    subscribers: Map<string, Map<string, Subscriber>>;
     websocketManager: WebSocketManager;
     unsubscribeUpdateListener: UnsubscribeCallback;
     unsubscribeDisconnectListener: UnsubscribeCallback;
@@ -65,14 +72,18 @@ export class RemoteStore {
     }
 
 
-    register(path: Array<string>, params:  StoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void): (() => void) {
+    register(path: Array<string>, params:  StoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void, update: boolean = false): (() => void) {
         const storeId = createStoreId(path, params);
         if (!this.subscribers.has(storeId)) {
             this.subscribers.set(storeId, new Map());
         }
 
         const id = uuidv4();
-        this.subscribers.get(storeId)!.set(id, setData);
+        const subscriber = {
+            type: update ? SubscriberType.UPDATE : SubscriberType.FULL,
+            callback: setData
+        };
+        this.subscribers.get(storeId)!.set(id, subscriber);
 
         this.openRemoteStore(path, params);
 
@@ -127,8 +138,23 @@ export class RemoteStore {
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");
 
-        storeSubscribers.forEach((setData) => {
-            setData(newStore);
+        const update = new Map();
+        if (Array.from(storeSubscribers.values()).some(subscriber => subscriber.type === SubscriberType.UPDATE)) {
+            for (const [key, value] of Object.entries(data)) {
+                update.set(key, value);
+            }
+        }
+
+        storeSubscribers.forEach((subscriber: Subscriber) => {
+            switch (subscriber.type) {
+                case SubscriberType.UPDATE:
+                    subscriber.callback(update);
+                    break;
+                case SubscriberType.FULL:
+                    subscriber.callback(newStore);
+                    break;
+                default: throw new Error("unknown SubscriberType: " + subscriber.type);
+            }
         });
     }
 

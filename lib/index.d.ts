@@ -20,6 +20,8 @@ export { DefaultListenerCallback } from "./lib/client/WebSocketManager";
 export { SendFunction } from "./lib/client/useWebSocket";
 export { connectStore } from "./lib/store/connectStore";
 export { ConnectionStateSetter } from "./lib/store/connectStore";
+export { ConnectionState } from "./lib/store/connectStore";
+export { ConnectionStateRef } from "./lib/store/connectStore";
 export { useRemoteStore } from "./lib/store/useRemoteStore";
 export { useRemoteSingleStore } from "./lib/store/useRemoteStore";
 export { useRemoteStoreArray } from "./lib/store/useRemoteStore";
