@@ -4,23 +4,23 @@ import { FailureCallback, SuccessCallback, ValidationCallback } from '../store/b
 import { useWebSocket } from './useWebSocket';
 import { UnsubscribeCallback } from './WebSocketManager';
 
-export const useListenEffect = (message: string, callback: (payload: any, fromSid?: string | null) => void, onInit?: () => void): void => {
-    const { listen } = useWebSocket();
+export const useListenEffect = (id: string | null, message: string, callback: (payload: any, fromSid?: string | null) => void, onInit?: () => void): void => {
+    const { listen } = useWebSocket(id);
 
     useEffect(() => {
         const unsubscribe = listen(message, callback);
 
         if (onInit) onInit();
 
-        () => {
+        return () => {
             unsubscribe();
         }
     }, []);
 
 }
 
-export const useListen = (message: string): ((callback: (payload: any, fromSid?: string | null) => void) => UnsubscribeCallback) => {
-    const { listen } = useWebSocket();
+export const useListen = (id: string | null, message: string): ((callback: (payload: any, fromSid?: string | null) => void) => UnsubscribeCallback) => {
+    const { listen } = useWebSocket(id);
 
     return (callback: (payload: any, fromSid?: string | null) => void) => {
         const unsubscribe = listen(message, callback);
@@ -29,9 +29,9 @@ export const useListen = (message: string): ((callback: (payload: any, fromSid?:
 
 }
 
-export const useServerValidationEffect = <VALIDATION_TYPE extends ValidationBean>(componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void, onInit?: () => void) => {
+export const useServerValidationEffect = <VALIDATION_TYPE extends ValidationBean>(id: string | null, componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void, onInit?: () => void) => {
 
-    useListenEffect(CoreMessage.VALIDATION,
+    useListenEffect(id, CoreMessage.VALIDATION,
 
         (validationBean: VALIDATION_TYPE) => {
             if (validationBean.originId !== componentId) return;
@@ -46,8 +46,8 @@ export const useServerValidationEffect = <VALIDATION_TYPE extends ValidationBean
 }
 
 
-export const useServerValidation = <VALIDATION_TYPE extends ValidationBean>(componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>): ((onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void) => UnsubscribeCallback) => {
-    const { listen } = useWebSocket();
+export const useServerValidation = <VALIDATION_TYPE extends ValidationBean>(id: string | null, componentId: string, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>): ((onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void) => UnsubscribeCallback) => {
+    const { listen } = useWebSocket(id);
 
     return (onSuccess?: (validation: VALIDATION_TYPE) => void, onFailure?: (validation: VALIDATION_TYPE) => void) => {
 

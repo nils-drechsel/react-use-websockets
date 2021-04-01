@@ -1,16 +1,18 @@
 import React, { FunctionComponent, useRef, useContext, useEffect } from "react";
-import { WebSocketManager } from "../client/WebSocketManager";
-import { WebSocketContext } from "../client/WebSocketContext";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
+import { useWebSocket } from "../client/useWebSocket";
 
 type Props = {
+    id: string
 }
 
 
-export const RemoteStoreProvider: FunctionComponent<Props> = ({ children }) => {
+export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children }) => {
 
-    const manager = useContext(WebSocketContext) as unknown as WebSocketManager;
+    const remoteStoreMap: Map<string, RemoteStore> = useContext(RemoteStoreContext);
+
+    const { manager } = useWebSocket(id);
 
     const storeRef = useRef<RemoteStore>();
 
@@ -30,8 +32,15 @@ export const RemoteStoreProvider: FunctionComponent<Props> = ({ children }) => {
     }, []);
 
 
+    const map = new Map();
+    if (remoteStoreMap) {
+        remoteStoreMap.forEach((value, key) => map.set(key, value));
+    }
+    map.set(id, storeRef.current);
+
+
     return (
-        <RemoteStoreContext.Provider value={storeRef.current as any}>
+        <RemoteStoreContext.Provider value={map}>
             {children}
         </RemoteStoreContext.Provider>
     )

@@ -1,1 +1,1 @@
-{"version":3,"file":"WebSocketContext.js","sourceRoot":"","sources":["../../../src/lib/client/WebSocketContext.ts"],"names":[],"mappings":";;AAAA,iCAAsC;AAGzB,QAAA,gBAAgB,GAAG,qBAAa,CAA0B,IAAI,CAAC,CAAC;AAE7E,kBAAe,wBAAgB,CAAC"}
+{"version":3,"file":"WebSocketContext.js","sourceRoot":"","sources":["../../../src/lib/client/WebSocketContext.ts"],"names":[],"mappings":";;AAAA,iCAAsC;AAGzB,QAAA,gBAAgB,GAAG,qBAAa,CAAgC,IAAI,GAAG,EAAE,CAAC,CAAC;AAExF,kBAAe,wBAAgB,CAAC"}

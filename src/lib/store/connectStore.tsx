@@ -1,4 +1,4 @@
-import React, { ClassAttributes, ComponentClass, ComponentType, Dispatch, MutableRefObject, SetStateAction } from 'react'; // importing FunctionComponent
+import React, { ClassAttributes, ComponentClass, ComponentType, Dispatch, MutableRefObject, ReactElement, SetStateAction } from 'react'; // importing FunctionComponent
 import { useStateVariable } from 'react-use-variable';
 
 // from redux
@@ -23,7 +23,8 @@ export type ConnectionStateSetter = Dispatch<SetStateAction<ConnectionState>>;
 export type ConnectionStateRef = MutableRefObject<ConnectionState>;
 
 export const connectStore = <MappedProps, OwnProps>(
-    useMapStores: (ownProps: OwnProps, connectionStateRef:ConnectionStateRef, setConnectionState: ConnectionStateSetter) => MappedProps
+    useMapStores: (ownProps: OwnProps, connectionStateRef: ConnectionStateRef, setConnectionState: ConnectionStateSetter) => MappedProps,
+    showElementWhileConnecting?: ReactElement | null
 ) => <C extends ComponentType<Matching<MappedProps, GetProps<C>>>>(
     WrappedComponent: C
 ): ComponentType<JSX.LibraryManagedAttributes<C, Omit<GetProps<C>, keyof MappedProps>>> => {
@@ -33,10 +34,10 @@ export const connectStore = <MappedProps, OwnProps>(
 
         const newProps = useMapStores(props, connectionStateRef, setConnectionState)
         if (Object.values(newProps).some(v => v === undefined)) {
-            return null;
+            return (showElementWhileConnecting as any) || null;
         }
         if (Array.from(connectionState.values()).some(v => !v)) {
-            return null;
+            return (showElementWhileConnecting as any) || null;
         }
         return <WrappedComponent {...props} {...newProps} />
     }

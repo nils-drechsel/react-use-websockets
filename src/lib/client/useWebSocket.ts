@@ -4,27 +4,32 @@ import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCa
 
 export type SendFunction = (message: string, payload: any, toSid?: string | null) => void;
 
-export const useWebSocket = () => {
-    const manager = useContext(WebSocketContext) as unknown as WebSocketManager;
+export const useWebSocket = (id?: string | null) => {
+    const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
+
+    let manager: WebSocketManager | undefined = undefined;
+    if (id) {
+        manager = managerMap.get(id);
+    } else {
+        if (managerMap.size > 0) manager = Array.from(managerMap.values())[0];
+    }
+
+    if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element with the correct id ("+id+") ?");
+
     const send: SendFunction = (message: string, payload: any, toSid: string | null = null) => {
-        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
-        manager.send(message, payload, toSid);
+        manager!.send(message, payload, toSid);
     };
     const listen = (message: string, callback: ListenerCallback): UnsubscribeCallback => {
-        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
-        return manager.addListener(message, callback);
+        return manager!.addListener(message, callback);
     }
     const isConnected = (): boolean => {
-        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
-        return manager.isConnected();
+        return manager!.isConnected();
     }
     const connectivity = (callback: ConnectivityCallback): UnsubscribeCallback => {
-        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
-        return manager.addConnectivityListener(callback);
+        return manager!.addConnectivityListener(callback);
     }
     const setDefaultCallback = (callback: DefaultListenerCallback): void => {
-        if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element?");
-        return manager.setDefaultCallback(callback);
+        return manager!.setDefaultCallback(callback);
     }
 
     return { manager, send, listen, isConnected, connectivity, setDefaultCallback };

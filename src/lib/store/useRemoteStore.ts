@@ -1,68 +1,14 @@
-import { useEffect, useState, useContext, Dispatch, SetStateAction } from "react"
-import RemoteStoreContext from "./RemoteStoreContext";
-import { RemoteStore } from "./RemoteStore";
-import { AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
-
-class RemoteStoreAccessor {
-
-    path: Array<string>;
-    params: StoreParametersBean | null = null;
-    dataCallbackFunction?: (data: Map<string, AbstractWebSocketBean> | undefined) => void = undefined;
-    dependencyItem?: any = undefined;
-    dependentFunction?: Dispatch<SetStateAction<AbstractWebSocketBean>>
-
-    constructor(path: Array<string>, params?: StoreParametersBean | null) {
-        this.path = path;
-        if (params) this.params = params;
-    }
-
-    dataCallback(dataCallbackFunction: (data: Map<string, AbstractWebSocketBean> | undefined) => void) : RemoteStoreAccessor {
-        this.dataCallbackFunction = dataCallbackFunction;
-        return this;
-    }
-
-    dependency(dependencyItem?: AbstractWebSocketBean) : RemoteStoreAccessor {
-        this.dependencyItem = dependencyItem;
-        return this;
-    }
-
-    dependent(dependentFunction?: Dispatch<SetStateAction<AbstractWebSocketBean>>) {
-        this.dependentFunction = dependentFunction;
-    }
-
-
-    map(): Map<string, AbstractWebSocketBean> | undefined {
-        
-        return useRemoteStore(this.path, this.params, this.dataCallbackFunction);
-
-    }
-
-    single(): AbstractWebSocketBean | undefined {
-        
-        return useRemoteSingleStore(this.path, this.params, this.dependentFunction, this.dependencyItem);
-
-    }
-
-    array(): Array<AbstractWebSocketBean> | undefined {
-        
-        return useRemoteStoreArray(this.path, this.params, this.dependencyItem);
-
-    }
-
-}
-
-export const useRemoteStoreAccess = (path: Array<string>, params: StoreParametersBean | null): RemoteStoreAccessor => {
-
-    const [accessor] = useState(new RemoteStoreAccessor(path, params));
-    return accessor;
-}
+import { useEffect, useState, Dispatch, SetStateAction } from "react"
+import { AbstractWebSocketBean, ReadableStoreParametersBean } from "./beans/Beans";
+import { useGetRemoteStore } from "./useGetRemoteStore";
 
 
 
-export const useRemoteStore = (path: Array<string>, params?: StoreParametersBean | null, callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void, dependency?: any):
+
+export const useRemoteStore = (id: string | null, path: Array<string>, params?: ReadableStoreParametersBean | null, callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void, dependency?: any):
     Map<string, any> => {
 
-    const remoteStore = useContext(RemoteStoreContext) as unknown as RemoteStore;
+    const remoteStore = useGetRemoteStore(id);
 
     const [data, setData] = useState(remoteStore.getData(path, params || null));
 
@@ -104,7 +50,7 @@ export const useRemoteStore = (path: Array<string>, params?: StoreParametersBean
 
 }
 
-export const useRemoteSingleStore = (path: Array<string>, params?: StoreParametersBean | null, updateDependent?: Dispatch<SetStateAction<AbstractWebSocketBean>>, dependency?: any):
+export const useRemoteSingleStore = (id: string | null, path: Array<string>, params?: ReadableStoreParametersBean | null, updateDependent?: Dispatch<SetStateAction<AbstractWebSocketBean>>, dependency?: any):
     any => {
 
     let callback = undefined;
@@ -123,7 +69,7 @@ export const useRemoteSingleStore = (path: Array<string>, params?: StoreParamete
         }
     }
 
-    const data : Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(path, params, callback, dependency);
+    const data : Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(id, path, params, callback, dependency);
 
     return data && data.size > 0 ? Array.from(data.values())[0] : undefined;
 
@@ -131,10 +77,10 @@ export const useRemoteSingleStore = (path: Array<string>, params?: StoreParamete
 
 
 
-export const useRemoteStoreArray = (path: Array<string>, params?: StoreParametersBean | null, dependency?: any):
+export const useRemoteStoreArray = (id: string | null, path: Array<string>, params?: ReadableStoreParametersBean | null, dependency?: any):
     Array<any> => {
 
-    const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(path, params, undefined, dependency);
+    const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(id, path, params, undefined, dependency);
 
     return data ? Array.from(data.values()) : undefined as any;
 

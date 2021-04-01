@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreParametersBean, StoreForcefulDisconnectBean} from "./beans/Beans";
+import { CoreMessage, StoreUpdateBean, ConnectPayload, DisconnectPayload , StoreEditBean, AbstractWebSocketBean, StoreForcefulDisconnectBean, WritableStoreParametersBean, ReadableStoreParametersBean} from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
 
 enum SubscriberType {
@@ -31,19 +31,23 @@ export class RemoteStore {
 
     initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback] {
         return [this.websocketManager.addListener(CoreMessage.STORE_UPDATE, (payload: StoreUpdateBean, _fromSid?: string | null) => {
+            if (payload.initial) this.clear(payload.id);
             this.update(payload.id, payload.payload);
         }),
             this.websocketManager.addListener(CoreMessage.STORE_DISCONNECT, (payload: StoreForcefulDisconnectBean, _fromSid?: string | null) => {
-                this.subscribers.delete(payload.id);
-                this.store.delete(payload.id);
-        })];
+                payload.ids.forEach(id => {
+                    this.subscribers.delete(id);
+                    this.store.delete(id);
+                })
+            })
+        ];
     }
 
     releaseRemoteStore() {
         this.unsubscribeUpdateListener();
     }
 
-    openRemoteStore(path: Array<string>, params:  StoreParametersBean | null) {
+    openRemoteStore(path: Array<string>, params:  ReadableStoreParametersBean | null) {
         const storeId = createStoreId(path, params);
         if (!this.store.has(storeId)) {
             this.store.set(storeId, undefined);
@@ -55,7 +59,7 @@ export class RemoteStore {
         }
     }
 
-    closeRemoteStore(path: Array<string>, params:  StoreParametersBean | null) {
+    closeRemoteStore(path: Array<string>, params:  ReadableStoreParametersBean | null) {
         const storeId = createStoreId(path, params);
         this.store.delete(storeId);
         const payload: DisconnectPayload = {
@@ -65,14 +69,14 @@ export class RemoteStore {
         this.websocketManager.send(CoreMessage.STORE_DISCONNECT, payload);
     }
 
-    getData(path: Array<string>, params:  StoreParametersBean | null) {
+    getData(path: Array<string>, params:  ReadableStoreParametersBean | null) {
         const storeId = createStoreId(path, params);
         if (!this.store.has(storeId)) return undefined;
         return this.store.get(storeId);
     }
 
 
-    register(path: Array<string>, params:  StoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void, update: boolean = false): (() => void) {
+    register(path: Array<string>, params:  ReadableStoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void, update: boolean = false): (() => void) {
         const storeId = createStoreId(path, params);
         if (!this.subscribers.has(storeId)) {
             this.subscribers.set(storeId, new Map());
@@ -92,7 +96,7 @@ export class RemoteStore {
         return returnDeregisterCallback.bind(this);
     }
 
-    deregister(path: Array<string>, id: string, params:  StoreParametersBean | null) {
+    deregister(path: Array<string>, id: string, params:  ReadableStoreParametersBean | null) {
         const storeId = createStoreId(path, params);
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) return;
@@ -103,7 +107,7 @@ export class RemoteStore {
         }
     }
 
-    editRemoteStore(msg: string, path: Array<string>, params:  StoreParametersBean | null, payload: AbstractWebSocketBean, originId: string) {
+    editRemoteStore(msg: string, path: Array<string>, params:  WritableStoreParametersBean | null, payload: AbstractWebSocketBean, originId: string) {
         const bean: StoreEditBean = {
             path,
             params,
@@ -114,6 +118,13 @@ export class RemoteStore {
         this.websocketManager.send(msg, bean);
     }
 
+    clear(storeId: string) {
+        if (!this.store.has(storeId)) {
+            console.log("received data from store " + storeId + " without being subscribed to the store", this.store);
+            return;
+        }
+        this.store.set(storeId, undefined);
+    }
 
     update(storeId: string, data: { [key: string]: AbstractWebSocketBean; }) {
 

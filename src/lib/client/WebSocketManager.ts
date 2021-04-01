@@ -1,4 +1,5 @@
-import { CoreMessage } from "../store/beans/Beans";
+import { ClientToServerAuthenticationBean, CoreMessage, ServerToClientAuthenticationBean } from "../store/beans/Beans";
+import { getCookie, setCookie } from "./cookie";
 
 export interface ListenerCallback {
     (payload: any, fromSid?: string | null): void;
@@ -10,7 +11,7 @@ export interface DefaultListenerCallback {
 }
 
 export interface ConnectivityCallback {
-    (isConnected: boolean, isReady: boolean, sid: string | null): void;
+    (isConnected: boolean, isReady: boolean, sid: string | null, uid: string | null): void;
 }
 
 export interface UnsubscribeCallback {
@@ -35,8 +36,10 @@ export class WebSocketManager {
     reconnect: boolean;
     logging: boolean;
     sid: string;
+    uid: string;
+    domain: string;
 
-    constructor(url: string, delimiter = "\t", reconnect = false, logging = true) {
+    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, logging = true) {
         this.url = url
         this.reconnect = reconnect;
         this.defaultCallback = null;
@@ -55,6 +58,8 @@ export class WebSocketManager {
         this.ws = new WebSocket(url);
         this.initListeners();
         this.sid = null as any;
+        this.uid = null as any;
+        this.domain = domain;
     }
 
     isConnected(): boolean {
@@ -62,7 +67,7 @@ export class WebSocketManager {
     }
 
     isReady(): boolean {
-        return this.ws.readyState === 1 && !!this.sid;
+        return this.ws.readyState === 1 && !!this.sid && !!this.uid;
     }    
 
     sleep(ms: number) {
@@ -84,15 +89,22 @@ export class WebSocketManager {
 
     private onConnect(_event?: Event) {
         if (this.logging) console.log("ws connection established");
-        this.send(CoreMessage.SID);
+
+        const authenticationBean: ClientToServerAuthenticationBean = {
+            token0: getCookie("token0"),
+            token1: getCookie("token1"),
+        }
+
+        this.send(CoreMessage.AUTHENTICATE, authenticationBean);
+
         const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid) : null);        
+        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid, this.uid) : null);        
     }
 
     private facilitateConnect() {
-        if (this.logging) console.log("connection established with sid ", this.sid);
+        if (this.logging) console.log("connection established with sid ", this.sid, this.uid);
         const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid) : null);
+        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid, this.uid) : null);
         this.resolveQueue();
     }
 
@@ -101,7 +113,7 @@ export class WebSocketManager {
         if (this.logging) console.log("close connection", event);
 
         const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), null) : null);
+        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), null, null) : null);
 
         if (!this.noReconnectOn.has(event.code) && this.reconnect) this.reinit();
     }
@@ -114,8 +126,13 @@ export class WebSocketManager {
         const fromSid = this.extractSid(parts[1]);
         const payload = this.extractJSONPayload(parts[2]);
 
-        if (message === CoreMessage.SID) {
-            this.sid = payload;
+        if (message === CoreMessage.AUTHENTICATE) {
+            const authenticationBean = payload as ServerToClientAuthenticationBean;
+            this.sid = authenticationBean.sid;
+            this.uid = authenticationBean.uid;
+            if (this.logging) console.log("received authentication bean with sid ", this.sid, "and uid", this.uid);
+            setCookie("token0", authenticationBean.token0, this.domain, authenticationBean.validity);
+            setCookie("token1", authenticationBean.token1, this.domain, authenticationBean.validity);
             this.facilitateConnect();
             return;
         }
@@ -153,7 +170,7 @@ export class WebSocketManager {
     }
 
     private resolveQueue() {
-        while (this.isConnected && this.queue.length > 0) {
+        while (this.isConnected() && this.queue.length > 0) {
             const item = this.queue.shift();
             if (!item) continue;
             if (this.logging) console.log("sending queued item");
@@ -222,13 +239,22 @@ export class WebSocketManager {
         this.connectivityListenerToCallback.set(id, callback);
         this.connectivityListeners.add(id);
 
-        callback(this.isConnected(), this.isReady(), this.sid);
+        callback(this.isConnected(), this.isReady(), this.sid, this.uid);
 
         const returnRemoveCallback = () => this.removeConnectivityListener(id);
         return returnRemoveCallback.bind(this);
     }
 
-    setDefaultCallback(callback: DefaultListenerCallback) {
+    setDefaultCallback(callback: DefaultListenerCallback): void {
         this.defaultCallback = callback;
     }
+
+    getSid(): string {
+        return this.sid;
+    }
+
+    getUid(): string {
+        return this.uid;
+    }
+
 }

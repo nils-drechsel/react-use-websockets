@@ -1,5 +1,5 @@
 import { WebSocketManager, UnsubscribeCallback } from '../client/WebSocketManager';
-import { AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
+import { AbstractWebSocketBean, WritableStoreParametersBean, ReadableStoreParametersBean } from "./beans/Beans";
 declare enum SubscriberType {
     FULL = 0,
     UPDATE = 1
@@ -17,12 +17,13 @@ export declare class RemoteStore {
     constructor(websocketManager: WebSocketManager);
     initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback];
     releaseRemoteStore(): void;
-    openRemoteStore(path: Array<string>, params: StoreParametersBean | null): void;
-    closeRemoteStore(path: Array<string>, params: StoreParametersBean | null): void;
-    getData(path: Array<string>, params: StoreParametersBean | null): Map<string, AbstractWebSocketBean> | undefined;
-    register(path: Array<string>, params: StoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void, update?: boolean): (() => void);
-    deregister(path: Array<string>, id: string, params: StoreParametersBean | null): void;
-    editRemoteStore(msg: string, path: Array<string>, params: StoreParametersBean | null, payload: AbstractWebSocketBean, originId: string): void;
+    openRemoteStore(path: Array<string>, params: ReadableStoreParametersBean | null): void;
+    closeRemoteStore(path: Array<string>, params: ReadableStoreParametersBean | null): void;
+    getData(path: Array<string>, params: ReadableStoreParametersBean | null): Map<string, AbstractWebSocketBean> | undefined;
+    register(path: Array<string>, params: ReadableStoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void, update?: boolean): (() => void);
+    deregister(path: Array<string>, id: string, params: ReadableStoreParametersBean | null): void;
+    editRemoteStore(msg: string, path: Array<string>, params: WritableStoreParametersBean | null, payload: AbstractWebSocketBean, originId: string): void;
+    clear(storeId: string): void;
     update(storeId: string, data: {
         [key: string]: AbstractWebSocketBean;
     }): void;

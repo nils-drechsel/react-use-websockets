@@ -25,6 +25,7 @@ export { ConnectionStateSetter } from "./lib/store/connectStore";
 export { ConnectionState} from "./lib/store/connectStore";
 export { ConnectionStateRef} from "./lib/store/connectStore";
 export { useRemoteStore } from "./lib/store/useRemoteStore";
+export { useGetRemoteStore } from "./lib/store/useGetRemoteStore";
 export { useRemoteSingleStore } from "./lib/store/useRemoteStore";
 export { useRemoteStoreArray } from "./lib/store/useRemoteStore";
 export { RemoteStoreContext } from "./lib/store/RemoteStoreContext";
@@ -43,10 +44,6 @@ export { updateBean } from "./lib/store/beans/StoreBeanUtils"
 export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils"
 export { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils"
 
-export { useListenForMessage } from "./lib/store/beans/Messages";
-export { useListenForMessageEffect } from "./lib/store/beans/Messages";
-export { useSendClientError } from "./lib/store/beans/Messages";
-
 export { MessageBean } from "./lib/store/beans/Beans";
 export { MessageType } from "./lib/store/beans/Beans";
 export { TimestampBean } from "./lib/store/beans/Beans";
@@ -61,3 +58,8 @@ export { validateSize } from "./lib/store/beans/StoreBeanUtils";
 export { errorSize } from "./lib/store/beans/StoreBeanUtils";
 export { validateComparison } from "./lib/store/beans/StoreBeanUtils";
 export { errorComparison } from "./lib/store/beans/StoreBeanUtils";
+
+export { ReadableKeyStoreParametersBean } from "./lib/store/beans/Beans";
+export { ReadableStoreParametersBean } from "./lib/store/beans/Beans";
+export { WritableStoreParametersBean } from "./lib/store/beans/Beans";
+export { NoParametersBean } from "./lib/store/beans/Beans";

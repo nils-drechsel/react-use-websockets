@@ -1,15 +1,5 @@
 // This file is auto-generated. Do not modify
 
-// @ts-ignore: unused
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { validateNotEmpty, errorNotEmpty, validateRegex, errorRegex, validateLength, errorLength, validateSize, errorSize, validateComparison, errorComparison, TimestampBean } from "react-use-websockets"
-
-
-export interface ClientErrorBean extends AbstractWebSocketBean {
-    message: string,
-    componentStack?: string | null,
-}
-
 export interface AssignedKeyContainingBean {
 }
 
@@ -17,7 +7,18 @@ export interface StoreEditFragment extends StoreBean {
     timestamp?: TimestampBean,
 }
 
+export interface ClientErrorBean extends AbstractWebSocketBean {
+    message: string,
+    componentStack?: string | null,
+}
+
 export interface NullBean extends AbstractWebSocketBean {
+}
+
+export interface TimestampBean extends AbstractWebSocketBean {
+    touched: number,
+    created: number,
+    modified: number,
 }
 
 export interface ServerMessageBean extends AbstractWebSocketBean {
@@ -25,26 +26,20 @@ export interface ServerMessageBean extends AbstractWebSocketBean {
     bean?: string,
 }
 
-export interface StoreParametersBean extends AbstractWebSocketBean {
-    key: string | null,
-}
-
-export interface TimestampBean extends AbstractWebSocketBean {
-    touched: number,
-    edited: number,
-    created: number,
-}
-
 export interface DataBaseBean extends StoreBean {
     timestamp?: TimestampBean,
+}
+
+export interface WritableStoreParametersBean extends AbstractStoreParametersBean {
+    key: string | null,
 }
 
 export interface ClientMessageBean {
 }
 
-export interface DisconnectPayload extends AbstractStoreBean {
+export interface DisconnectPayload extends AbstractConnectionBean {
     path: Array<string>,
-    params?: StoreParametersBean | null,
+    params?: ReadableStoreParametersBean | null,
 }
 
 export enum Comparator {
@@ -56,6 +51,12 @@ export enum Comparator {
     SMALLER_OR_EQUAL = "SMALLER_OR_EQUAL",
 }
 
+export interface NoParametersBean extends ReadableStoreParametersBean {
+}
+
+export interface AbstractStoreParametersBean extends AbstractWebSocketBean {
+}
+
 export interface StoreBean extends AbstractWebSocketBean {
     timestamp?: TimestampBean,
 }
@@ -64,10 +65,18 @@ export interface ClientOriginatedBean extends AbstractWebSocketBean {
     originId?: string,
 }
 
+export interface ReadableStoreParametersBean extends AbstractStoreParametersBean {
+}
+
 export interface StoreUpdateBean extends AbstractWebSocketBean {
     initial?: boolean | null,
     payload: { [key: string]: AbstractWebSocketBean; },
     id: string,
+}
+
+export interface AbstractConnectionBean extends AbstractWebSocketBean {
+    path: Array<string>,
+    params?: ReadableStoreParametersBean | null,
 }
 
 export interface AbstractWebSocketBean extends Object {
@@ -79,11 +88,11 @@ export interface OwnerContainingBean {
 export interface AnnotationContainingBean {
 }
 
-export interface StoreEditBean extends AbstractStoreBean {
+export interface StoreEditBean extends AbstractWebSocketBean {
     path: Array<string>,
     originId: string,
     payload: StoreBean,
-    params?: StoreParametersBean | null,
+    params?: WritableStoreParametersBean | null,
 }
 
 export enum MessageType {
@@ -98,23 +107,36 @@ export interface MessageBean extends AbstractWebSocketBean {
     message: string,
 }
 
-export interface AbstractStoreBean extends AbstractWebSocketBean {
-    path: Array<string>,
-    params?: StoreParametersBean | null,
+export interface ServerToClientAuthenticationBean extends AbstractWebSocketBean {
+    uid: string,
+    token0: string,
+    token1: string,
+    validity: number,
+    sid: string,
 }
 
-export interface ConnectPayload extends AbstractStoreBean {
+export interface ConnectPayload extends AbstractConnectionBean {
     path: Array<string>,
-    params?: StoreParametersBean | null,
+    params?: ReadableStoreParametersBean | null,
+}
+
+export interface StoreReconnectBean extends AbstractWebSocketBean {
+    ids: Array<string>,
+}
+
+export interface ClientToServerAuthenticationBean extends AbstractWebSocketBean {
+    token0: string | null,
+    token1: string | null,
 }
 
 export interface StoreForcefulDisconnectBean extends AbstractWebSocketBean {
-    id: string,
+    ids: Array<string>,
 }
 
 export enum CoreMessage {
-    SID = "SID",
+    AUTHENTICATE = "AUTHENTICATE",
     STORE_CONNECT = "STORE_CONNECT",
+    STORE_RECONNECT = "STORE_RECONNECT",
     STORE_DISCONNECT = "STORE_DISCONNECT",
     STORE_UPDATE = "STORE_UPDATE",
     VALIDATION = "VALIDATION",
@@ -122,6 +144,10 @@ export enum CoreMessage {
     STORE_CREATE = "STORE_CREATE",
     MESSAGE = "MESSAGE",
     CLIENT_ERROR = "CLIENT_ERROR",
+}
+
+export interface ReadableKeyStoreParametersBean extends ReadableStoreParametersBean {
+    key: string | null,
 }
 
 export interface UidContainingBean {

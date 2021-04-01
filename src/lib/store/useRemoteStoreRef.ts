@@ -1,15 +1,14 @@
-import { useEffect, useContext, Dispatch, SetStateAction, useRef, MutableRefObject } from "react"
-import RemoteStoreContext from "./RemoteStoreContext";
-import { RemoteStore } from "./RemoteStore";
-import { AbstractWebSocketBean, StoreParametersBean } from "./beans/Beans";
+import { useEffect, Dispatch, SetStateAction, useRef, MutableRefObject } from "react"
+import { AbstractWebSocketBean, ReadableStoreParametersBean } from "./beans/Beans";
 import { useVariable } from "react-use-variable";
 import { ConnectionStateRef, ConnectionStateSetter } from "./connectStore";
+import { useGetRemoteStore } from "./useGetRemoteStore";
 
 
-export const useRemoteStoreRef = (path: Array<string>, params?: StoreParametersBean | null, callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void, dependency?: any, connectionStateRef?: ConnectionStateRef, setConnectionState?: ConnectionStateSetter):
+export const useRemoteStoreRef = (id: string | null, path: Array<string>, params?: ReadableStoreParametersBean | null, callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void, dependency?: any, connectionStateRef?: ConnectionStateRef, setConnectionState?: ConnectionStateSetter):
     MutableRefObject<Map<string, any>> => {
 
-    const remoteStore = useContext(RemoteStoreContext) as unknown as RemoteStore;
+    const remoteStore = useGetRemoteStore(id);
 
     const dataRef = useRef(remoteStore.getData(path, params || null) as Map<string, AbstractWebSocketBean>);
 
@@ -76,7 +75,7 @@ export const useRemoteStoreRef = (path: Array<string>, params?: StoreParametersB
 
 }
 
-export const useRemoteSingleStoreRef = (path: Array<string>, params?: StoreParametersBean | null, updateDependent?: Dispatch<SetStateAction<AbstractWebSocketBean>>, dependency?: any, connectionStateRef?: ConnectionStateRef, setConnectionState?: ConnectionStateSetter):
+export const useRemoteSingleStoreRef = (id: string | null, path: Array<string>, params?: ReadableStoreParametersBean | null, updateDependent?: Dispatch<SetStateAction<AbstractWebSocketBean>>, dependency?: any, connectionStateRef?: ConnectionStateRef, setConnectionState?: ConnectionStateSetter):
     MutableRefObject<any> => {
 
     let callback = undefined;
@@ -95,7 +94,7 @@ export const useRemoteSingleStoreRef = (path: Array<string>, params?: StoreParam
         }
     }
 
-    const dataRef: MutableRefObject<Map<string, AbstractWebSocketBean> | undefined> = useRemoteStoreRef(path, params, callback, dependency, connectionStateRef, setConnectionState);
+    const dataRef: MutableRefObject<Map<string, AbstractWebSocketBean> | undefined> = useRemoteStoreRef(id, path, params, callback, dependency, connectionStateRef, setConnectionState);
     
     const singleDataRef = useVariable(dataRef.current && dataRef.current.size > 0 ? Array.from(dataRef.current.values())[0] : undefined)
 
@@ -105,10 +104,10 @@ export const useRemoteSingleStoreRef = (path: Array<string>, params?: StoreParam
 
 
 
-export const useRemoteStoreArrayRef = (path: Array<string>, params?: StoreParametersBean | null, dependency?: any, connectionStateRef?: ConnectionStateRef, setConnectionState?: ConnectionStateSetter):
+export const useRemoteStoreArrayRef = (id: string | null, path: Array<string>, params?: ReadableStoreParametersBean | null, dependency?: any, connectionStateRef?: ConnectionStateRef, setConnectionState?: ConnectionStateSetter):
     MutableRefObject<Array<any>> => {
 
-    const dataRef: MutableRefObject<Map<string, AbstractWebSocketBean> | undefined> = useRemoteStoreRef(path, params, undefined, dependency, connectionStateRef, setConnectionState);
+    const dataRef: MutableRefObject<Map<string, AbstractWebSocketBean> | undefined> = useRemoteStoreRef(id, path, params, undefined, dependency, connectionStateRef, setConnectionState);
 
     const arrayDataRef = useVariable(dataRef.current ? Array.from(dataRef.current.values()) : undefined as any)
     return arrayDataRef;

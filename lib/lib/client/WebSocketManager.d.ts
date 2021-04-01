@@ -5,7 +5,7 @@ export interface DefaultListenerCallback {
     (message: string, payload: any, fromSid?: string | null): void;
 }
 export interface ConnectivityCallback {
-    (isConnected: boolean, isReady: boolean, sid: string | null): void;
+    (isConnected: boolean, isReady: boolean, sid: string | null, uid: string | null): void;
 }
 export interface UnsubscribeCallback {
     (): void;
@@ -26,7 +26,9 @@ export declare class WebSocketManager {
     reconnect: boolean;
     logging: boolean;
     sid: string;
-    constructor(url: string, delimiter?: string, reconnect?: boolean, logging?: boolean);
+    uid: string;
+    domain: string;
+    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, logging?: boolean);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;
@@ -47,4 +49,6 @@ export declare class WebSocketManager {
     removeConnectivityListener(id: number): void;
     addConnectivityListener(callback: ConnectivityCallback): UnsubscribeCallback;
     setDefaultCallback(callback: DefaultListenerCallback): void;
+    getSid(): string;
+    getUid(): string;
 }

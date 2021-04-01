@@ -1,9 +1,10 @@
-import { Comparator, ValidationBean, AbstractWebSocketBean, StoreParametersBean } from "./Beans";
+import { Comparator, ValidationBean, AbstractWebSocketBean, AbstractStoreParametersBean } from "./Beans";
 import { Dispatch, SetStateAction } from "react";
 
-export const createStoreId = (path: Array<string>, params: StoreParametersBean | null) => {
+
+export const createStoreId = (path: Array<string>, params: AbstractStoreParametersBean | null) => {
     path = [...path];
-    if (params && params.key) path.push(params.key);
+    if (params && (params as any).key) path.push((params as any).key);
     return path.join("/");
 }
 
