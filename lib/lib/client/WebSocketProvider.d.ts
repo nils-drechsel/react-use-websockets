@@ -5,6 +5,7 @@ interface Props {
     domain: string;
     delimiter?: string;
     logging?: boolean;
+    reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
 }
 export declare const WebSocketProvider: FunctionComponent<Props>;

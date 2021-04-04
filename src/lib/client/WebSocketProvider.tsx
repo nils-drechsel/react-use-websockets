@@ -10,18 +10,19 @@ interface Props {
     domain: string;
     delimiter?: string;
     logging?: boolean;
+    reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
 }
 
 
-export const WebSocketProvider: FunctionComponent<Props> = ({ id, url, domain, delimiter, logging, showElementWhileConnecting, children }) => {
+export const WebSocketProvider: FunctionComponent<Props> = ({ id, url, domain, delimiter, logging, reconnect, showElementWhileConnecting, children }) => {
 
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
 
     const managerRef = useRef<WebSocketManager>();
 
     if (!managerRef.current) {
-        managerRef.current = new WebSocketManager(url, domain, delimiter || "\t", false, logging || false);
+        managerRef.current = new WebSocketManager(url, domain, delimiter || "\t", reconnect, logging || false);
     }
 
     const [, setUid] = useState(null as string | null);

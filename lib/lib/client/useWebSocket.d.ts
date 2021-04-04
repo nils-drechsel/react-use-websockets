@@ -8,3 +8,4 @@ export declare const useWebSocket: (id?: string | null | undefined) => {
     connectivity: (callback: ConnectivityCallback) => UnsubscribeCallback;
     setDefaultCallback: (callback: DefaultListenerCallback) => void;
 };
+export declare const useSocket: (id?: string | null | undefined) => [string, string];

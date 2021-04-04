@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
 
@@ -33,4 +33,25 @@ export const useWebSocket = (id?: string | null) => {
     }
 
     return { manager, send, listen, isConnected, connectivity, setDefaultCallback };
+}
+
+export const useSocket = (id?: string | null): [string, string] => {
+    
+    const { connectivity, manager } = useWebSocket(id);
+    const [sid, setSid] = useState(manager.getSid());
+    const [uid, setUid] = useState(manager.getUid());
+
+    useEffect(() => {
+        const unsubscribe = connectivity((_isConnected, _isReady, sid, uid) => {
+            if (sid) setSid(sid);
+            if (uid) setUid(uid);
+        });
+
+        return () => {
+            unsubscribe();
+        }
+    });
+
+    return [sid, uid];
+
 }
