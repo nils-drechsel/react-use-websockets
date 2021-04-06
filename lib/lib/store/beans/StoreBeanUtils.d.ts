@@ -1,6 +1,6 @@
 import { Comparator, ValidationBean, AbstractWebSocketBean, AbstractStoreParametersBean } from "./Beans";
 import { Dispatch, SetStateAction } from "react";
-export declare const createStoreId: (path: string[], params: AbstractStoreParametersBean | null) => string;
+export declare const createStoreId: (path: Array<string>, params: AbstractStoreParametersBean | null) => string;
 export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
     (changeset: Partial<TYPE>): void;
 }
