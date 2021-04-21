@@ -25,6 +25,12 @@ export const WebSocketProvider: FunctionComponent<Props> = ({ id, url, domain, d
         managerRef.current = new WebSocketManager(url, domain, delimiter || "\t", reconnect, logging || false);
     }
 
+    useEffect(() => {
+        return () => {
+            if (managerRef.current) managerRef.current.destroy();
+        }
+    }, []);
+
     const [, setUid] = useState(null as string | null);
 
   

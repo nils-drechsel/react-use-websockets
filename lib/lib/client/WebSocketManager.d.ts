@@ -28,6 +28,7 @@ export declare class WebSocketManager {
     sid: string;
     uid: string;
     domain: string;
+    unsubscribeInterval: number;
     constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, logging?: boolean);
     isConnected(): boolean;
     isReady(): boolean;
@@ -51,4 +52,5 @@ export declare class WebSocketManager {
     setDefaultCallback(callback: DefaultListenerCallback): void;
     getSid(): string;
     getUid(): string;
+    destroy(): void;
 }

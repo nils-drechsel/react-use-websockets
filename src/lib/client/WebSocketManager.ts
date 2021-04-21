@@ -38,6 +38,7 @@ export class WebSocketManager {
     sid: string;
     uid: string;
     domain: string;
+    unsubscribeInterval: number;
 
     constructor(url: string, domain: string, delimiter = "\t", reconnect = false, logging = true) {
         this.url = url
@@ -60,6 +61,11 @@ export class WebSocketManager {
         this.sid = null as any;
         this.uid = null as any;
         this.domain = domain;
+
+        this.unsubscribeInterval = setInterval(() => {
+            if (this.logging) console.log("PING");
+            this.send(CoreMessage.PING);
+        }, 60 * 1000) as unknown as number;
     }
 
     isConnected(): boolean {
@@ -134,6 +140,9 @@ export class WebSocketManager {
             setCookie("token0", authenticationBean.token0, this.domain, authenticationBean.validity);
             setCookie("token1", authenticationBean.token1, this.domain, authenticationBean.validity);
             this.facilitateConnect();
+            return;
+        } else if (message === CoreMessage.PONG) {
+            if (this.logging) console.log("PONG");
             return;
         }
 
@@ -255,6 +264,13 @@ export class WebSocketManager {
 
     getUid(): string {
         return this.uid;
+    }
+
+    destroy(): void {
+        clearInterval(this.unsubscribeInterval);
+        this.ws.onmessage = null;
+        this.ws.onopen = null;
+        this.ws.onclose = null;
     }
 
 }

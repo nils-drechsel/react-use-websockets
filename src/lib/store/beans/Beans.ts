@@ -134,6 +134,8 @@ export interface StoreForcefulDisconnectBean extends AbstractWebSocketBean {
 }
 
 export enum CoreMessage {
+    PING = "PING",
+    PONG = "PONG",
     AUTHENTICATE = "AUTHENTICATE",
     STORE_CONNECT = "STORE_CONNECT",
     STORE_RECONNECT = "STORE_RECONNECT",
