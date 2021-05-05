@@ -7,6 +7,7 @@ interface Props {
     logging?: boolean;
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
+    ping?: number;
 }
 export declare const WebSocketProvider: FunctionComponent<Props>;
 export {};

@@ -29,7 +29,7 @@ export declare class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
-    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, logging?: boolean);
+    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;

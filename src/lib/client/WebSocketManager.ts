@@ -40,7 +40,7 @@ export class WebSocketManager {
     domain: string;
     unsubscribeInterval: number;
 
-    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, logging = true) {
+    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping=5, logging = true) {
         this.url = url
         this.reconnect = reconnect;
         this.defaultCallback = null;
@@ -65,7 +65,7 @@ export class WebSocketManager {
         this.unsubscribeInterval = setInterval(() => {
             if (this.logging) console.log("PING");
             this.send(CoreMessage.PING);
-        }, 60 * 1000) as unknown as number;
+        }, ping * 60 * 1000) as unknown as number;
     }
 
     isConnected(): boolean {

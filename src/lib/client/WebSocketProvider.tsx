@@ -12,17 +12,18 @@ interface Props {
     logging?: boolean;
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
+    ping?: number;
 }
 
 
-export const WebSocketProvider: FunctionComponent<Props> = ({ id, url, domain, delimiter, logging, reconnect, showElementWhileConnecting, children }) => {
+export const WebSocketProvider: FunctionComponent<Props> = ({ id, url, domain, delimiter, ping, logging, reconnect, showElementWhileConnecting, children }) => {
 
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
 
     const managerRef = useRef<WebSocketManager>();
 
     if (!managerRef.current) {
-        managerRef.current = new WebSocketManager(url, domain, delimiter || "\t", reconnect, logging || false);
+        managerRef.current = new WebSocketManager(url, domain, delimiter || "\t", reconnect, ping, logging || false);
     }
 
     useEffect(() => {
