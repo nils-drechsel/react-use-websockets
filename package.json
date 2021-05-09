@@ -1,30 +1,30 @@
 {
-  "name": "react-use-websockets",
-  "version": "1.9.2",
-  "description": "",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nils-drechsel/react-use-websockets.git"
-  },
-  "author": "Nils J. D. Drechsel",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nils-drechsel/react-use-websockets/issues"
-  },
-  "homepage": "https://github.com/nils-drechsel/react-use-websockets#readme",
-  "devDependencies": {
-    "@types/react": "17.0.3",
-    "typescript": "4.2.3"
-  },
-  "dependencies": {
-    "@types/uuid": "8.3.0",
-    "react-error-boundary": "3.1.1",
-    "react-use-variable": "1.2.0",
-    "uuid": "8.3.2"
-  }
+    "name": "react-use-websockets",
+    "version": "1.9.3",
+    "description": "",
+    "main": "lib/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nils-drechsel/react-use-websockets.git"
+    },
+    "author": "Nils J. D. Drechsel",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/nils-drechsel/react-use-websockets/issues"
+    },
+    "homepage": "https://github.com/nils-drechsel/react-use-websockets#readme",
+    "devDependencies": {
+        "@types/react": "17.0.3",
+        "typescript": "4.2.3"
+    },
+    "dependencies": {
+        "@types/uuid": "8.3.0",
+        "react-error-boundary": "3.1.1",
+        "react-use-variable": "1.2.0",
+        "uuid": "8.3.2"
+    }
 }
