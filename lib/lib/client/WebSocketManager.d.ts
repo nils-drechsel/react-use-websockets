@@ -1,3 +1,5 @@
+import Deserialiser from "./serialisation/Deserialisation";
+import Serialiser, { SerialisationSignature } from "./serialisation/Serialisation";
 export interface ListenerCallback {
     (payload: any, fromSid?: string | null): void;
 }
@@ -29,7 +31,9 @@ export declare class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
-    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean);
+    serialisers: Map<string, Serialiser>;
+    deserialisers: Map<string, Deserialiser>;
+    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Array<SerialisationSignature>);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;

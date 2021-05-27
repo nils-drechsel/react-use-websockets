@@ -3,6 +3,7 @@ import { WebSocketManager } from "./WebSocketManager";
 import { WebSocketContext } from "./WebSocketContext";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { ClientErrorBean, CoreMessage } from "../store/beans/Beans";
+import { SerialisationSignature } from "./serialisation/Serialisation";
 
 interface Props {
     id: string;
@@ -13,6 +14,7 @@ interface Props {
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
+    serialisationSignatures?: Array<SerialisationSignature>;
 }
 
 export const WebSocketProvider: FunctionComponent<Props> = ({
@@ -28,15 +30,25 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
 }) => {
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
 
-    const [manager] = useState<WebSocketManager>(
-        new WebSocketManager(url, domain, delimiter || "\t", reconnect, ping, logging || false)
-    );
+    const [manager, setManager] = useState<WebSocketManager | null>(null);
 
     useEffect(() => {
+        const manager = new WebSocketManager(url, domain, delimiter || "\t", reconnect, ping, logging || false);
+
+        setManager(manager);
+
+        const unsubscribe = manager.addConnectivityListener((_isConnected, isReady, _sid, uid) => {
+            if (logging) console.log("setting connectivity for uid:", uid, "ready:", isReady);
+            setSocketConnected(isReady);
+            setUid(uid);
+        });
+
         return () => {
+            if (logging) console.log("destroying websocket manager");
+            unsubscribe();
             manager.destroy();
         };
-    }, [manager]);
+    }, []);
 
     const [, setUid] = useState(null as string | null);
 
@@ -53,18 +65,6 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
     };
 
     const [isSocketConnected, setSocketConnected] = useState(false);
-
-    useEffect(() => {
-        const unsubscribe = manager.addConnectivityListener((_isConnected, isReady, _sid, uid) => {
-            if (logging) console.log("setting connectivity for uid:", uid, "ready:", isReady);
-            setSocketConnected(isReady);
-            setUid(uid);
-        });
-
-        return () => {
-            unsubscribe();
-        };
-    }, []);
 
     if ((!manager || !isSocketConnected) && showElementWhileConnecting) {
         return <div>{cloneElement(showElementWhileConnecting)}</div>;

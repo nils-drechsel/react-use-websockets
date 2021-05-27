@@ -1,26 +1,25 @@
 import { ClientToServerAuthenticationBean, CoreMessage, ServerToClientAuthenticationBean } from "../store/beans/Beans";
 import { getCookie, setCookie } from "./cookie";
+import Deserialiser from "./serialisation/Deserialisation";
+import Serialiser, { SerialisationSignature } from "./serialisation/Serialisation";
 
 export interface ListenerCallback {
     (payload: any, fromSid?: string | null): void;
 }
-
 
 export interface DefaultListenerCallback {
     (message: string, payload: any, fromSid?: string | null): void;
 }
 
 export interface ConnectivityCallback {
-    (isConnected: boolean, isReady: boolean, sid: string | null, uid: string | null): void;
+    (isConnected: boolean, isReady: boolean, sid: string | null, uid: string | null): void;
 }
 
 export interface UnsubscribeCallback {
     (): void;
 }
 
-
 export class WebSocketManager {
-
     ws: WebSocket;
     url: string;
     messageToListeners: Map<string, Set<number>>;
@@ -39,9 +38,11 @@ export class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
+    serialisers: Map<string, Serialiser> = new Map();
+    deserialisers: Map<string, Deserialiser> = new Map();
 
-    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping=5, logging = true) {
-        this.url = url
+    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping = 5, logging = true, serialisationSignatures?: Array<SerialisationSignature>) {
+        this.url = url;
         this.reconnect = reconnect;
         this.defaultCallback = null;
         this.listenerIdCount = 0;
@@ -56,16 +57,24 @@ export class WebSocketManager {
         this.queue = [];
         this.delimiter = delimiter;
         this.logging = logging;
+
+        if (serialisationSignatures) {
+            serialisationSignatures.forEach(s => {
+                if(!s.incoming) this.serialisers.set(s.message, new Serialiser(s.signature));
+                if(s.incoming) this.deserialisers.set(s.message, new Deserialiser(s.signature));
+            })
+        }
+
         this.ws = new WebSocket(url);
         this.initListeners();
         this.sid = null as any;
         this.uid = null as any;
         this.domain = domain;
 
-        this.unsubscribeInterval = setInterval(() => {
+        this.unsubscribeInterval = (setInterval(() => {
             if (this.logging) console.log("PING");
             this.send(CoreMessage.PING);
-        }, ping * 60 * 1000) as unknown as number;
+        }, ping * 60 * 1000) as unknown) as number;
     }
 
     isConnected(): boolean {
@@ -74,10 +83,10 @@ export class WebSocketManager {
 
     isReady(): boolean {
         return this.ws.readyState === 1 && !!this.sid && !!this.uid;
-    }    
+    }
 
     sleep(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     async reinit() {
@@ -99,27 +108,36 @@ export class WebSocketManager {
         const authenticationBean: ClientToServerAuthenticationBean = {
             token0: getCookie("token0"),
             token1: getCookie("token1"),
-        }
+        };
 
         this.send(CoreMessage.AUTHENTICATE, authenticationBean);
 
-        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid, this.uid) : null);        
+        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) =>
+            this.connectivityListenerToCallback.get(listener)
+        );
+        callbacks?.forEach((callback) =>
+            callback ? callback(this.isConnected(), this.isReady(), this.sid, this.uid) : null
+        );
     }
 
     private facilitateConnect() {
         if (this.logging) console.log("connection established with sid ", this.sid, this.uid);
-        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), this.sid, this.uid) : null);
+        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) =>
+            this.connectivityListenerToCallback.get(listener)
+        );
+        callbacks?.forEach((callback) =>
+            callback ? callback(this.isConnected(), this.isReady(), this.sid, this.uid) : null
+        );
         this.resolveQueue();
     }
-
 
     private onClose(event: CloseEvent) {
         if (this.logging) console.log("close connection", event);
 
-        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) => this.connectivityListenerToCallback.get(listener));
-        callbacks?.forEach(callback => callback ? callback(this.isConnected(), this.isReady(), null, null) : null);
+        const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) =>
+            this.connectivityListenerToCallback.get(listener)
+        );
+        callbacks?.forEach((callback) => (callback ? callback(this.isConnected(), this.isReady(), null, null) : null));
 
         if (!this.noReconnectOn.has(event.code) && this.reconnect) this.reinit();
     }
@@ -131,6 +149,10 @@ export class WebSocketManager {
         const message = parts[0];
         const fromSid = this.extractSid(parts[1]);
         const payload = this.extractJSONPayload(parts[2]);
+
+        if (this.deserialisers.has(message)) {
+            this.deserialisers.get(message)!.deserialise(payload);
+        }
 
         if (message === CoreMessage.AUTHENTICATE) {
             const authenticationBean = payload as ServerToClientAuthenticationBean;
@@ -146,23 +168,27 @@ export class WebSocketManager {
             return;
         }
 
-
-        if (this.logging) console.log("received message", message, "from", fromSid, "with payload", payload, "raw:", event.data);
+        if (this.logging)
+            console.log("received message", message, "from", fromSid, "with payload", payload, "raw:", event.data);
 
         if (!this.messageToListeners.has(message)) {
             if (this.defaultCallback) {
-                if (this.logging) console.log("no listeners defined, calling default listener for ", message, "and payload", payload);
+                if (this.logging)
+                    console.log("no listeners defined, calling default listener for ", message, "and payload", payload);
                 this.defaultCallback(message, payload, fromSid);
             }
             return;
         }
         const listeners = this.messageToListeners.get(message);
 
-        if (this.logging) console.log("message", message, "from", fromSid, "with payload", payload, " has listeners:", listeners);
+        if (this.logging)
+            console.log("message", message, "from", fromSid, "with payload", payload, " has listeners:", listeners);
 
-        const callbacks = Array.from(listeners!.values()).map((listener: number) => this.listenerToCallback.get(listener));
+        const callbacks = Array.from(listeners!.values()).map((listener: number) =>
+            this.listenerToCallback.get(listener)
+        );
 
-        callbacks?.forEach(callback => callback ? callback(payload, fromSid) : null);
+        callbacks?.forEach((callback) => (callback ? callback(payload, fromSid) : null));
     }
 
     private extractSid(value: string | null | undefined) {
@@ -187,9 +213,14 @@ export class WebSocketManager {
         }
     }
 
-
     send(message: string, payload: any = null, toSid: string | null = null) {
-        const data: any = [message, toSid, typeof (payload) !== "object" ? payload : JSON.stringify(payload)]
+
+        if (this.serialisers.has(message)) {
+            payload = this.serialisers.get(message)!.serialise(payload);
+        }
+
+
+        const data: any = [message, toSid, typeof payload !== "object" ? payload : JSON.stringify(payload)];
 
         const raw = data.join("\t");
 
@@ -198,7 +229,7 @@ export class WebSocketManager {
             if (this.logging) console.log("queueing", message, "with payload", payload);
         } else {
             if (this.logging) console.log("sending", message, "with payload", payload);
-            this.sendRaw(raw)
+            this.sendRaw(raw);
         }
     }
 
@@ -235,7 +266,6 @@ export class WebSocketManager {
         return returnRemoveCallback.bind(this);
     }
 
-
     removeConnectivityListener(id: number) {
         if (this.logging) console.log("removing connectivity listener with id", id);
         this.connectivityListeners.delete(id);
@@ -271,6 +301,6 @@ export class WebSocketManager {
         this.ws.onmessage = null;
         this.ws.onopen = null;
         this.ws.onclose = null;
+        this.ws.close();
     }
-
 }
