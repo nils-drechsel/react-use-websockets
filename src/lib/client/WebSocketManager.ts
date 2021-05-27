@@ -1,7 +1,7 @@
 import { ClientToServerAuthenticationBean, CoreMessage, ServerToClientAuthenticationBean } from "../store/beans/Beans";
 import { getCookie, setCookie } from "./cookie";
 import Deserialiser from "./serialisation/Deserialisation";
-import Serialiser, { SerialisationSignature } from "./serialisation/Serialisation";
+import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation";
 
 export interface ListenerCallback {
     (payload: any, fromSid?: string | null): void;
@@ -41,7 +41,7 @@ export class WebSocketManager {
     serialisers: Map<string, Serialiser> = new Map();
     deserialisers: Map<string, Deserialiser> = new Map();
 
-    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping = 5, logging = true, serialisationSignatures?: Array<SerialisationSignature>) {
+    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping = 5, logging = true, serialisationSignatures?: Array<BeanSerialisationSignature>) {
         this.url = url;
         this.reconnect = reconnect;
         this.defaultCallback = null;

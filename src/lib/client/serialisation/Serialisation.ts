@@ -16,7 +16,7 @@ export interface SingleSerialisationSignature {
 export type SerialisationEntitySignature =
     Array<SingleSerialisationSignature>;
 
-export interface SerialisationSignature {
+export interface BeanSerialisationSignature {
     incoming: boolean;
     message: string,
     signature: SerialisationEntitySignature

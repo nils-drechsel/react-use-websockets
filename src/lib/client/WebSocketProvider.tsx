@@ -3,7 +3,7 @@ import { WebSocketManager } from "./WebSocketManager";
 import { WebSocketContext } from "./WebSocketContext";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { ClientErrorBean, CoreMessage } from "../store/beans/Beans";
-import { SerialisationSignature } from "./serialisation/Serialisation";
+import { BeanSerialisationSignature } from "./serialisation/Serialisation";
 
 interface Props {
     id: string;
@@ -14,7 +14,7 @@ interface Props {
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
-    serialisationSignatures?: Array<SerialisationSignature>;
+    serialisationSignatures?: Array<BeanSerialisationSignature>;
 }
 
 export const WebSocketProvider: FunctionComponent<Props> = ({
@@ -27,13 +27,14 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
     reconnect,
     showElementWhileConnecting,
     children,
+    serialisationSignatures,
 }) => {
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
 
     const [manager, setManager] = useState<WebSocketManager | null>(null);
 
     useEffect(() => {
-        const manager = new WebSocketManager(url, domain, delimiter || "\t", reconnect, ping, logging || false);
+        const manager = new WebSocketManager(url, domain, delimiter || "\t", reconnect, ping, logging || false, serialisationSignatures);
 
         setManager(manager);
 
