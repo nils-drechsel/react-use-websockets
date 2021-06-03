@@ -1,5 +1,5 @@
 import { FunctionComponent, ReactElement } from "react";
-import { SerialisationSignature } from "./serialisation/Serialisation";
+import { BeanSerialisationSignature } from "./serialisation/Serialisation";
 interface Props {
     id: string;
     url: string;
@@ -9,7 +9,9 @@ interface Props {
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
-    serialisationSignatures?: Array<SerialisationSignature>;
+    serialisationSignatures?: Map<string, BeanSerialisationSignature>;
+    serialisationPairs?: Map<string, string>;
+    deserialisationPairs?: Map<string, string>;
 }
 export declare const WebSocketProvider: FunctionComponent<Props>;
 export {};

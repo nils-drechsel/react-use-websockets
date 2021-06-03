@@ -1,5 +1,5 @@
 import Deserialiser from "./serialisation/Deserialisation";
-import Serialiser, { SerialisationSignature } from "./serialisation/Serialisation";
+import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation";
 export interface ListenerCallback {
     (payload: any, fromSid?: string | null): void;
 }
@@ -12,6 +12,8 @@ export interface ConnectivityCallback {
 export interface UnsubscribeCallback {
     (): void;
 }
+export declare const addSerialisers: (serialisers: Map<string, Serialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature> | undefined, serialisationPairs?: Map<string, string> | undefined) => void;
+export declare const addDeserialisers: (deserialisers: Map<string, Deserialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature> | undefined, deserialisationPairs?: Map<string, string> | undefined) => void;
 export declare class WebSocketManager {
     ws: WebSocket;
     url: string;
@@ -33,7 +35,7 @@ export declare class WebSocketManager {
     unsubscribeInterval: number;
     serialisers: Map<string, Serialiser>;
     deserialisers: Map<string, Deserialiser>;
-    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Array<SerialisationSignature>);
+    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>, deserialisationPairs?: Map<string, string>);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;

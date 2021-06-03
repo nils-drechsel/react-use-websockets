@@ -15,6 +15,7 @@
         "esModuleInterop": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
+        "lib": ["es2017", "DOM"],
     },
     "include": [
         "src"

@@ -10,15 +10,10 @@ export interface SingleSerialisationSignature {
     path: Array<string>;
     type: SerialisationEntity;
 }
-export declare type SerialisationEntitySignature = Array<SingleSerialisationSignature>;
-export interface SerialisationSignature {
-    incoming: boolean;
-    message: string;
-    signature: SerialisationEntitySignature;
-}
+export declare type BeanSerialisationSignature = Array<SingleSerialisationSignature>;
 export declare class Serialiser {
     private signature;
-    constructor(signature: SerialisationEntitySignature);
+    constructor(signature: BeanSerialisationSignature);
     serialise(bean: any): any;
 }
 export default Serialiser;

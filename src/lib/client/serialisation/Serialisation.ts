@@ -13,21 +13,16 @@ export interface SingleSerialisationSignature {
     type: SerialisationEntity;
 }
 
-export type SerialisationEntitySignature =
+export type BeanSerialisationSignature =
     Array<SingleSerialisationSignature>;
 
-export interface BeanSerialisationSignature {
-    incoming: boolean;
-    message: string,
-    signature: SerialisationEntitySignature
-}
 
 
 export class Serialiser {
 
-    private signature: SerialisationEntitySignature
+    private signature: BeanSerialisationSignature
 
-    constructor(signature: SerialisationEntitySignature) {
+    constructor(signature: BeanSerialisationSignature) {
         this.signature = signature;
     }
 
@@ -62,7 +57,6 @@ const serialiseMap = <T>(map: Map<string, T> | null | undefined): { [key: string
     });
     return obj;
 };
-
 
 
 const serialiseObjectProperty = (obj: {[key: string]: any}, path: Array<string>, type: SerialisationEntity) => {

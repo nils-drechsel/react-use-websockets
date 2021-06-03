@@ -14,7 +14,9 @@ interface Props {
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
-    serialisationSignatures?: Array<BeanSerialisationSignature>;
+    serialisationSignatures?: Map<string, BeanSerialisationSignature>;
+    serialisationPairs?: Map<string, string>;
+    deserialisationPairs?: Map<string, string>;
 }
 
 export const WebSocketProvider: FunctionComponent<Props> = ({
@@ -28,13 +30,25 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
     showElementWhileConnecting,
     children,
     serialisationSignatures,
+    serialisationPairs,
+    deserialisationPairs,
 }) => {
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
 
     const [manager, setManager] = useState<WebSocketManager | null>(null);
 
     useEffect(() => {
-        const manager = new WebSocketManager(url, domain, delimiter || "\t", reconnect, ping, logging || false, serialisationSignatures);
+        const manager = new WebSocketManager(
+            url,
+            domain,
+            delimiter || "\t",
+            reconnect,
+            ping,
+            logging || false,
+            serialisationSignatures,
+            serialisationPairs,
+            deserialisationPairs
+        );
 
         setManager(manager);
 

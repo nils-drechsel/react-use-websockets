@@ -4,6 +4,17 @@ import { FailureCallback, SuccessCallback, ValidationCallback } from '../store/b
 import { useWebSocket } from './useWebSocket';
 import { UnsubscribeCallback } from './WebSocketManager';
 
+
+export const updateSet = <T>(set: Set<T> | undefined | null, value: T, state: boolean): Set<T> => {
+    const result = new Set(set);
+    if (state) {
+        result.add(value);
+    } else {
+        result.delete(value);
+    }
+    return result;
+}
+
 export const useListenEffect = (id: string | null, message: string, callback: (payload: any, fromSid?: string | null) => void, onInit?: () => void): void => {
     const { listen } = useWebSocket(id);
 

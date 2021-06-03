@@ -19,6 +19,26 @@ export interface UnsubscribeCallback {
     (): void;
 }
 
+export const addSerialisers = (serialisers: Map<string, Serialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>) => {
+    if (serialisationPairs && serialisationSignatures) {
+        serialisationPairs.forEach((entity, message) => {
+            const signature = serialisationSignatures.get(entity);
+            if (!signature) return;
+            serialisers.set(message, new Serialiser(signature));
+        })
+    }
+}
+
+export const addDeserialisers = (deserialisers: Map<string, Deserialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature>, deserialisationPairs?: Map<string, string>) => {
+    if (deserialisationPairs && serialisationSignatures) {
+        deserialisationPairs.forEach((entity, message) => {
+            const signature = serialisationSignatures.get(entity);
+            if (!signature) return;
+            deserialisers.set(message, new Deserialiser(signature));
+        })
+    }
+}
+
 export class WebSocketManager {
     ws: WebSocket;
     url: string;
@@ -40,8 +60,8 @@ export class WebSocketManager {
     unsubscribeInterval: number;
     serialisers: Map<string, Serialiser> = new Map();
     deserialisers: Map<string, Deserialiser> = new Map();
-
-    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping = 5, logging = true, serialisationSignatures?: Array<BeanSerialisationSignature>) {
+    
+    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping = 5, logging = true, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>, deserialisationPairs?: Map<string, string>) {
         this.url = url;
         this.reconnect = reconnect;
         this.defaultCallback = null;
@@ -58,12 +78,8 @@ export class WebSocketManager {
         this.delimiter = delimiter;
         this.logging = logging;
 
-        if (serialisationSignatures) {
-            serialisationSignatures.forEach(s => {
-                if(!s.incoming) this.serialisers.set(s.message, new Serialiser(s.signature));
-                if(s.incoming) this.deserialisers.set(s.message, new Deserialiser(s.signature));
-            })
-        }
+        addSerialisers(this.serialisers, serialisationSignatures, serialisationPairs);
+        addDeserialisers(this.deserialisers, serialisationSignatures, deserialisationPairs);
 
         this.ws = new WebSocket(url);
         this.initListeners();

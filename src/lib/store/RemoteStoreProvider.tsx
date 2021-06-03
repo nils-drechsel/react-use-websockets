@@ -1,47 +1,44 @@
-import React, { FunctionComponent, useRef, useContext, useEffect } from "react";
+import React, { FunctionComponent, useContext, useEffect, useState } from "react";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
 import { useWebSocket } from "../client/useWebSocket";
+import { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
 
-type Props = {
-    id: string
+interface Props {
+    id: string;
+    serialisationSignatures?: Map<string, BeanSerialisationSignature>;
+    serialisationPairs?: Map<string, string>;
+    deserialisationPairs?: Map<string, string>;
 }
 
-
-export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children }) => {
-
+export const RemoteStoreProvider: FunctionComponent<Props> = ({
+    id,
+    children,
+    serialisationSignatures,
+    serialisationPairs,
+    deserialisationPairs,
+}) => {
     const remoteStoreMap: Map<string, RemoteStore> = useContext(RemoteStoreContext);
 
     const { manager } = useWebSocket(id);
 
-    const storeRef = useRef<RemoteStore>();
-
-    if (!storeRef.current && manager) {
-        storeRef.current = new RemoteStore(manager);
-    }
+    const [store, setStore] = useState<RemoteStore | null>(null);
 
     useEffect(() => {
+        const store = new RemoteStore(manager, serialisationSignatures, serialisationPairs, deserialisationPairs);
+
+        setStore(store);
 
         return () => {
-            if (storeRef.current) {
-                storeRef.current.releaseRemoteStore();
-                storeRef.current = undefined;
-            }
-        }
-
+            store.releaseRemoteStore();
+        };
     }, []);
-
 
     const map = new Map();
     if (remoteStoreMap) {
         remoteStoreMap.forEach((value, key) => map.set(key, value));
     }
-    map.set(id, storeRef.current);
+    map.set(id, store);
 
-
-    return (
-        <RemoteStoreContext.Provider value={map}>
-            {children}
-        </RemoteStoreContext.Provider>
-    )
-}
+    return <RemoteStoreContext.Provider value={map}>{children}</RemoteStoreContext.Provider>;
+};

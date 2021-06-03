@@ -2,7 +2,7 @@ import { Comparator, ValidationBean, AbstractWebSocketBean, AbstractStoreParamet
 import { Dispatch, SetStateAction } from "react";
 
 
-export const createStoreId = (path: Array<string>, params: AbstractStoreParametersBean | null) => {
+export const createStoreId = (path: Array<string>, params?: AbstractStoreParametersBean | null) => {
     path = [...path];
     if (params && (params as any).key) path.push((params as any).key);
     return path.join("/");

@@ -1,17 +1,16 @@
 import { expect } from "chai";
 import "mocha";
-import Serialiser, { SerialisationEntity, SerialisationEntitySignature } from "./Serialisation";
+import Serialiser, { BeanSerialisationSignature, SerialisationEntity } from "./Serialisation";
 
 describe("Serialisation", () => {
     it("map", () => {
-
         const bean = {
             subBean: {
                 map0: new Map(),
                 something0: "string0",
-                map1: new Map()
+                map1: new Map(),
             },
-            map: new Map()
+            map: new Map(),
         } as any;
 
         bean.subBean.map0.set("test0", "text0");
@@ -30,23 +29,23 @@ describe("Serialisation", () => {
 
         const bean1 = {
             subSubBean: {
-                subSubMap0: new Map()
-            }
-        }
+                subSubMap0: new Map(),
+            },
+        };
         bean1.subSubBean.subSubMap0.set("test6", "text6");
         bean1.subSubBean.subSubMap0.set("test7", "text7");
         bean.map.set("submap0", bean1);
 
         const bean2 = {
             subSubBean: {
-                subSubMap0: new Map()
-            }
-        }
+                subSubMap0: new Map(),
+            },
+        };
         bean2.subSubBean.subSubMap0.set("test8", "text8");
         bean2.subSubBean.subSubMap0.set("test9", "text9");
         bean.map.set("submap1", bean2);
 
-        const signature: SerialisationEntitySignature = [
+        const signature: BeanSerialisationSignature = [
             { path: ["subBean", "map0"], type: SerialisationEntity.MAP },
             { path: ["subBean", "map1"], type: SerialisationEntity.MAP },
             { path: ["subBean", "map1", "<map>"], type: SerialisationEntity.MAP },
@@ -57,7 +56,6 @@ describe("Serialisation", () => {
         const s = new Serialiser(signature);
 
         s.serialise(bean);
-
 
         expect(bean.subBean.map0 instanceof Map).to.be.false;
         expect("test0" in bean.subBean.map0).to.be.true;
@@ -82,19 +80,16 @@ describe("Serialisation", () => {
         expect(bean.map["submap1"].subSubBean.subSubMap0 instanceof Map).to.be.false;
         expect("test8" in bean.map["submap1"].subSubBean.subSubMap0).to.be.true;
         expect("test9" in bean.map["submap1"].subSubBean.subSubMap0).to.be.true;
-
     });
 
-
     it("set", () => {
-
         const bean = {
             subBean: {
                 set0: new Set(),
                 something0: "string0",
-                set1: new Set()
+                set1: new Set(),
             },
-            set: new Set()
+            set: new Set(),
         } as any;
 
         bean.subBean.set0.add("test0");
@@ -113,23 +108,23 @@ describe("Serialisation", () => {
 
         const bean1 = {
             subSubBean: {
-                subSubSet0: new Set()
-            }
-        }
+                subSubSet0: new Set(),
+            },
+        };
         bean1.subSubBean.subSubSet0.add("test6");
         bean1.subSubBean.subSubSet0.add("test7");
         bean.set.add(bean1);
 
         const bean2 = {
             subSubBean: {
-                subSubSet0: new Set()
-            }
-        }
+                subSubSet0: new Set(),
+            },
+        };
         bean2.subSubBean.subSubSet0.add("test8");
         bean2.subSubBean.subSubSet0.add("test9");
         bean.set.add(bean2);
 
-        const signature: SerialisationEntitySignature = [
+        const signature: BeanSerialisationSignature = [
             { path: ["subBean", "set0"], type: SerialisationEntity.SET },
             { path: ["subBean", "set1"], type: SerialisationEntity.SET },
             { path: ["subBean", "set1", "<set>"], type: SerialisationEntity.SET },
@@ -140,7 +135,6 @@ describe("Serialisation", () => {
         const s = new Serialiser(signature);
 
         s.serialise(bean);
-
 
         expect(bean.subBean.set0 instanceof Set).to.be.false;
         expect(bean.subBean.set0.includes("test0")).to.be.true;
@@ -161,7 +155,5 @@ describe("Serialisation", () => {
         expect(bean.set[1].subSubBean.subSubSet0 instanceof Set).to.be.false;
         expect(bean.set[1].subSubBean.subSubSet0.includes("test8")).to.be.true;
         expect(bean.set[1].subSubBean.subSubSet0.includes("test9")).to.be.true;
-
-    });    
-
+    });
 });

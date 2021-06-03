@@ -54,3 +54,8 @@ export { ReadableKeyStoreParametersBean } from "./lib/store/beans/Beans";
 export { ReadableStoreParametersBean } from "./lib/store/beans/Beans";
 export { WritableStoreParametersBean } from "./lib/store/beans/Beans";
 export { NoParametersBean } from "./lib/store/beans/Beans";
+export { SerialisationEntity } from "./lib/client/serialisation/Serialisation";
+export { BeanSerialisationSignature } from "./lib/client/serialisation/Serialisation";
+export { SerialisationTarget } from "./lib/client/serialisation/Serialisation";
+export { SingleSerialisationSignature } from "./lib/client/serialisation/Serialisation";
+export { updateSet } from "./lib/client/helpers";

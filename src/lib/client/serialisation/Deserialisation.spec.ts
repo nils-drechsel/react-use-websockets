@@ -1,28 +1,27 @@
 import { expect } from "chai";
 import "mocha";
 import Deserialiser from "./Deserialisation";
-import { SerialisationEntity, SerialisationEntitySignature } from "./Serialisation";
+import { SerialisationEntity, BeanSerialisationSignature } from "./Serialisation";
 
 describe("Deserialisation", () => {
     it("map", () => {
-
         const bean = {
             subBean: {
                 map0: { test0: "text0", test1: "text1" },
                 something0: "string0",
-                map1: { subtest0: { test2: "text2", test3: "text3" }, subtest1: { test4: "text4", test5: "text5" } }
+                map1: { subtest0: { test2: "text2", test3: "text3" }, subtest1: { test4: "text4", test5: "text5" } },
             },
             map: {
                 submap0: {
-                    subSubBean: { subSubMap0: { test6: "text6", test7: "text7" } }
+                    subSubBean: { subSubMap0: { test6: "text6", test7: "text7" } },
                 },
                 submap1: {
-                    subSubBean: { subSubMap0: { test8: "text8", test9: "text9" } }
-                }
-            }
+                    subSubBean: { subSubMap0: { test8: "text8", test9: "text9" } },
+                },
+            },
         } as any;
 
-        const signature: SerialisationEntitySignature = [
+        const signature: BeanSerialisationSignature = [
             { path: ["subBean", "map0"], type: SerialisationEntity.MAP },
             { path: ["subBean", "map1"], type: SerialisationEntity.MAP },
             { path: ["subBean", "map1", "<map>"], type: SerialisationEntity.MAP },
@@ -57,32 +56,29 @@ describe("Deserialisation", () => {
         expect(bean.map.get("submap1").subSubBean.subSubMap0 instanceof Map).to.be.true;
         expect(bean.map.get("submap1").subSubBean.subSubMap0.has("test8")).to.be.true;
         expect(bean.map.get("submap1").subSubBean.subSubMap0.has("test9")).to.be.true;
-
-
-
     });
 
-
-
     it("set", () => {
-
         const bean = {
             subBean: {
                 set0: ["test0", "test1"],
                 something0: "string0",
-                set1: [["test2", "test3"], ["test4", "test5"]]
+                set1: [
+                    ["test2", "test3"],
+                    ["test4", "test5"],
+                ],
             },
             set: [
                 {
-                    subSubBean: { subSubSet0: [ "test6", "test7" ] }
+                    subSubBean: { subSubSet0: ["test6", "test7"] },
                 },
                 {
-                    subSubBean: { subSubSet0: [ "test8", "test9"] }
-                }
-            ]
+                    subSubBean: { subSubSet0: ["test8", "test9"] },
+                },
+            ],
         } as any;
 
-        const signature: SerialisationEntitySignature = [
+        const signature: BeanSerialisationSignature = [
             { path: ["subBean", "set0"], type: SerialisationEntity.SET },
             { path: ["subBean", "set1"], type: SerialisationEntity.SET },
             { path: ["subBean", "set1", "<set>"], type: SerialisationEntity.SET },
@@ -113,10 +109,5 @@ describe("Deserialisation", () => {
         expect((Array.from(bean.set) as any)[1].subSubBean.subSubSet0 instanceof Set).to.be.true;
         expect((Array.from(bean.set) as any)[1].subSubBean.subSubSet0.has("test8")).to.be.true;
         expect((Array.from(bean.set) as any)[1].subSubBean.subSubSet0.has("test9")).to.be.true;
-
-
-
     });
-
-
 });
