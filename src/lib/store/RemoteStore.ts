@@ -152,16 +152,15 @@ export class RemoteStore {
         msg: string,
         path: Array<string>,
         params: WritableStoreParametersBean | null,
-        value: AbstractWebSocketBean,
+        payload: AbstractWebSocketBean,
         originId: string
     ) {
         const serialisationId = createStoreId(path);
 
         const serialiser = this.serialisers.get(serialisationId);
 
-        const payload = Object.assign({}, value);
 
-        if (serialiser) serialiser.serialise(payload);
+        if (serialiser) payload = serialiser.serialise(payload);
 
         const bean: StoreEditBean = {
             path,
@@ -198,11 +197,11 @@ export class RemoteStore {
 
         const deserialiser = store.deserialiser;
 
-        for (const [key, value] of Object.entries(data)) {
+        for (let [key, value] of Object.entries(data)) {
             if (value === null || value === undefined) {
                 newData.delete(key);
             } else {
-                if (deserialiser) deserialiser.deserialise(value);
+                if (deserialiser) value = deserialiser.deserialise(value);
 
                 if (newData.has(key)) {
                     newData.set(key, Object.assign({}, newData.get(key), value));
@@ -218,8 +217,8 @@ export class RemoteStore {
 
         const update = new Map();
         if (Array.from(storeSubscribers.values()).some((subscriber) => subscriber.type === SubscriberType.UPDATE)) {
-            for (const [key, value] of Object.entries(data)) {
-                if (deserialiser) deserialiser.deserialise(value);
+            for (let [key, value] of Object.entries(data)) {
+                if (deserialiser) value = deserialiser.deserialise(value);
 
                 update.set(key, value);
             }

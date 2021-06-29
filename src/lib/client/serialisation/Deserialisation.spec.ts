@@ -5,7 +5,7 @@ import { SerialisationEntity, BeanSerialisationSignature } from "./Serialisation
 
 describe("Deserialisation", () => {
     it("map", () => {
-        const bean = {
+        let bean = {
             subBean: {
                 map0: { test0: "text0", test1: "text1" },
                 something0: "string0",
@@ -31,7 +31,7 @@ describe("Deserialisation", () => {
 
         const s = new Deserialiser(signature);
 
-        s.deserialise(bean);
+        bean = s.deserialise(bean);
 
         expect(bean.subBean.map0 instanceof Map).to.be.true;
         expect(bean.subBean.map0.has("test0")).to.be.true;
@@ -59,7 +59,7 @@ describe("Deserialisation", () => {
     });
 
     it("set", () => {
-        const bean = {
+        let bean = {
             subBean: {
                 set0: ["test0", "test1"],
                 something0: "string0",
@@ -88,7 +88,7 @@ describe("Deserialisation", () => {
 
         const s = new Deserialiser(signature);
 
-        s.deserialise(bean);
+        bean = s.deserialise(bean);
 
         expect(bean.subBean.set0 instanceof Set).to.be.true;
         expect(bean.subBean.set0.has("test0")).to.be.true;

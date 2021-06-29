@@ -58,6 +58,8 @@ export { validateSize } from "./lib/store/beans/StoreBeanUtils";
 export { errorSize } from "./lib/store/beans/StoreBeanUtils";
 export { validateComparison } from "./lib/store/beans/StoreBeanUtils";
 export { errorComparison } from "./lib/store/beans/StoreBeanUtils";
+export { validatePassword } from "./lib/store/beans/StoreBeanUtils";
+export { errorPassword } from "./lib/store/beans/StoreBeanUtils";
 
 export { ReadableKeyStoreParametersBean } from "./lib/store/beans/Beans";
 export { ReadableStoreParametersBean } from "./lib/store/beans/Beans";
@@ -70,3 +72,6 @@ export { SerialisationTarget } from "./lib/client/serialisation/Serialisation";
 export { SingleSerialisationSignature } from "./lib/client/serialisation/Serialisation";
 
 export { updateSet } from "./lib/client/helpers";
+export { calculatePasswordEntropy } from "./lib/client/ClientUtils";
+export { passwordConformsToEntropy } from "./lib/client/ClientUtils";
+export { PasswordStrengthCriterium } from "./lib/store/beans/Beans";

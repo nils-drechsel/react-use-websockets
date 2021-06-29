@@ -7,10 +7,15 @@ export class Deserialiser {
         this.signature = signature;
     }
 
-    deserialise(bean: any) {
+    deserialise(bean: any): any {
+
+        const clone = Object.assign({}, bean);
+
         this.signature.forEach((entity) => {
-            deserialiseBeanProperty(bean, entity.path, entity.type);
+            deserialiseBeanProperty(clone, entity.path, entity.type);
         });
+
+        return clone;
     }
 }
 

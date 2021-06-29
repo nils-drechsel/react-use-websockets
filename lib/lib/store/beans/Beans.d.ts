@@ -1,22 +1,28 @@
-export interface AssignedKeyContainingBean {
-}
-export interface StoreEditFragment extends StoreBean {
-    timestamp?: TimestampBean;
+export declare enum PasswordStrengthCriterium {
+    LOWERCASE = "LOWERCASE",
+    UPPERCASE = "UPPERCASE",
+    NUMBERS = "NUMBERS",
+    SPECIAL_CHARACTERS = "SPECIAL_CHARACTERS"
 }
 export interface ClientErrorBean extends AbstractWebSocketBean {
     message: string;
     componentStack?: string | null;
 }
+export interface AssignedKeyContainingBean {
+}
+export interface StoreEditFragment extends StoreBean {
+    timestamp?: TimestampBean;
+}
 export interface NullBean extends AbstractWebSocketBean {
+}
+export interface ServerMessageBean extends AbstractWebSocketBean {
+    originId?: string | null;
+    bean?: string;
 }
 export interface TimestampBean extends AbstractWebSocketBean {
     touched: number;
     created: number;
     modified: number;
-}
-export interface ServerMessageBean extends AbstractWebSocketBean {
-    originId?: string | null;
-    bean?: string;
 }
 export interface DataBaseBean extends StoreBean {
     timestamp?: TimestampBean;
@@ -42,11 +48,11 @@ export interface NoParametersBean extends ReadableStoreParametersBean {
 }
 export interface AbstractStoreParametersBean extends AbstractWebSocketBean {
 }
-export interface StoreBean extends AbstractWebSocketBean {
-    timestamp?: TimestampBean;
-}
 export interface ClientOriginatedBean extends AbstractWebSocketBean {
     originId?: string;
+}
+export interface StoreBean extends AbstractWebSocketBean {
+    timestamp?: TimestampBean;
 }
 export interface ReadableStoreParametersBean extends AbstractStoreParametersBean {
 }
@@ -63,9 +69,9 @@ export interface AbstractConnectionBean extends AbstractWebSocketBean {
 }
 export interface AbstractWebSocketBean extends Object {
 }
-export interface OwnerContainingBean {
-}
 export interface AnnotationContainingBean {
+}
+export interface OwnerContainingBean {
 }
 export interface StoreEditBean extends AbstractWebSocketBean {
     path: Array<string>;
@@ -79,16 +85,16 @@ export declare enum MessageType {
     INFO = "INFO",
     SUCCESS = "SUCCESS"
 }
-export interface MessageBean extends AbstractWebSocketBean {
-    type: MessageType;
-    message: string;
-}
 export interface ServerToClientAuthenticationBean extends AbstractWebSocketBean {
     uid: string;
     token0: string;
     token1: string;
     validity: number;
     sid: string;
+}
+export interface MessageBean extends AbstractWebSocketBean {
+    type: MessageType;
+    message: string;
 }
 export interface ConnectPayload extends AbstractConnectionBean {
     path: Array<string>;

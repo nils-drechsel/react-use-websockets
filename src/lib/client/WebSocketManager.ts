@@ -164,10 +164,10 @@ export class WebSocketManager {
 
         const message = parts[0];
         const fromSid = this.extractSid(parts[1]);
-        const payload = this.extractJSONPayload(parts[2]);
+        let payload = this.extractJSONPayload(parts[2]);
 
         if (this.deserialisers.has(message)) {
-            this.deserialisers.get(message)!.deserialise(payload);
+            payload = this.deserialisers.get(message)!.deserialise(payload);
         }
 
         if (message === CoreMessage.AUTHENTICATE) {

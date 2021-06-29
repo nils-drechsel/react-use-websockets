@@ -30,7 +30,7 @@ export declare class RemoteStore {
     getData(path: Array<string>, params: ReadableStoreParametersBean | null): Map<String, AbstractWebSocketBean> | undefined;
     register(path: Array<string>, params: ReadableStoreParametersBean | null, setData: (data: Map<string, AbstractWebSocketBean>) => void, update?: boolean): () => void;
     deregister(path: Array<string>, id: string, params: ReadableStoreParametersBean | null): void;
-    editRemoteStore(msg: string, path: Array<string>, params: WritableStoreParametersBean | null, value: AbstractWebSocketBean, originId: string): void;
+    editRemoteStore(msg: string, path: Array<string>, params: WritableStoreParametersBean | null, payload: AbstractWebSocketBean, originId: string): void;
     clear(storeId: string): void;
     update(storeId: string, data: {
         [key: string]: AbstractWebSocketBean;

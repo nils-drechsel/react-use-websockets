@@ -1,5 +1,6 @@
 import { Comparator, ValidationBean, AbstractWebSocketBean, AbstractStoreParametersBean } from "./Beans";
 import { Dispatch, SetStateAction } from "react";
+import { passwordConformsToEntropy } from "../../client/ClientUtils";
 
 
 export const createStoreId = (path: Array<string>, params?: AbstractStoreParametersBean | null) => {
@@ -86,6 +87,16 @@ export const validateRegex = (regex: string, value?: string): boolean => {
 export const errorRegex = (fieldName: string, errorMessage: string | null): string => {
     if (errorMessage) return errorMessage;
     return fieldName + " is not valid";
+}
+
+export const validatePassword = (pw: string | undefined | null, minEntropy: number): boolean => {
+    if (!pw) return false;
+    return passwordConformsToEntropy(pw, minEntropy);
+}
+
+export const errorPassword = (fieldName: string, errorMessage: string | null): string => {
+    if (errorMessage) return errorMessage;
+    return fieldName + " is not strong enough";
 }
 
 export const validateLength = (length: number, value?: string): boolean => {

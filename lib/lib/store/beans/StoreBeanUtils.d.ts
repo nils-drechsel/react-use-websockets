@@ -11,6 +11,8 @@ export declare const validateComparison: (cmp: Comparator, baseValue: number, va
 export declare const errorComparison: (cmp: Comparator, baseValue: number, fieldName: string, errorMessage: string | null) => string;
 export declare const validateRegex: (regex: string, value?: string | undefined) => boolean;
 export declare const errorRegex: (fieldName: string, errorMessage: string | null) => string;
+export declare const validatePassword: (pw: string | undefined | null, minEntropy: number) => boolean;
+export declare const errorPassword: (fieldName: string, errorMessage: string | null) => string;
 export declare const validateLength: (length: number, value?: string | undefined) => boolean;
 export declare const errorLength: (length: number, fieldName: string, errorMessage: string | null) => string;
 export declare const validateSize: (size: number, value?: any[] | undefined) => boolean;
