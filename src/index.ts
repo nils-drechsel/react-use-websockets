@@ -22,8 +22,8 @@ export { SendFunction } from "./lib/client/useWebSocket";
 
 export { connectStore } from "./lib/store/connectStore";
 export { ConnectionStateSetter } from "./lib/store/connectStore";
-export { ConnectionState} from "./lib/store/connectStore";
-export { ConnectionStateRef} from "./lib/store/connectStore";
+export { ConnectionState } from "./lib/store/connectStore";
+export { ConnectionStateRef } from "./lib/store/connectStore";
 export { useRemoteStore } from "./lib/store/useRemoteStore";
 export { useGetRemoteStore } from "./lib/store/useGetRemoteStore";
 export { useRemoteSingleStore } from "./lib/store/useRemoteStore";
@@ -33,16 +33,19 @@ export { RemoteStore } from "./lib/store/RemoteStore";
 export { RemoteStoreProvider } from "./lib/store/RemoteStoreProvider";
 
 export { useRemoteStoreUpdate } from "./lib/store/useRemoteStoreUpdate";
+export { usePartialRemoteStoreUpdate } from "./lib/store/useRemoteStoreUpdate";
 
 export { useRemoteStoreRef } from "./lib/store/useRemoteStoreRef";
 export { useRemoteSingleStoreRef } from "./lib/store/useRemoteStoreRef";
 export { useRemoteStoreArrayRef } from "./lib/store/useRemoteStoreRef";
 
-
-export { UpdateFunction } from "./lib/store/beans/StoreBeanUtils"
-export { updateBean } from "./lib/store/beans/StoreBeanUtils"
-export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils"
-export { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils"
+export { UpdateFunction } from "./lib/store/beans/StoreBeanUtils";
+export { PartialUpdateFunction } from "./lib/store/beans/StoreBeanUtils";
+export { updateBean } from "./lib/store/beans/StoreBeanUtils";
+export { updatePartialBean } from "./lib/store/beans/StoreBeanUtils";
+export { EditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils";
+export { PartialEditRemoteStoreFunction } from "./lib/store/beans/StoreBeanUtils";
+export { PostValidationCallback } from "./lib/store/beans/StoreBeanUtils";
 
 export { MessageBean } from "./lib/store/beans/Beans";
 export { MessageType } from "./lib/store/beans/Beans";
