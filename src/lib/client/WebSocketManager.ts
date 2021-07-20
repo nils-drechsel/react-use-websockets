@@ -19,26 +19,6 @@ export interface UnsubscribeCallback {
     (): void;
 }
 
-export const addSerialisers = (serialisers: Map<string, Serialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>) => {
-    if (serialisationPairs && serialisationSignatures) {
-        serialisationPairs.forEach((entity, message) => {
-            const signature = serialisationSignatures.get(entity);
-            if (!signature) return;
-            serialisers.set(message, new Serialiser(signature));
-        })
-    }
-}
-
-export const addDeserialisers = (deserialisers: Map<string, Deserialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature>, deserialisationPairs?: Map<string, string>) => {
-    if (deserialisationPairs && serialisationSignatures) {
-        deserialisationPairs.forEach((entity, message) => {
-            const signature = serialisationSignatures.get(entity);
-            if (!signature) return;
-            deserialisers.set(message, new Deserialiser(signature));
-        })
-    }
-}
-
 export class WebSocketManager {
     ws: WebSocket;
     url: string;
@@ -58,10 +38,18 @@ export class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
-    serialisers: Map<string, Serialiser> = new Map();
-    deserialisers: Map<string, Deserialiser> = new Map();
-    
-    constructor(url: string, domain: string, delimiter = "\t", reconnect = false, ping = 5, logging = true, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>, deserialisationPairs?: Map<string, string>) {
+    serialiser: Serialiser;
+    deserialiser: Deserialiser;
+
+    constructor(
+        url: string,
+        domain: string,
+        delimiter = "\t",
+        reconnect = false,
+        ping = 5,
+        logging = true,
+        serialisationSignatures?: Map<string, BeanSerialisationSignature>
+    ) {
         this.url = url;
         this.reconnect = reconnect;
         this.defaultCallback = null;
@@ -78,8 +66,8 @@ export class WebSocketManager {
         this.delimiter = delimiter;
         this.logging = logging;
 
-        addSerialisers(this.serialisers, serialisationSignatures, serialisationPairs);
-        addDeserialisers(this.deserialisers, serialisationSignatures, deserialisationPairs);
+        this.serialiser = new Serialiser(serialisationSignatures);
+        this.deserialiser = new Deserialiser(serialisationSignatures);
 
         this.ws = new WebSocket(url);
         this.initListeners();
@@ -87,10 +75,10 @@ export class WebSocketManager {
         this.uid = null as any;
         this.domain = domain;
 
-        this.unsubscribeInterval = (setInterval(() => {
+        this.unsubscribeInterval = setInterval(() => {
             if (this.logging) console.log("PING");
             this.send(CoreMessage.PING);
-        }, ping * 60 * 1000) as unknown) as number;
+        }, ping * 60 * 1000) as unknown as number;
     }
 
     isConnected(): boolean {
@@ -166,9 +154,7 @@ export class WebSocketManager {
         const fromSid = this.extractSid(parts[1]);
         let payload = this.extractJSONPayload(parts[2]);
 
-        if (this.deserialisers.has(message)) {
-            payload = this.deserialisers.get(message)!.deserialise(payload);
-        }
+        payload = this.deserialiser.deserialise(payload);
 
         if (message === CoreMessage.AUTHENTICATE) {
             const authenticationBean = payload as ServerToClientAuthenticationBean;
@@ -230,11 +216,7 @@ export class WebSocketManager {
     }
 
     send(message: string, payload: any = null, toSid: string | null = null) {
-
-        if (this.serialisers.has(message)) {
-            payload = this.serialisers.get(message)!.serialise(payload);
-        }
-
+        payload = this.serialiser.serialise(payload);
 
         const data: any = [message, toSid, typeof payload !== "object" ? payload : JSON.stringify(payload)];
 

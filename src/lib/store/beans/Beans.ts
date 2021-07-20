@@ -8,6 +8,7 @@ export enum PasswordStrengthCriterium {
 }
 
 export interface ClientErrorBean extends AbstractWebSocketBean {
+    _t?: string,
     message: string,
     componentStack?: string | null,
 }
@@ -16,28 +17,34 @@ export interface AssignedKeyContainingBean {
 }
 
 export interface StoreEditFragment extends StoreBean {
+    _t?: string,
     timestamp?: TimestampBean,
 }
 
 export interface NullBean extends AbstractWebSocketBean {
+    _t?: string,
 }
 
 export interface ServerMessageBean extends AbstractWebSocketBean {
     originId?: string | null,
+    _t?: string,
     bean?: string,
 }
 
 export interface TimestampBean extends AbstractWebSocketBean {
     touched: number,
+    _t?: string,
     created: number,
     modified: number,
 }
 
 export interface DataBaseBean extends StoreBean {
+    _t?: string,
     timestamp?: TimestampBean,
 }
 
 export interface WritableStoreParametersBean extends AbstractStoreParametersBean {
+    _t?: string,
     key: string | null,
 }
 
@@ -46,6 +53,7 @@ export interface ClientMessageBean {
 
 export interface DisconnectPayload extends AbstractConnectionBean {
     path: Array<string>,
+    _t?: string,
     params?: ReadableStoreParametersBean | null,
 }
 
@@ -59,23 +67,29 @@ export enum Comparator {
 }
 
 export interface NoParametersBean extends ReadableStoreParametersBean {
+    _t?: string,
 }
 
 export interface AbstractStoreParametersBean extends AbstractWebSocketBean {
+    _t?: string,
 }
 
 export interface ClientOriginatedBean extends AbstractWebSocketBean {
     originId?: string,
+    _t?: string,
 }
 
 export interface StoreBean extends AbstractWebSocketBean {
+    _t?: string,
     timestamp?: TimestampBean,
 }
 
 export interface ReadableStoreParametersBean extends AbstractStoreParametersBean {
+    _t?: string,
 }
 
 export interface StoreUpdateBean extends AbstractWebSocketBean {
+    _t?: string,
     initial?: boolean | null,
     payload: { [key: string]: AbstractWebSocketBean},
     id: string,
@@ -83,10 +97,12 @@ export interface StoreUpdateBean extends AbstractWebSocketBean {
 
 export interface AbstractConnectionBean extends AbstractWebSocketBean {
     path: Array<string>,
+    _t?: string,
     params?: ReadableStoreParametersBean | null,
 }
 
 export interface AbstractWebSocketBean extends Object {
+    _t?: string,
 }
 
 export interface AnnotationContainingBean {
@@ -98,6 +114,7 @@ export interface OwnerContainingBean {
 export interface StoreEditBean extends AbstractWebSocketBean {
     path: Array<string>,
     originId: string,
+    _t?: string,
     payload: StoreBean,
     params?: WritableStoreParametersBean | null,
 }
@@ -111,6 +128,7 @@ export enum MessageType {
 
 export interface ServerToClientAuthenticationBean extends AbstractWebSocketBean {
     uid: string,
+    _t?: string,
     token0: string,
     token1: string,
     validity: number,
@@ -118,25 +136,30 @@ export interface ServerToClientAuthenticationBean extends AbstractWebSocketBean 
 }
 
 export interface MessageBean extends AbstractWebSocketBean {
+    _t?: string,
     type: MessageType,
     message: string,
 }
 
 export interface ConnectPayload extends AbstractConnectionBean {
     path: Array<string>,
+    _t?: string,
     params?: ReadableStoreParametersBean | null,
 }
 
 export interface StoreReconnectBean extends AbstractWebSocketBean {
+    _t?: string,
     ids: Array<string>,
 }
 
 export interface ClientToServerAuthenticationBean extends AbstractWebSocketBean {
+    _t?: string,
     token0: string | null,
     token1: string | null,
 }
 
 export interface StoreForcefulDisconnectBean extends AbstractWebSocketBean {
+    _t?: string,
     ids: Array<string>,
 }
 
@@ -156,6 +179,7 @@ export enum CoreMessage {
 }
 
 export interface ReadableKeyStoreParametersBean extends ReadableStoreParametersBean {
+    _t?: string,
     key: string | null,
 }
 
@@ -164,12 +188,14 @@ export interface UidContainingBean {
 
 export interface ValidationBean extends ServerMessageBean {
     originId?: string | null,
+    _t?: string,
     success?: boolean,
     bean?: string,
 }
 
 export interface StoreValidationBean extends ValidationBean {
     originId?: string | null,
+    _t?: string,
     success?: boolean,
     storeUid?: string,
     bean?: string,

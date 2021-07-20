@@ -12,8 +12,6 @@ export interface ConnectivityCallback {
 export interface UnsubscribeCallback {
     (): void;
 }
-export declare const addSerialisers: (serialisers: Map<string, Serialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature> | undefined, serialisationPairs?: Map<string, string> | undefined) => void;
-export declare const addDeserialisers: (deserialisers: Map<string, Deserialiser>, serialisationSignatures?: Map<string, BeanSerialisationSignature> | undefined, deserialisationPairs?: Map<string, string> | undefined) => void;
 export declare class WebSocketManager {
     ws: WebSocket;
     url: string;
@@ -33,9 +31,9 @@ export declare class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
-    serialisers: Map<string, Serialiser>;
-    deserialisers: Map<string, Deserialiser>;
-    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>, deserialisationPairs?: Map<string, string>);
+    serialiser: Serialiser;
+    deserialiser: Deserialiser;
+    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;

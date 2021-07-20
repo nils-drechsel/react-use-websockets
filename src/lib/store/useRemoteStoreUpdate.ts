@@ -27,7 +27,8 @@ export const usePartialRemoteStoreUpdate = <
     validationFunction?: ValidationCallback<BEAN_TYPE, CLIENT_VALIDATION_TYPE>,
     postServerValidationCallback?: PostValidationCallback<SERVER_VALIDATION_TYPE>,
     postClientValidationCallback?: PostValidationCallback<CLIENT_VALIDATION_TYPE>,
-    onInitCallback?: () => void
+    onInitCallback?: () => void,
+    beanType?: string
 ): [PartialEditRemoteStoreFunction<Partial<BEAN_TYPE>>, CLIENT_VALIDATION_TYPE | SERVER_VALIDATION_TYPE | null] => {
     return useRemoteStoreUpdate<BEAN_TYPE, SERVER_VALIDATION_TYPE, CLIENT_VALIDATION_TYPE>(
         id,
@@ -37,6 +38,7 @@ export const usePartialRemoteStoreUpdate = <
         postServerValidationCallback,
         postClientValidationCallback,
         onInitCallback,
+        beanType,
         true
     ) as [PartialEditRemoteStoreFunction<Partial<BEAN_TYPE>>, CLIENT_VALIDATION_TYPE | SERVER_VALIDATION_TYPE | null];
 };
@@ -53,6 +55,7 @@ export const useRemoteStoreUpdate = <
     postServerValidationCallback?: PostValidationCallback<SERVER_VALIDATION_TYPE>,
     postClientValidationCallback?: PostValidationCallback<CLIENT_VALIDATION_TYPE>,
     onInitCallback?: () => void,
+    beanType?: string,
     partial?: boolean
 ): [EditRemoteStoreFunction<BEAN_TYPE>, CLIENT_VALIDATION_TYPE | SERVER_VALIDATION_TYPE | null] => {
     const [componentId] = useState(uuidv4());
@@ -69,6 +72,10 @@ export const useRemoteStoreUpdate = <
             setValidation(validationBean);
             if (postClientValidationCallback) postClientValidationCallback(validationBean);
             if (!validationBean.success) return;
+        }
+
+        if (payload) {
+            payload._t = beanType;
         }
 
         if (!params || !params.key) {

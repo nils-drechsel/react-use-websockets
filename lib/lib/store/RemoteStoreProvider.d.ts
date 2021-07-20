@@ -3,8 +3,6 @@ import { BeanSerialisationSignature } from "../client/serialisation/Serialisatio
 interface Props {
     id: string;
     serialisationSignatures?: Map<string, BeanSerialisationSignature>;
-    serialisationPairs?: Map<string, string>;
-    deserialisationPairs?: Map<string, string>;
 }
 export declare const RemoteStoreProvider: FunctionComponent<Props>;
 export {};

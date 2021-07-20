@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import Serialiser, { BeanSerialisationSignature, SerialisationEntity } from "./Serialisation";
+import { BeanSerialiser, BeanSerialisationSignature, SerialisationEntity } from "./Serialisation";
 
 describe("Serialisation", () => {
     it("map", () => {
@@ -53,7 +53,7 @@ describe("Serialisation", () => {
             { path: ["map", "<map>", "subSubBean", "subSubMap0"], type: SerialisationEntity.MAP },
         ];
 
-        const s = new Serialiser(signature);
+        const s = new BeanSerialiser(signature);
 
         bean = s.serialise(bean);
 
@@ -132,7 +132,7 @@ describe("Serialisation", () => {
             { path: ["set", "<set>", "subSubBean", "subSubSet0"], type: SerialisationEntity.SET },
         ];
 
-        const s = new Serialiser(signature);
+        const s = new BeanSerialiser(signature);
 
         bean = s.serialise(bean);
 

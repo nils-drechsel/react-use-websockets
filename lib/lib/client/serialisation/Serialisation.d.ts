@@ -12,6 +12,11 @@ export interface SingleSerialisationSignature {
 }
 export declare type BeanSerialisationSignature = Array<SingleSerialisationSignature>;
 export declare class Serialiser {
+    serialisers: Map<string, BeanSerialiser>;
+    constructor(signatures?: Map<string, BeanSerialisationSignature>);
+    serialise(bean: any): any;
+}
+export declare class BeanSerialiser {
     private signature;
     constructor(signature: BeanSerialisationSignature);
     serialise(bean: any): any;

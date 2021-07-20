@@ -1,6 +1,7 @@
 import { Comparator, ValidationBean, AbstractWebSocketBean, AbstractStoreParametersBean } from "./Beans";
 import { Dispatch, SetStateAction } from "react";
 import { passwordConformsToEntropy } from "../../client/ClientUtils";
+import debounce from "lodash/debounce";
 
 export const createStoreId = (path: Array<string>, params?: AbstractStoreParametersBean | null) => {
     path = [...path];
@@ -13,7 +14,7 @@ export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
 }
 
 export interface PartialUpdateFunction<TYPE extends Partial<AbstractWebSocketBean>> {
-    (changeset: Partial<TYPE>): void;
+    (changeset: Partial<TYPE>, store: boolean): void;
 }
 
 export const updateBean = <TYPE extends AbstractWebSocketBean>(
@@ -31,14 +32,17 @@ export const updateBean = <TYPE extends AbstractWebSocketBean>(
 
 export const updatePartialBean = <TYPE extends AbstractWebSocketBean>(
     setBean: Dispatch<SetStateAction<TYPE>>,
-    store: PartialEditRemoteStoreFunction<Partial<TYPE>>
+    remoteStore: PartialEditRemoteStoreFunction<Partial<TYPE>>,
+    debounceTime?: number
 ): PartialUpdateFunction<Partial<TYPE>> => {
-    const result: UpdateFunction<TYPE> = (changeset: Partial<TYPE>): void => {
+    const remoteStoreFunction = debounceTime ? debounce(remoteStore, debounceTime) : remoteStore;
+
+    const result: PartialUpdateFunction<TYPE> = (changeset: Partial<TYPE>, store: boolean): void => {
         setBean((old: TYPE) => {
             const res: TYPE = Object.assign({}, old, changeset);
             return res;
         });
-        store(changeset);
+        if (store) remoteStoreFunction(changeset);
     };
 
     return result;

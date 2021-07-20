@@ -1,6 +1,27 @@
 import { SerialisationEntity, BeanSerialisationSignature, SerialisationTarget } from "./Serialisation";
 
 export class Deserialiser {
+    deserialisers: Map<string, BeanDeserialiser>;
+
+    constructor(signatures?: Map<string, BeanSerialisationSignature>) {
+        this.deserialisers = new Map();
+        if (signatures) {
+            signatures.forEach((signature, beanName) => {
+                this.deserialisers.set(beanName, new BeanDeserialiser(signature));
+            });
+        }
+    }
+
+    deserialise(bean: any): any {
+        if (bean && bean._t && this.deserialisers.has(bean._t)) {
+            return this.deserialisers.get(bean._t)!.deserialise(bean);
+        } else {
+            return bean;
+        }
+    }
+}
+
+export class BeanDeserialiser {
     private signature: BeanSerialisationSignature;
 
     constructor(signature: BeanSerialisationSignature) {
@@ -8,7 +29,6 @@ export class Deserialiser {
     }
 
     deserialise(bean: any): any {
-
         const clone = Object.assign({}, bean);
 
         this.signature.forEach((entity) => {

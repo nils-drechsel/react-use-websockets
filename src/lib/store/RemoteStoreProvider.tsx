@@ -7,17 +7,9 @@ import { BeanSerialisationSignature } from "../client/serialisation/Serialisatio
 interface Props {
     id: string;
     serialisationSignatures?: Map<string, BeanSerialisationSignature>;
-    serialisationPairs?: Map<string, string>;
-    deserialisationPairs?: Map<string, string>;
 }
 
-export const RemoteStoreProvider: FunctionComponent<Props> = ({
-    id,
-    children,
-    serialisationSignatures,
-    serialisationPairs,
-    deserialisationPairs,
-}) => {
+export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children, serialisationSignatures }) => {
     const remoteStoreMap: Map<string, RemoteStore> = useContext(RemoteStoreContext);
 
     const { manager } = useWebSocket(id);
@@ -25,7 +17,7 @@ export const RemoteStoreProvider: FunctionComponent<Props> = ({
     const [store, setStore] = useState<RemoteStore | null>(null);
 
     useEffect(() => {
-        const store = new RemoteStore(manager, serialisationSignatures, serialisationPairs, deserialisationPairs);
+        const store = new RemoteStore(manager, serialisationSignatures);
 
         setStore(store);
 

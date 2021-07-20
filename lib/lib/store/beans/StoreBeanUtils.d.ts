@@ -5,10 +5,10 @@ export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
     (changeset: Partial<TYPE>): void;
 }
 export interface PartialUpdateFunction<TYPE extends Partial<AbstractWebSocketBean>> {
-    (changeset: Partial<TYPE>): void;
+    (changeset: Partial<TYPE>, store: boolean): void;
 }
 export declare const updateBean: <TYPE extends AbstractWebSocketBean>(setBean: Dispatch<SetStateAction<TYPE>>) => UpdateFunction<TYPE>;
-export declare const updatePartialBean: <TYPE extends AbstractWebSocketBean>(setBean: Dispatch<SetStateAction<TYPE>>, store: PartialEditRemoteStoreFunction<Partial<TYPE>>) => PartialUpdateFunction<Partial<TYPE>>;
+export declare const updatePartialBean: <TYPE extends AbstractWebSocketBean>(setBean: Dispatch<SetStateAction<TYPE>>, remoteStore: PartialEditRemoteStoreFunction<Partial<TYPE>>, debounceTime?: number | undefined) => PartialUpdateFunction<Partial<TYPE>>;
 export declare const validateNotEmpty: (value: any, partial: boolean) => boolean;
 export declare const errorNotEmpty: (fieldName: string, errorMessage: string | null) => string;
 export declare const validateComparison: (cmp: Comparator, baseValue: number, value: number, partial: boolean) => boolean;

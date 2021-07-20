@@ -11,7 +11,6 @@ interface Subscriber {
     callback: (data: Map<string, AbstractWebSocketBean>) => void;
 }
 interface ClientStore {
-    deserialiser: Deserialiser | undefined;
     data: Map<string, AbstractWebSocketBean> | undefined;
 }
 export declare class RemoteStore {
@@ -20,9 +19,9 @@ export declare class RemoteStore {
     websocketManager: WebSocketManager;
     unsubscribeUpdateListener: UnsubscribeCallback;
     unsubscribeDisconnectListener: UnsubscribeCallback;
-    serialisers: Map<string, Serialiser>;
-    deserialisers: Map<string, Deserialiser>;
-    constructor(websocketManager: WebSocketManager, serialisationSignatures?: Map<string, BeanSerialisationSignature>, serialisationPairs?: Map<string, string>, deserialisationPairs?: Map<string, string>);
+    serialiser: Serialiser;
+    deserialiser: Deserialiser;
+    constructor(websocketManager: WebSocketManager, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
     initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback];
     releaseRemoteStore(): void;
     openRemoteStore(path: Array<string>, params: ReadableStoreParametersBean | null): void;

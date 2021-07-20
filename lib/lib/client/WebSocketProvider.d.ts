@@ -10,8 +10,6 @@ interface Props {
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
     serialisationSignatures?: Map<string, BeanSerialisationSignature>;
-    serialisationPairs?: Map<string, string>;
-    deserialisationPairs?: Map<string, string>;
 }
 export declare const WebSocketProvider: FunctionComponent<Props>;
 export {};

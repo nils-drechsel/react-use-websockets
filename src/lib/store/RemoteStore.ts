@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import Deserialiser from "../client/serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
-import { WebSocketManager, UnsubscribeCallback, addSerialisers, addDeserialisers } from "../client/WebSocketManager";
+import { WebSocketManager, UnsubscribeCallback } from "../client/WebSocketManager";
 import {
     CoreMessage,
     StoreUpdateBean,
@@ -26,7 +26,6 @@ interface Subscriber {
 }
 
 interface ClientStore {
-    deserialiser: Deserialiser | undefined;
     data: Map<string, AbstractWebSocketBean> | undefined;
 }
 
@@ -36,21 +35,16 @@ export class RemoteStore {
     websocketManager: WebSocketManager;
     unsubscribeUpdateListener: UnsubscribeCallback;
     unsubscribeDisconnectListener: UnsubscribeCallback;
-    serialisers: Map<string, Serialiser> = new Map();
-    deserialisers: Map<string, Deserialiser> = new Map();
+    serialiser: Serialiser;
+    deserialiser: Deserialiser;
 
-    constructor(
-        websocketManager: WebSocketManager,
-        serialisationSignatures?: Map<string, BeanSerialisationSignature>,
-        serialisationPairs?: Map<string, string>,
-        deserialisationPairs?: Map<string, string>
-    ) {
+    constructor(websocketManager: WebSocketManager, serialisationSignatures?: Map<string, BeanSerialisationSignature>) {
         this.clientStore = new Map();
         this.subscribers = new Map();
         this.websocketManager = websocketManager;
 
-        addSerialisers(this.serialisers, serialisationSignatures, serialisationPairs);
-        addDeserialisers(this.deserialisers, serialisationSignatures, deserialisationPairs);
+        this.serialiser = new Serialiser(serialisationSignatures);
+        this.deserialiser = new Deserialiser(serialisationSignatures);
 
         [this.unsubscribeUpdateListener, this.unsubscribeDisconnectListener] = this.initRemoteStore();
     }
@@ -82,9 +76,8 @@ export class RemoteStore {
 
     openRemoteStore(path: Array<string>, params: ReadableStoreParametersBean | null) {
         const storeId = createStoreId(path, params);
-        const deserialisationId = createStoreId(path);
         if (!this.clientStore.has(storeId)) {
-            this.clientStore.set(storeId, { deserialiser: this.deserialisers.get(deserialisationId), data: undefined });
+            this.clientStore.set(storeId, { data: undefined });
             const payload: ConnectPayload = {
                 path,
                 params,
@@ -155,12 +148,7 @@ export class RemoteStore {
         payload: AbstractWebSocketBean,
         originId: string
     ) {
-        const serialisationId = createStoreId(path);
-
-        const serialiser = this.serialisers.get(serialisationId);
-
-
-        if (serialiser) payload = serialiser.serialise(payload);
+        payload = this.serialiser.serialise(payload);
 
         const bean: StoreEditBean = {
             path,
@@ -195,13 +183,11 @@ export class RemoteStore {
 
         const newData = new Map(store.data!);
 
-        const deserialiser = store.deserialiser;
-
         for (let [key, value] of Object.entries(data)) {
             if (value === null || value === undefined) {
                 newData.delete(key);
             } else {
-                if (deserialiser) value = deserialiser.deserialise(value);
+                value = this.deserialiser.deserialise(value);
 
                 if (newData.has(key)) {
                     newData.set(key, Object.assign({}, newData.get(key), value));
@@ -218,7 +204,7 @@ export class RemoteStore {
         const update = new Map();
         if (Array.from(storeSubscribers.values()).some((subscriber) => subscriber.type === SubscriberType.UPDATE)) {
             for (let [key, value] of Object.entries(data)) {
-                if (deserialiser) value = deserialiser.deserialise(value);
+                value = this.deserialiser.deserialise(value);
 
                 update.set(key, value);
             }
