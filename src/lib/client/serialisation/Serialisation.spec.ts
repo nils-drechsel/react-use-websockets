@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import { BeanSerialiser, BeanSerialisationSignature, SerialisationEntity } from "./Serialisation";
+import { BeanResolver, BeanSerialisationSignature, SerialisationEntity } from "./Serialisation";
 
 describe("Serialisation", () => {
     it("map", () => {
@@ -53,9 +53,9 @@ describe("Serialisation", () => {
             { path: ["map", "<map>", "subSubBean", "subSubMap0"], type: SerialisationEntity.MAP },
         ];
 
-        const s = new BeanSerialiser(signature);
+        const s = new BeanResolver(signature);
 
-        bean = s.serialise(bean);
+        bean = s.resolve(bean);
 
         expect(bean.subBean.map0 instanceof Map).to.be.false;
         expect("test0" in bean.subBean.map0).to.be.true;
@@ -132,9 +132,9 @@ describe("Serialisation", () => {
             { path: ["set", "<set>", "subSubBean", "subSubSet0"], type: SerialisationEntity.SET },
         ];
 
-        const s = new BeanSerialiser(signature);
+        const s = new BeanResolver(signature);
 
-        bean = s.serialise(bean);
+        bean = s.resolve(bean);
 
         expect(bean.subBean.set0 instanceof Set).to.be.false;
         expect(bean.subBean.set0.includes("test0")).to.be.true;

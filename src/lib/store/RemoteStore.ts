@@ -1,17 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
+import { UnsubscribeCallback, WebSocketManager } from "../client/WebSocketManager";
 import Deserialiser from "../client/serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
-import { WebSocketManager, UnsubscribeCallback } from "../client/WebSocketManager";
 import {
-    CoreMessage,
-    StoreUpdateBean,
-    ConnectPayload,
-    DisconnectPayload,
-    StoreEditBean,
-    AbstractWebSocketBean,
-    StoreForcefulDisconnectBean,
-    WritableStoreParametersBean,
-    ReadableStoreParametersBean,
+    AbstractIOBean,
+    AbstractStoreParametersBean,
+    ClientToServerStoreMessage,
+    IOClientToServerStoreBean,
+    IOServerToClientStoreBean,
+    ServerToClientStoreMessage,
+    StoreUpdateBean
 } from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
 
@@ -22,11 +20,11 @@ enum SubscriberType {
 
 interface Subscriber {
     type: SubscriberType;
-    callback: (data: Map<string, AbstractWebSocketBean>) => void;
+    callback: (data: Map<string, AbstractIOBean>) => void;
 }
 
 interface ClientStore {
-    data: Map<string, AbstractWebSocketBean> | undefined;
+    data: Map<string, AbstractIOBean> | undefined;
 }
 
 export class RemoteStore {
@@ -52,19 +50,27 @@ export class RemoteStore {
     initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback] {
         return [
             this.websocketManager.addListener(
-                CoreMessage.STORE_UPDATE,
-                (payload: StoreUpdateBean, _fromSid?: string | null) => {
-                    if (payload.initial) this.clear(payload.id);
-                    this.update(payload.id, payload.payload);
+                "store",
+                ServerToClientStoreMessage.UPDATE,
+                (storeBean: IOServerToClientStoreBean, _fromSid?: string | null) => {
+
+                    const payload: StoreUpdateBean = this.deserialiser.deserialise(storeBean.payload);
+
+                    if (payload.initial) this.clear(storeBean.secondaryId);
+                    this.update(storeBean.secondaryId, payload.payload);
                 }
             ),
             this.websocketManager.addListener(
-                CoreMessage.STORE_DISCONNECT,
-                (payload: StoreForcefulDisconnectBean, _fromSid?: string | null) => {
-                    payload.ids.forEach((id) => {
-                        this.subscribers.delete(id);
-                        this.clientStore.delete(id);
-                    });
+                "store",
+                ServerToClientStoreMessage.DISCONNECT_FORCEFULLY,
+                (payload: IOServerToClientStoreBean, _fromSid?: string | null) => {
+
+                    console.error("FORCEFUL DISCONNECT");
+
+                    // payload.ids.forEach((id) => {
+                    //     this.subscribers.delete(id);
+                    //     this.clientStore.delete(id);
+                    // });
                 }
             ),
         ];
@@ -74,44 +80,49 @@ export class RemoteStore {
         this.unsubscribeUpdateListener();
     }
 
-    openRemoteStore(path: Array<string>, params: ReadableStoreParametersBean | null) {
-        const storeId = createStoreId(path, params);
+    openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null) {
+        const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.clientStore.has(storeId)) {
             this.clientStore.set(storeId, { data: undefined });
-            const payload: ConnectPayload = {
-                path,
-                params,
+
+            const payload: IOClientToServerStoreBean = {
+                primaryPath,
+                secondaryPath,
+                parametersJson: this.serialiser.serialise(params)
             };
-            this.websocketManager.send(CoreMessage.STORE_CONNECT, payload);
+            this.websocketManager.send("store", ClientToServerStoreMessage.CONNECT, payload);
         }
     }
 
-    closeRemoteStore(path: Array<string>, params: ReadableStoreParametersBean | null) {
-        const storeId = createStoreId(path, params);
+    closeRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null) {
+        const storeId = createStoreId(primaryPath, secondaryPath, params);
         this.clientStore.delete(storeId);
-        const payload: DisconnectPayload = {
-            path,
-            params,
+        const payload: IOClientToServerStoreBean = {
+            primaryPath,
+            secondaryPath,
+            parametersJson: this.serialiser.serialise(params)
         };
-        this.websocketManager.send(CoreMessage.STORE_DISCONNECT, payload);
+        this.websocketManager.send("store", ClientToServerStoreMessage.DISCONNECT, payload);
     }
 
     getData(
-        path: Array<string>,
-        params: ReadableStoreParametersBean | null
-    ): Map<String, AbstractWebSocketBean> | undefined {
-        const storeId = createStoreId(path, params);
+        primaryPath: Array<string>, 
+        secondaryPath: Array<string>,
+        params: AbstractStoreParametersBean | null
+    ): Map<String, AbstractIOBean> | undefined {
+        const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.clientStore.has(storeId)) return undefined;
         return this.clientStore.get(storeId)!.data;
     }
 
     register(
-        path: Array<string>,
-        params: ReadableStoreParametersBean | null,
-        setData: (data: Map<string, AbstractWebSocketBean>) => void,
+        primaryPath: Array<string>,
+        secondaryPath: Array<string>,
+        params: AbstractStoreParametersBean | null,
+        setData: (data: Map<string, AbstractIOBean>) => void,
         update: boolean = false
     ): () => void {
-        const storeId = createStoreId(path, params);
+        const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.subscribers.has(storeId)) {
             this.subscribers.set(storeId, new Map());
         }
@@ -123,41 +134,80 @@ export class RemoteStore {
         };
         this.subscribers.get(storeId)!.set(id, subscriber);
 
-        this.openRemoteStore(path, params);
+        this.openRemoteStore(primaryPath, secondaryPath, params);
 
-        const returnDeregisterCallback = () => this.deregister(path, id, params);
+        const returnDeregisterCallback = () => this.deregister(primaryPath, secondaryPath, id, params);
 
         return returnDeregisterCallback.bind(this);
     }
 
-    deregister(path: Array<string>, id: string, params: ReadableStoreParametersBean | null) {
-        const storeId = createStoreId(path, params);
+    deregister(primaryPath: Array<string>, secondaryPath: Array<string>, id: string, params: AbstractStoreParametersBean | null) {
+        const storeId = createStoreId(primaryPath, secondaryPath, params);
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) return;
         storeSubscribers.delete(id);
         if (storeSubscribers.size === 0) {
             storeSubscribers.delete(storeId);
-            this.closeRemoteStore(path, params);
+            this.closeRemoteStore(primaryPath, secondaryPath, params);
         }
     }
 
-    editRemoteStore(
-        msg: string,
-        path: Array<string>,
-        params: WritableStoreParametersBean | null,
-        payload: AbstractWebSocketBean,
-        originId: string
+    updateBean(
+        primaryPath: Array<string>, 
+        secondaryPath: Array<string>,
+        params: AbstractStoreParametersBean | null,
+        payload: AbstractIOBean,
+        origin: string
     ) {
-        payload = this.serialiser.serialise(payload);
 
-        const bean: StoreEditBean = {
-            path,
-            params,
-            payload,
-            originId,
-        };
-        this.websocketManager.send(msg, bean);
+        const storeBean: IOClientToServerStoreBean = {
+            primaryPath,
+            secondaryPath,
+            parametersJson: this.serialiser.serialise(params),
+            payloadJson: this.serialiser.serialise(payload),
+            origin,
+        }
+
+        this.websocketManager.send("store", ClientToServerStoreMessage.UPDATE, storeBean);
     }
+
+    insertBean(
+        primaryPath: Array<string>, 
+        secondaryPath: Array<string>,
+        params: AbstractStoreParametersBean | null,
+        payload: AbstractIOBean,
+        origin: string
+    ) {
+
+        const storeBean: IOClientToServerStoreBean = {
+            primaryPath,
+            secondaryPath,
+            parametersJson: this.serialiser.serialise(params),
+            payloadJson: this.serialiser.serialise(payload),
+            origin,
+        }
+
+        this.websocketManager.send("store", ClientToServerStoreMessage.INSERT, storeBean);
+    }    
+
+    removeBean(
+        primaryPath: Array<string>, 
+        secondaryPath: Array<string>,
+        params: AbstractStoreParametersBean | null,
+        key: string,
+        origin: string
+    ) {
+
+        const storeBean: IOClientToServerStoreBean = {
+            primaryPath,
+            secondaryPath,
+            parametersJson: this.serialiser.serialise(params),
+            key,
+            origin,
+        }
+
+        this.websocketManager.send("store", ClientToServerStoreMessage.REMOVE, storeBean);
+    }    
 
     clear(storeId: string) {
         if (!this.clientStore.has(storeId)) {
@@ -170,7 +220,7 @@ export class RemoteStore {
         this.clientStore.get(storeId)!.data = undefined;
     }
 
-    update(storeId: string, data: { [key: string]: AbstractWebSocketBean }) {
+    update(storeId: string, data: { [key: string]: AbstractIOBean }) {
         if (!this.clientStore.has(storeId)) {
             console.error(
                 "received data from store " + storeId + " without being subscribed to the store",
@@ -187,7 +237,7 @@ export class RemoteStore {
             if (value === null || value === undefined) {
                 newData.delete(key);
             } else {
-                value = this.deserialiser.deserialise(value);
+                //value = this.deserialiser.resolve(value); // FIXME
 
                 if (newData.has(key)) {
                     newData.set(key, Object.assign({}, newData.get(key), value));
@@ -204,7 +254,7 @@ export class RemoteStore {
         const update = new Map();
         if (Array.from(storeSubscribers.values()).some((subscriber) => subscriber.type === SubscriberType.UPDATE)) {
             for (let [key, value] of Object.entries(data)) {
-                value = this.deserialiser.deserialise(value);
+                //value = this.deserialiser.deserialise(value); // FIXME
 
                 update.set(key, value);
             }

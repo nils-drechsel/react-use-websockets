@@ -16,34 +16,39 @@ export interface SingleSerialisationSignature {
 export type BeanSerialisationSignature = Array<SingleSerialisationSignature>;
 
 export class Serialiser {
-    serialisers: Map<string, BeanSerialiser>;
+    resolvers: Map<string, BeanResolver>;
 
     constructor(signatures?: Map<string, BeanSerialisationSignature>) {
-        this.serialisers = new Map();
+        this.resolvers = new Map();
         if (signatures) {
             signatures.forEach((signature, beanName) => {
-                this.serialisers.set(beanName, new BeanSerialiser(signature));
+                this.resolvers.set(beanName, new BeanResolver(signature));
             });
         }
     }
 
-    serialise(bean: any): any {
-        if (bean && bean._t && this.serialisers.has(bean._t)) {
-            return this.serialisers.get(bean._t)!.serialise(bean);
+    serialise(bean: any): string {
+        const _bean = this.resolve(bean);
+        return JSON.stringify(_bean);
+    }
+
+    resolve(bean: any): any {
+        if (bean && bean._t && this.resolvers.has(bean._t)) {
+            return this.resolvers.get(bean._t)!.resolve(bean);
         } else {
             return bean;
         }
     }
 }
 
-export class BeanSerialiser {
+export class BeanResolver {
     private signature: BeanSerialisationSignature;
 
     constructor(signature: BeanSerialisationSignature) {
         this.signature = signature;
     }
 
-    serialise(bean: any): any {
+    resolve(bean: any): any {
         const clone = Object.assign({}, bean);
 
         this.signature.forEach((entity) => {

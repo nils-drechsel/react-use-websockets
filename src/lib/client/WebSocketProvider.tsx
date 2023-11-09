@@ -1,8 +1,8 @@
-import React, { FunctionComponent, useEffect, useState, cloneElement, ReactElement, useContext } from "react";
-import { WebSocketManager } from "./WebSocketManager";
-import { WebSocketContext } from "./WebSocketContext";
+import React, { FunctionComponent, ReactElement, ReactNode, cloneElement, useContext, useEffect, useState } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { ClientErrorBean, CoreMessage } from "../store/beans/Beans";
+import { WebSocketContext } from "./WebSocketContext";
+import { WebSocketManager } from "./WebSocketManager";
 import { BeanSerialisationSignature } from "./serialisation/Serialisation";
 
 interface Props {
@@ -15,13 +15,13 @@ interface Props {
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
     serialisationSignatures?: Map<string, BeanSerialisationSignature>;
+    children: ReactNode;
 }
 
 export const WebSocketProvider: FunctionComponent<Props> = ({
     id,
     url,
     domain,
-    delimiter,
     ping,
     logging,
     reconnect,
@@ -37,7 +37,6 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
         const manager = new WebSocketManager(
             url,
             domain,
-            delimiter || "\t",
             reconnect,
             ping,
             logging || false,
@@ -66,7 +65,7 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
             message: "" + error,
             componentStack: info?.componentStack,
         };
-        if (manager) manager.send(CoreMessage.CLIENT_ERROR, errorBean);
+        if (manager) manager.send("core", CoreMessage.CLIENT_ERROR, errorBean);
     };
 
     const errorFallback = ({}: FallbackProps) => {

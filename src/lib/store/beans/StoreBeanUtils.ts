@@ -1,23 +1,22 @@
-import { Comparator, ValidationBean, AbstractWebSocketBean, AbstractStoreParametersBean } from "./Beans";
+import debounce from "lodash/debounce";
 import { Dispatch, SetStateAction } from "react";
 import { passwordConformsToEntropy } from "../../client/ClientUtils";
-import debounce from "lodash/debounce";
+import { AbstractIOBean, AbstractStoreParametersBean, Comparator, ValidationBean } from "./Beans";
 
-export const createStoreId = (path: Array<string>, params?: AbstractStoreParametersBean | null) => {
-    path = [...path];
-    if (params && (params as any).key) path.push((params as any).key);
+export const createStoreId = (primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null) => {
+    const path = [...primaryPath, ...secondaryPath, ...(!!params ? params.getPathElements!() : [])];
     return path.join("/");
 };
 
-export interface UpdateFunction<TYPE extends AbstractWebSocketBean> {
+export interface UpdateFunction<TYPE extends AbstractIOBean> {
     (changeset: Partial<TYPE>): void;
 }
 
-export interface PartialUpdateFunction<TYPE extends Partial<AbstractWebSocketBean>> {
+export interface PartialUpdateFunction<TYPE extends Partial<AbstractIOBean>> {
     (changeset: Partial<TYPE>, store: boolean): void;
 }
 
-export const updateBean = <TYPE extends AbstractWebSocketBean>(
+export const updateBean = <TYPE extends AbstractIOBean>(
     setBean: Dispatch<SetStateAction<TYPE>>
 ): UpdateFunction<TYPE> => {
     const result: UpdateFunction<TYPE> = (changeset: Partial<TYPE>): void => {
@@ -30,7 +29,7 @@ export const updateBean = <TYPE extends AbstractWebSocketBean>(
     return result;
 };
 
-export const updatePartialBean = <TYPE extends AbstractWebSocketBean>(
+export const updatePartialBean = <TYPE extends AbstractIOBean>(
     setBean: Dispatch<SetStateAction<TYPE>>,
     remoteStore: PartialEditRemoteStoreFunction<Partial<TYPE>>,
     debounceTime?: number
@@ -167,11 +166,11 @@ export interface ValidationCallback<BEAN_TYPE, VALIDATION_TYPE extends Validatio
     (bean: BEAN_TYPE, partial?: boolean): VALIDATION_TYPE;
 }
 
-export interface EditRemoteStoreFunction<BEAN_TYPE extends AbstractWebSocketBean> {
+export interface EditRemoteStoreFunction<BEAN_TYPE extends AbstractIOBean> {
     (payload: BEAN_TYPE): void;
 }
 
-export interface PartialEditRemoteStoreFunction<BEAN_TYPE extends Partial<AbstractWebSocketBean>> {
+export interface PartialEditRemoteStoreFunction<BEAN_TYPE extends Partial<AbstractIOBean>> {
     (payload: BEAN_TYPE): void;
 }
 

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { WebSocketContext } from "./WebSocketContext";
-import { WebSocketManager, ListenerCallback, UnsubscribeCallback, ConnectivityCallback, DefaultListenerCallback } from './WebSocketManager';
+import { ConnectivityCallback, DefaultListenerCallback, ListenerCallback, UnsubscribeCallback, WebSocketManager } from './WebSocketManager';
 
 export type SendFunction = (message: string, payload: any, toSid?: string | null) => void;
 
@@ -16,11 +16,11 @@ export const useWebSocket = (id?: string | null) => {
 
     if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element with the correct id ("+id+") ?");
 
-    const send: SendFunction = (message: string, payload: any, toSid: string | null = null) => {
-        manager!.send(message, payload, toSid);
+    const send: SendFunction = (endpoint: string, message: string, payload: any, toSid: string | null = null) => {
+        manager!.send(endpoint, message, payload, toSid);
     };
-    const listen = (message: string, callback: ListenerCallback): UnsubscribeCallback => {
-        return manager!.addListener(message, callback);
+    const listen = (endpoint: string, message: string, callback: ListenerCallback): UnsubscribeCallback => {
+        return manager!.addListener(endpoint, message, callback);
     }
     const isConnected = (): boolean => {
         return manager!.isConnected();

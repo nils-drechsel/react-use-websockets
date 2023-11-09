@@ -1,12 +1,13 @@
-import React, { FunctionComponent, useContext, useEffect, useState } from "react";
+import React, { FunctionComponent, ReactNode, useContext, useEffect, useState } from "react";
+import { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
+import { useWebSocket } from "../client/useWebSocket";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
-import { useWebSocket } from "../client/useWebSocket";
-import { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
 
 interface Props {
     id: string;
     serialisationSignatures?: Map<string, BeanSerialisationSignature>;
+    children: ReactNode;
 }
 
 export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children, serialisationSignatures }) => {

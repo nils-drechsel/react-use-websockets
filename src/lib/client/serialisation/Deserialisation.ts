@@ -1,34 +1,39 @@
-import { SerialisationEntity, BeanSerialisationSignature, SerialisationTarget } from "./Serialisation";
+import { BeanSerialisationSignature, SerialisationEntity, SerialisationTarget } from "./Serialisation";
 
 export class Deserialiser {
-    deserialisers: Map<string, BeanDeserialiser>;
+    resolvers: Map<string, BeanResolver>;
 
     constructor(signatures?: Map<string, BeanSerialisationSignature>) {
-        this.deserialisers = new Map();
+        this.resolvers = new Map();
         if (signatures) {
             signatures.forEach((signature, beanName) => {
-                this.deserialisers.set(beanName, new BeanDeserialiser(signature));
+                this.resolvers.set(beanName, new BeanResolver(signature));
             });
         }
     }
 
-    deserialise(bean: any): any {
-        if (bean && bean._t && this.deserialisers.has(bean._t)) {
-            return this.deserialisers.get(bean._t)!.deserialise(bean);
+    deserialise(json: string): any {
+        const bean = JSON.parse(json);
+        return this.resolve(bean);
+    }
+
+    resolve(bean: any): any {
+        if (bean && bean._t && this.resolvers.has(bean._t)) {
+            return this.resolvers.get(bean._t)!.resolve(bean);
         } else {
             return bean;
         }
     }
 }
 
-export class BeanDeserialiser {
+export class BeanResolver {
     private signature: BeanSerialisationSignature;
 
     constructor(signature: BeanSerialisationSignature) {
         this.signature = signature;
     }
 
-    deserialise(bean: any): any {
+    resolve(bean: any): any {
         const clone = Object.assign({}, bean);
 
         this.signature.forEach((entity) => {

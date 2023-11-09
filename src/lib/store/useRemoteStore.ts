@@ -1,36 +1,67 @@
-import { useEffect, useState, Dispatch, SetStateAction } from "react";
-import { AbstractWebSocketBean, ReadableStoreParametersBean } from "./beans/Beans";
+import { useEffect, useState } from "react";
+import { AbstractIOBean, AbstractStoreParametersBean } from "./beans/Beans";
+import { createStoreId } from "./beans/StoreBeanUtils";
+import { ConnectionStateRef, ConnectionStateSetter } from "./connectStore";
 import { useGetRemoteStore } from "./useGetRemoteStore";
 
 export const useRemoteStore = (
     id: string | null,
-    path: Array<string>,
-    params?: ReadableStoreParametersBean | null,
-    callback?: (data: Map<string, AbstractWebSocketBean> | undefined) => void,
-    dependency?: any
+    primaryPath: Array<string>,
+    secondaryPath: Array<string>,
+    params?: AbstractStoreParametersBean | null,
+    callback?: (data: Map<string, AbstractIOBean> | undefined) => void,
+    dependency?: any,
+    connectionStateRef?: ConnectionStateRef,
+    setConnectionState?: ConnectionStateSetter
 ): Map<string, any> => {
     const remoteStore = useGetRemoteStore(id);
 
-    const [data, setData] = useState(remoteStore.getData(path, params || null));
+    const [data, setData] = useState(remoteStore.getData(primaryPath, secondaryPath, params || null));
 
     const dependencyFulfilled = dependency === undefined || !!dependency;
 
-    const pathId = path.join("/");
+    const storeId = createStoreId(primaryPath, secondaryPath, params);
 
     const paramString = params ? JSON.stringify(params) : null;
 
+    if (connectionStateRef && connectionStateRef.current && !connectionStateRef.current.has(storeId)) {
+        connectionStateRef.current.set(storeId, data !== undefined);
+    }
+
     useEffect(() => {
+
+        const setThisConnectionState = (s: boolean) => {
+            if (connectionStateRef && connectionStateRef.current.get(storeId) !== s) {
+                if (setConnectionState)
+                    setConnectionState((state: Map<string, boolean>) => {
+                        const newState = new Map(state);
+                        newState.set(storeId, s);
+                        return newState;
+                    });
+            }
+        };
+
+        if (data === undefined) {
+            setThisConnectionState(false);
+        } else {
+            setThisConnectionState(true);
+        }
+
         if (dependencyFulfilled) {
-            let setIncomingData = setData as (incomingData: Map<string, AbstractWebSocketBean>) => void;
+            let setIncomingData = (incomingData: Map<string, AbstractIOBean>): void => {
+                setData(incomingData);
+                setThisConnectionState(true);
+            };
 
             if (callback) {
-                setIncomingData = (incomingData: Map<string, AbstractWebSocketBean>): void => {
+                setIncomingData = (incomingData: Map<string, AbstractIOBean>): void => {
                     setData(incomingData);
                     callback(incomingData);
+                    setThisConnectionState(true);
                 };
             }
 
-            const deregister = remoteStore.register(path, params || null, setIncomingData);
+            const deregister = remoteStore.register(primaryPath, secondaryPath, params || null, setIncomingData);
 
             return () => {
                 deregister();
@@ -42,48 +73,23 @@ export const useRemoteStore = (
         return () => {
             // do nothing in the case we wait for dependencies fulfilled
         };
-    }, [dependencyFulfilled, pathId, paramString]);
+    }, [dependencyFulfilled, storeId, paramString]);
 
     return data as any;
 };
 
-export const useRemoteSingleStore = (
-    id: string | null,
-    path: Array<string>,
-    params?: ReadableStoreParametersBean | null,
-    updateDependent?: Dispatch<SetStateAction<AbstractWebSocketBean>>,
-    dependency?: any
-): any => {
-    let callback = undefined;
-
-    if (updateDependent) {
-        callback = (incomingData: Map<string, AbstractWebSocketBean> | undefined): void => {
-            const item = incomingData && incomingData.size > 0 ? Array.from(incomingData.values())[0] : null;
-            updateDependent((old: any) => {
-                if (incomingData === undefined) return undefined;
-                if (old === null || old === undefined) {
-                    return item;
-                } else {
-                    return Object.assign({}, old, item);
-                }
-            });
-        };
-    }
-
-    const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(id, path, params, callback, dependency);
-
-    return data && data.size > 0 ? Array.from(data.values())[0] : undefined;
-};
 
 export const useRemoteStoreArray = (
     id: string | null,
-    path: Array<string>,
-    params?: ReadableStoreParametersBean | null,
+    primaryPath: Array<string>,
+    secondaryPath: Array<string>,
+    params?: AbstractStoreParametersBean | null,
     dependency?: any
 ): Array<any> => {
-    const data: Map<string, AbstractWebSocketBean> | undefined = useRemoteStore(
+    const data: Map<string, AbstractIOBean> | undefined = useRemoteStore(
         id,
-        path,
+        primaryPath,
+        secondaryPath,
         params,
         undefined,
         dependency
