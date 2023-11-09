@@ -24,7 +24,6 @@ export declare class WebSocketManager {
     listenerIdCount: number;
     noReconnectOn: Set<number>;
     queue: Array<string>;
-    delimiter: string;
     reconnect: boolean;
     logging: boolean;
     sid: string;
@@ -33,7 +32,7 @@ export declare class WebSocketManager {
     unsubscribeInterval: number;
     serialiser: Serialiser;
     deserialiser: Deserialiser;
-    constructor(url: string, domain: string, delimiter?: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
+    constructor(url: string, domain: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;
@@ -43,14 +42,13 @@ export declare class WebSocketManager {
     private facilitateConnect;
     private onClose;
     private onMessage;
-    private extractSid;
-    private extractJSONPayload;
     private resolveQueue;
-    send(message: string, payload?: any, toSid?: string | null): void;
+    send(endpoint: string, message: string, payload?: any, toSid?: string | null): void;
     sendRaw(raw: string): void;
     private createId;
     removeListener(id: number): void;
-    addListener(message: string, callback: ListenerCallback): UnsubscribeCallback;
+    addListener(endpoint: string, message: string, callback: ListenerCallback): UnsubscribeCallback;
+    createMessageId(endpoint: string, message: string): string;
     removeConnectivityListener(id: number): void;
     addConnectivityListener(callback: ConnectivityCallback): UnsubscribeCallback;
     setDefaultCallback(callback: DefaultListenerCallback): void;

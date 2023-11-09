@@ -4,45 +4,51 @@ export declare enum PasswordStrengthCriterium {
     NUMBERS = "NUMBERS",
     SPECIAL_CHARACTERS = "SPECIAL_CHARACTERS"
 }
-export interface ClientErrorBean extends AbstractWebSocketBean {
-    _t?: string;
+export interface ClientErrorBean extends AbstractIOBean {
+    _t?: string | null;
     message: string;
     componentStack?: string | null;
 }
 export interface AssignedKeyContainingBean {
 }
-export interface StoreEditFragment extends StoreBean {
-    _t?: string;
-    timestamp?: TimestampBean;
+export interface AbstractIOBean extends Object {
+    _t?: string | null;
 }
-export interface NullBean extends AbstractWebSocketBean {
-    _t?: string;
+export interface KeyParametersBean extends AbstractStoreParametersBean {
+    getPathElements: () => Array<string>;
+    _t?: string | null;
+    key: string | null;
 }
-export interface ServerMessageBean extends AbstractWebSocketBean {
-    originId?: string | null;
-    _t?: string;
-    bean?: string;
+export interface NullBean extends AbstractIOBean {
+    _t?: string | null;
 }
-export interface TimestampBean extends AbstractWebSocketBean {
+export interface TimestampBean extends AbstractIOBean {
     touched: number;
-    _t?: string;
+    _t?: string | null;
     created: number;
     modified: number;
 }
-export interface DataBaseBean extends StoreBean {
-    _t?: string;
+export interface ServerMessageBean extends AbstractIOBean {
+    originId?: string | null;
+    _t?: string | null;
+    bean?: string;
+}
+export interface TemplateMasterBean extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface DataBaseBean extends AbstractStoreBean {
+    uid?: string;
+    _t?: string | null;
     timestamp?: TimestampBean;
 }
-export interface WritableStoreParametersBean extends AbstractStoreParametersBean {
-    _t?: string;
-    key: string | null;
+export interface IOClientToServerCoreBean extends AbstractIOBean {
+    endpoint: string;
+    _t?: string | null;
+    toSid: string | null;
+    payload: string;
+    message: string;
 }
 export interface ClientMessageBean {
-}
-export interface DisconnectPayload extends AbstractConnectionBean {
-    path: Array<string>;
-    _t?: string;
-    params?: ReadableStoreParametersBean | null;
 }
 export declare enum Comparator {
     EQUAL = "EQUAL",
@@ -52,49 +58,37 @@ export declare enum Comparator {
     SMALLER = "SMALLER",
     SMALLER_OR_EQUAL = "SMALLER_OR_EQUAL"
 }
-export interface NoParametersBean extends ReadableStoreParametersBean {
-    _t?: string;
+export interface NoParametersBean extends AbstractStoreParametersBean {
+    getPathElements: () => Array<string>;
+    _t?: string | null;
 }
-export interface AbstractStoreParametersBean extends AbstractWebSocketBean {
-    _t?: string;
+export interface AbstractStoreParametersBean extends AbstractIOBean {
+    getPathElements?: () => Array<string>;
+    _t?: string | null;
 }
-export interface ClientOriginatedBean extends AbstractWebSocketBean {
+export interface StoreBean {
+}
+export interface ClientOriginatedBean extends AbstractIOBean {
     originId?: string;
-    _t?: string;
+    _t?: string | null;
 }
-export interface StoreBean extends AbstractWebSocketBean {
-    _t?: string;
-    timestamp?: TimestampBean;
+export declare enum ClientToServerStoreMessage {
+    CONNECT = "CONNECT",
+    DISCONNECT = "DISCONNECT",
+    INSERT = "INSERT",
+    REMOVE = "REMOVE",
+    UPDATE = "UPDATE"
 }
-export interface ReadableStoreParametersBean extends AbstractStoreParametersBean {
-    _t?: string;
-}
-export interface StoreUpdateBean extends AbstractWebSocketBean {
-    _t?: string;
+export interface StoreUpdateBean extends AbstractIOBean {
+    _t?: string | null;
     initial?: boolean | null;
     payload: {
-        [key: string]: AbstractWebSocketBean;
+        [key: string]: AbstractIOBean;
     };
-    id: string;
-}
-export interface AbstractConnectionBean extends AbstractWebSocketBean {
-    path: Array<string>;
-    _t?: string;
-    params?: ReadableStoreParametersBean | null;
-}
-export interface AbstractWebSocketBean extends Object {
-    _t?: string;
 }
 export interface AnnotationContainingBean {
 }
 export interface OwnerContainingBean {
-}
-export interface StoreEditBean extends AbstractWebSocketBean {
-    path: Array<string>;
-    originId: string;
-    _t?: string;
-    payload: StoreBean;
-    params?: WritableStoreParametersBean | null;
 }
 export declare enum MessageType {
     ERROR = "ERROR",
@@ -102,66 +96,91 @@ export declare enum MessageType {
     INFO = "INFO",
     SUCCESS = "SUCCESS"
 }
-export interface ServerToClientAuthenticationBean extends AbstractWebSocketBean {
+export interface ServerToClientAuthenticationBean extends AbstractIOBean {
     uid: string;
-    _t?: string;
+    _t?: string | null;
     token0: string;
     token1: string;
     validity: number;
     sid: string;
 }
-export interface MessageBean extends AbstractWebSocketBean {
-    _t?: string;
+export interface MessageBean extends AbstractIOBean {
+    _t?: string | null;
     type: MessageType;
     message: string;
 }
-export interface ConnectPayload extends AbstractConnectionBean {
-    path: Array<string>;
-    _t?: string;
-    params?: ReadableStoreParametersBean | null;
+export interface AbstractStoreBean extends AbstractIOBean {
+    uid?: string;
+    _t?: string | null;
+    timestamp?: TimestampBean;
 }
-export interface StoreReconnectBean extends AbstractWebSocketBean {
-    _t?: string;
-    ids: Array<string>;
+export interface StoreFragment {
 }
-export interface ClientToServerAuthenticationBean extends AbstractWebSocketBean {
-    _t?: string;
+export interface IOPingPongBean extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface ClientToServerAuthenticationBean extends AbstractIOBean {
+    _t?: string | null;
     token0: string | null;
     token1: string | null;
 }
-export interface StoreForcefulDisconnectBean extends AbstractWebSocketBean {
-    _t?: string;
-    ids: Array<string>;
+export interface AbstractStoreFragment extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface TimestampContainingBean {
+}
+export interface IOServerToClientCoreBean extends AbstractIOBean {
+    endpoint: string;
+    _t?: string | null;
+    payload: string;
+    fromSid: string;
+    message: string;
+}
+export declare enum ServerStoreMessage {
+    UPDATE = "UPDATE"
 }
 export declare enum CoreMessage {
     PING = "PING",
     PONG = "PONG",
     AUTHENTICATE = "AUTHENTICATE",
-    STORE_CONNECT = "STORE_CONNECT",
-    STORE_RECONNECT = "STORE_RECONNECT",
-    STORE_DISCONNECT = "STORE_DISCONNECT",
-    STORE_UPDATE = "STORE_UPDATE",
     VALIDATION = "VALIDATION",
-    STORE_EDIT = "STORE_EDIT",
-    STORE_CREATE = "STORE_CREATE",
     MESSAGE = "MESSAGE",
     CLIENT_ERROR = "CLIENT_ERROR"
 }
-export interface ReadableKeyStoreParametersBean extends ReadableStoreParametersBean {
-    _t?: string;
-    key: string | null;
+export interface ArrayBean extends AbstractIOBean {
+    _t?: string | null;
+    beans: Array<AbstractIOBean>;
+}
+export declare enum ServerToClientStoreMessage {
+    UPDATE = "UPDATE",
+    DISCONNECT_FORCEFULLY = "DISCONNECT_FORCEFULLY"
 }
 export interface UidContainingBean {
 }
+export interface IOClientToServerStoreBean extends AbstractIOBean {
+    payloadJson?: string | null;
+    _t?: string | null;
+    secondaryPath: Array<string>;
+    parametersJson: string;
+    origin?: string | null;
+    key?: string | null;
+    primaryPath: Array<string>;
+}
+export interface IOServerToClientStoreBean extends AbstractIOBean {
+    secondaryId: string;
+    _t?: string | null;
+    payload: string;
+    primaryId: string;
+}
 export interface ValidationBean extends ServerMessageBean {
     originId?: string | null;
-    _t?: string;
+    _t?: string | null;
     success?: boolean;
     bean?: string;
 }
 export interface StoreValidationBean extends ValidationBean {
     originId?: string | null;
-    _t?: string;
+    _t?: string | null;
     success?: boolean;
     storeUid?: string;
     bean?: string;

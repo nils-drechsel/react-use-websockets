@@ -1,12 +1,13 @@
 import { BeanSerialisationSignature } from "./Serialisation";
 export declare class Deserialiser {
-    deserialisers: Map<string, BeanDeserialiser>;
+    resolvers: Map<string, BeanResolver>;
     constructor(signatures?: Map<string, BeanSerialisationSignature>);
-    deserialise(bean: any): any;
+    deserialise(json: string): any;
+    resolve(bean: any): any;
 }
-export declare class BeanDeserialiser {
+export declare class BeanResolver {
     private signature;
     constructor(signature: BeanSerialisationSignature);
-    deserialise(bean: any): any;
+    resolve(bean: any): any;
 }
 export default Deserialiser;

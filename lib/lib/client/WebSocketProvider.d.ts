@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactElement } from "react";
+import { FunctionComponent, ReactElement, ReactNode } from "react";
 import { BeanSerialisationSignature } from "./serialisation/Serialisation";
 interface Props {
     id: string;
@@ -10,6 +10,7 @@ interface Props {
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
     serialisationSignatures?: Map<string, BeanSerialisationSignature>;
+    children: ReactNode;
 }
 export declare const WebSocketProvider: FunctionComponent<Props>;
 export {};

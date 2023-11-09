@@ -63,8 +63,8 @@ export class RemoteStore {
             this.websocketManager.addListener(
                 "store",
                 ServerToClientStoreMessage.DISCONNECT_FORCEFULLY,
-                (payload: IOServerToClientStoreBean, _fromSid?: string | null) => {
-
+                (_payload: IOServerToClientStoreBean, _fromSid?: string | null) => {
+                    // FIXME
                     console.error("FORCEFUL DISCONNECT");
 
                     // payload.ids.forEach((id) => {

@@ -33,9 +33,7 @@ export const connectStore = <MappedProps, OwnProps>(
         const [connectionState, connectionStateRef, setConnectionState] = useStateVariable(new Map() as ConnectionState);
 
         const newProps = useMapStores(props, connectionStateRef, setConnectionState)
-        if (Object.values(newProps).some(v => v === undefined)) {
-            return (showElementWhileConnecting as any) || null;
-        }
+        
         if (Array.from(connectionState.values()).some(v => !v)) {
             return (showElementWhileConnecting as any) || null;
         }
