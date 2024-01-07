@@ -154,9 +154,8 @@ export class WebSocketManager {
         const messageId = this.createMessageId(endpoint, message);
 
         const fromSid = coreBean.fromSid;
-        const payloadJSON = JSON.parse(coreBean.payload);
 
-        const payload = this.deserialiser.deserialise(payloadJSON);
+        const payload = this.deserialiser.deserialise(coreBean.payload);
         
 
         if (messageId === this.createMessageId("core", CoreMessage.AUTHENTICATE)) {
