@@ -9,7 +9,7 @@ export { SendFunction } from "./lib/client/useWebSocket";
 export { RemoteStore } from "./lib/store/RemoteStore";
 export { RemoteStoreContext } from "./lib/store/RemoteStoreContext";
 export { RemoteStoreProvider } from "./lib/store/RemoteStoreProvider";
-export { ConnectionState, ConnectionStateRef, ConnectionStateSetter, connectStore } from "./lib/store/connectStore";
+export { ConnectionMetaSetter, ConnectionState, ConnectionStateRef, connectStore } from "./lib/store/connectStore";
 export { useGetRemoteStore } from "./lib/store/useGetRemoteStore";
 export { useRemoteStore, useRemoteStoreArray } from "./lib/store/useRemoteStore";
 export { EditRemoteStoreFunction, PartialEditRemoteStoreFunction, PartialUpdateFunction, PostValidationCallback, UpdateFunction, updateBean, updatePartialBean } from "./lib/store/beans/StoreBeanUtils";

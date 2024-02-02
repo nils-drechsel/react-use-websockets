@@ -1,5 +1,6 @@
-import React, { ClassAttributes, ComponentClass, ComponentType, Dispatch, MutableRefObject, ReactElement, SetStateAction } from 'react'; // importing FunctionComponent
+import React, { ClassAttributes, ComponentClass, ComponentType, MutableRefObject, ReactElement } from 'react'; // importing FunctionComponent
 import { useStateVariable } from 'react-use-variable';
+import { StoreConnectionState, StoreMeta } from './RemoteStore';
 
 // from redux
 export type Matching<InjectedProps, DecorationTargetProps> = {
@@ -16,15 +17,22 @@ export type GetProps<C> = C extends ComponentType<infer P>
     : never;
 
 
-export type ConnectionState = Map<string, boolean>
+export type ConnectionState = Map<string, StoreMeta>
 
-export type ConnectionStateSetter = Dispatch<SetStateAction<ConnectionState>>;
+export interface ConnectionMetaSetter {
+    (fn: ConnectionMetaSetterInside): void;
+}
+
+export interface ConnectionMetaSetterInside {
+    (metas: Map<string, StoreMeta>): Map<string, StoreMeta>;
+}
 
 export type ConnectionStateRef = MutableRefObject<ConnectionState>;
 
 export const connectStore = <MappedProps, OwnProps>(
-    useMapStores: (ownProps: OwnProps, connectionStateRef: ConnectionStateRef, setConnectionState: ConnectionStateSetter) => MappedProps,
-    showElementWhileConnecting?: ReactElement | null
+    useMapStores: (ownProps: OwnProps, connectionStateRef: ConnectionStateRef, setConnectionState: ConnectionMetaSetter) => MappedProps,
+    showElementWhileConnecting?: ReactElement | null,
+    showElementOnError?: (errors: Array<string>) => ReactElement | null
 ) => <C extends ComponentType<Matching<MappedProps, GetProps<C>>>>(
     WrappedComponent: C
 ): ComponentType<JSX.LibraryManagedAttributes<C, Omit<GetProps<C>, keyof MappedProps>>> => {
@@ -33,8 +41,21 @@ export const connectStore = <MappedProps, OwnProps>(
         const [connectionState, connectionStateRef, setConnectionState] = useStateVariable(new Map() as ConnectionState);
 
         const newProps = useMapStores(props, connectionStateRef, setConnectionState)
+
+        const storeMetas: Array<StoreMeta> = Array.from(connectionState.values());
+
+        if (storeMetas.some(meta => meta.state === StoreConnectionState.ERROR)) {
+            const errors: Array<string> =
+                storeMetas
+                    .filter(meta => meta.state === StoreConnectionState.ERROR)
+                    .filter(meta => !!meta.errors)
+                    .map(meta => meta.errors as Array<string>)
+                    .reduce((a,b) => a.concat(b), []);
+
+            return showElementOnError ? showElementOnError(errors) : <div>{errors.join(";")}</div>
+        }
         
-        if (Array.from(connectionState.values()).some(v => !v)) {
+        if (storeMetas.some(meta => meta.state !== StoreConnectionState.READY)) {
             return (showElementWhileConnecting as any) || null;
         }
         return <WrappedComponent {...props} {...newProps} />

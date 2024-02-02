@@ -9,6 +9,7 @@ import {
     IOClientToServerStoreBean,
     IOServerToClientStoreBean,
     ServerToClientStoreMessage,
+    StoreConnectionErrorBean,
     StoreUpdateBean
 } from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
@@ -20,10 +21,24 @@ enum SubscriberType {
 
 interface Subscriber {
     type: SubscriberType;
-    callback: (data: Map<string, AbstractIOBean>) => void;
+    dataCallback: (data: Map<string, AbstractIOBean>) => void;
+    metaCallback: (meta: StoreMeta) => void;
+}
+
+export enum StoreConnectionState {
+    CONNECTING,
+    CONNECTED,
+    READY,
+    ERROR
+}
+
+export interface StoreMeta {
+    state: StoreConnectionState;
+    errors: Array<string> | null;
 }
 
 interface ClientStore {
+    meta: StoreMeta;
     data: Map<string, AbstractIOBean> | undefined;
 }
 
@@ -47,7 +62,7 @@ export class RemoteStore {
         [this.unsubscribeUpdateListener, this.unsubscribeDisconnectListener] = this.initRemoteStore();
     }
 
-    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback] {
+    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback] {
         return [
             this.websocketManager.addListener(
                 "store",
@@ -56,8 +71,12 @@ export class RemoteStore {
 
                     const payload: StoreUpdateBean = this.deserialiser.deserialise(storeBean.payload);
 
-                    if (payload.initial) this.clear(storeBean.secondaryId);
-                    this.update(storeBean.secondaryId, payload.payload);
+                    if (payload.initial) {
+                        this.clear(storeBean.secondaryId);
+                        this.update(storeBean.secondaryId, payload.payload, true /*initial*/);
+                    } else {
+                        this.update(storeBean.secondaryId, payload.payload, false /*initial*/);
+                    }
                 }
             ),
             this.websocketManager.addListener(
@@ -73,6 +92,26 @@ export class RemoteStore {
                     // });
                 }
             ),
+            this.websocketManager.addListener(
+                "store",
+                ServerToClientStoreMessage.CONNECTED,
+                (storeBean: IOServerToClientStoreBean, _fromSid?: string | null) => {
+
+                    //const payload: StoreConnectedBean = this.deserialiser.deserialise(storeBean.payload);
+                    
+                    this.storeConnected(storeBean.secondaryId);
+                }
+            ),
+            this.websocketManager.addListener(
+                "store",
+                ServerToClientStoreMessage.CONNECTION_ERROR,
+                (storeBean: IOServerToClientStoreBean, _fromSid?: string | null) => {
+
+                    const payload: StoreConnectionErrorBean = this.deserialiser.deserialise(storeBean.payload);
+
+                    this.storeConnectionError(storeBean.secondaryId, payload.errors);
+                }
+            ),
         ];
     }
 
@@ -83,7 +122,7 @@ export class RemoteStore {
     openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null) {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.clientStore.has(storeId)) {
-            this.clientStore.set(storeId, { data: undefined });
+            this.clientStore.set(storeId, { data: undefined, meta: {state: StoreConnectionState.CONNECTING, errors: null} });
 
             const payload: IOClientToServerStoreBean = {
                 primaryPath,
@@ -111,8 +150,22 @@ export class RemoteStore {
         params: AbstractStoreParametersBean | null
     ): Map<String, AbstractIOBean> | undefined {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
-        if (!this.clientStore.has(storeId)) return undefined;
+        if (!this.clientStore.has(storeId)) {
+            throw new Error("store " + storeId + " does not exist");
+        }
         return this.clientStore.get(storeId)!.data;
+    }
+
+    getStoreMeta(
+        primaryPath: Array<string>, 
+        secondaryPath: Array<string>,
+        params: AbstractStoreParametersBean | null
+    ): StoreMeta {
+        const storeId = createStoreId(primaryPath, secondaryPath, params);
+        if (!this.clientStore.has(storeId)) {
+            throw new Error("store " + storeId + " does not exist");
+        }
+        return this.clientStore.get(storeId)!.meta;
     }
 
     register(
@@ -120,6 +173,7 @@ export class RemoteStore {
         secondaryPath: Array<string>,
         params: AbstractStoreParametersBean | null,
         setData: (data: Map<string, AbstractIOBean>) => void,
+        setMeta: (meta: StoreMeta) => void,
         update: boolean = false
     ): () => void {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
@@ -128,9 +182,10 @@ export class RemoteStore {
         }
 
         const id = uuidv4();
-        const subscriber = {
+        const subscriber: Subscriber = {
             type: update ? SubscriberType.UPDATE : SubscriberType.FULL,
-            callback: setData,
+            dataCallback: setData,
+            metaCallback: setMeta,
         };
         this.subscribers.get(storeId)!.set(id, subscriber);
 
@@ -220,7 +275,51 @@ export class RemoteStore {
         this.clientStore.get(storeId)!.data = undefined;
     }
 
-    update(storeId: string, data: { [key: string]: AbstractIOBean }) {
+    storeConnected(storeId: string) {
+        if (!this.clientStore.has(storeId)) {
+            console.error(
+                "received state from store " + storeId + " without being subscribed to the store",
+                this.clientStore
+            );
+            return;
+        }
+
+        const store = this.clientStore.get(storeId)!;
+        if (store.data) {
+            store.meta = {state: StoreConnectionState.READY, errors:null};
+        } else {
+            store.meta = {state: StoreConnectionState.CONNECTED, errors:null};
+        }
+
+        const storeSubscribers = this.subscribers.get(storeId);
+        if (!storeSubscribers) throw new Error("store has no subscribers");
+
+        storeSubscribers.forEach((subscriber: Subscriber) => {
+            subscriber.metaCallback(store.meta);
+        });
+    }
+
+    storeConnectionError(storeId: string, errors: Array<string>) {
+        if (!this.clientStore.has(storeId)) {
+            console.error(
+                "received error from store " + storeId + " without being subscribed to the store",
+                this.clientStore
+            );
+            return;
+        }
+
+        const store = this.clientStore.get(storeId)!;
+        store.meta = {state: StoreConnectionState.ERROR, errors};
+
+        const storeSubscribers = this.subscribers.get(storeId);
+        if (!storeSubscribers) throw new Error("store has no subscribers");
+
+        storeSubscribers.forEach((subscriber: Subscriber) => {
+            subscriber.metaCallback(store.meta);
+        });
+    }    
+
+    update(storeId: string, data: Map<string, AbstractIOBean>, initial: boolean) {
         if (!this.clientStore.has(storeId)) {
             console.error(
                 "received data from store " + storeId + " without being subscribed to the store",
@@ -231,9 +330,11 @@ export class RemoteStore {
 
         const store = this.clientStore.get(storeId)!;
 
+        if (store.meta.state === StoreConnectionState.ERROR) throw new Error("received update from store " + storeId + " but store has error state");
+
         const newData = new Map(store.data!);
 
-        for (let [key, value] of Object.entries(data)) {
+        data.forEach((value, key) => {
             if (value === null || value === undefined) {
                 newData.delete(key);
             } else {
@@ -245,8 +346,11 @@ export class RemoteStore {
                     newData.set(key, value);
                 }
             }
-        }
+        });
+        
         store.data = newData;
+
+        store.meta = {state: StoreConnectionState.READY, errors: null};
 
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");
@@ -263,14 +367,22 @@ export class RemoteStore {
         storeSubscribers.forEach((subscriber: Subscriber) => {
             switch (subscriber.type) {
                 case SubscriberType.UPDATE:
-                    subscriber.callback(update);
+                    console.log("PARTIAL:",update);
+                    subscriber.dataCallback(update);
                     break;
                 case SubscriberType.FULL:
-                    subscriber.callback(newData);
+                    console.log("FULL:", newData);
+                    subscriber.dataCallback(newData);
                     break;
                 default:
                     throw new Error("unknown SubscriberType: " + subscriber.type);
             }
         });
+
+        if (initial) {
+            storeSubscribers.forEach((subscriber: Subscriber) => {
+                subscriber.metaCallback(store.meta);
+            }); 
+        }
     }
 }
