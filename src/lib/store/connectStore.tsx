@@ -17,7 +17,7 @@ export type GetProps<C> = C extends ComponentType<infer P>
     : never;
 
 
-export type ConnectionState = Map<string, StoreMeta>
+export type ConnectionMeta = Map<string, StoreMeta>
 
 export interface ConnectionMetaSetter {
     (fn: ConnectionMetaSetterInside): void;
@@ -27,10 +27,10 @@ export interface ConnectionMetaSetterInside {
     (metas: Map<string, StoreMeta>): Map<string, StoreMeta>;
 }
 
-export type ConnectionStateRef = MutableRefObject<ConnectionState>;
+export type ConnectionMetaRef = MutableRefObject<ConnectionMeta>;
 
 export const connectStore = <MappedProps, OwnProps>(
-    useMapStores: (ownProps: OwnProps, connectionStateRef: ConnectionStateRef, setConnectionState: ConnectionMetaSetter) => MappedProps,
+    useMapStores: (ownProps: OwnProps, connectionStateRef: ConnectionMetaRef, setConnectionState: ConnectionMetaSetter) => MappedProps,
     showElementWhileConnecting?: ReactElement | null,
     showElementOnError?: (errors: Array<string>) => ReactElement | null
 ) => <C extends ComponentType<Matching<MappedProps, GetProps<C>>>>(
@@ -38,11 +38,13 @@ export const connectStore = <MappedProps, OwnProps>(
 ): ComponentType<JSX.LibraryManagedAttributes<C, Omit<GetProps<C>, keyof MappedProps>>> => {
     return (props: any) => {
 
-        const [connectionState, connectionStateRef, setConnectionState] = useStateVariable(new Map() as ConnectionState);
+        const [connectionState, connectionStateRef, setConnectionState] = useStateVariable(new Map() as ConnectionMeta);
 
         const newProps = useMapStores(props, connectionStateRef, setConnectionState)
 
         const storeMetas: Array<StoreMeta> = Array.from(connectionState.values());
+
+        console.log("STOREMETAS: ", storeMetas);
 
         if (storeMetas.some(meta => meta.state === StoreConnectionState.ERROR)) {
             const errors: Array<string> =
@@ -51,6 +53,8 @@ export const connectStore = <MappedProps, OwnProps>(
                     .filter(meta => !!meta.errors)
                     .map(meta => meta.errors as Array<string>)
                     .reduce((a,b) => a.concat(b), []);
+
+            console.log("At least one store raised an error");
 
             return showElementOnError ? showElementOnError(errors) : <div>{errors.join(";")}</div>
         }

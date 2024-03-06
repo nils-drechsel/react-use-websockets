@@ -1,14 +1,16 @@
-import { ClientToServerAuthenticationBean, CoreMessage, IOClientToServerCoreBean, IOPingPongBean, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../store/beans/Beans";
+import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../store/beans/Beans";
+import { ClientToServerCoreBean, clientToServerCoreBeanBuilder } from "./ClientToServerCoreBeanBuilder";
+import { ServerToClientCoreBean, serverToClientCoreBeanBuilder } from "./ServerToClientCoreBeanBuilder";
 import { getCookie, setCookie } from "./cookie";
 import Deserialiser from "./serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation";
 
-export interface ListenerCallback {
-    (payload: any, fromSid?: string | null): void;
+export interface ListenerCallback<BEAN extends AbstractIOBean> {
+    (coreBean: ServerToClientCoreBean<BEAN>): void;
 }
 
 export interface DefaultListenerCallback {
-    (message: string, payload: any, fromSid?: string | null): void;
+    (coreBean: ServerToClientCoreBean<AbstractIOBean>): void;
 }
 
 export interface ConnectivityCallback {
@@ -23,7 +25,7 @@ export class WebSocketManager {
     ws: WebSocket;
     url: string;
     messageToListeners: Map<string, Set<number>>;
-    listenerToCallback: Map<number, ListenerCallback>;
+    listenerToCallback: Map<number, ListenerCallback<AbstractIOBean>>;
     connectivityListenerToCallback: Map<number, ConnectivityCallback>;
     listenerToMessage: Map<number, string>;
     defaultCallback: DefaultListenerCallback | null;
@@ -74,7 +76,12 @@ export class WebSocketManager {
 
         this.unsubscribeInterval = setInterval(() => {
             if (this.logging) console.log("PING");
-            this.send("core", CoreMessage.PING, {} as IOPingPongBean);
+            this.send(
+                clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.CORE)
+                .message(CoreMessage.PING)
+                .payloadJSON("{}")
+                .build());
         }, ping * 60 * 1000) as unknown as number;
     }
 
@@ -111,7 +118,12 @@ export class WebSocketManager {
             token1: getCookie("token1"),
         };
 
-        this.send("core", CoreMessage.AUTHENTICATE, authenticationBean);
+        this.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.CORE)
+                .message(CoreMessage.AUTHENTICATE)
+                .payload(authenticationBean)
+                .build());
 
         const callbacks = Array.from(this.connectivityListeners.values()).map((listener: number) =>
             this.connectivityListenerToCallback.get(listener)
@@ -148,18 +160,20 @@ export class WebSocketManager {
 
         const coreBean: IOServerToClientCoreBean = this.deserialiser.deserialise(raw);
 
-        const endpoint = coreBean.endpoint;
-        const message = coreBean.message;
+        const bean: ServerToClientCoreBean<AbstractIOBean> = 
+            serverToClientCoreBeanBuilder()
+                .endpoint(coreBean.endpoint)
+                .message(coreBean.message)
+                .payload(this.deserialiser.deserialise(coreBean.payload))
+                .origin(coreBean.origin ?? undefined)
+                .fromSid(coreBean.fromSid ?? undefined)
+                .build();
 
-        const messageId = this.createMessageId(endpoint, message);
 
-        const fromSid = coreBean.fromSid;
 
-        const payload = this.deserialiser.deserialise(coreBean.payload);
-        
-
-        if (messageId === this.createMessageId("core", CoreMessage.AUTHENTICATE)) {
-            const authenticationBean = payload as ServerToClientAuthenticationBean;
+        const messageId = this.createMessageId(bean.endpoint, bean.message);
+        if (messageId === this.createMessageId(IOCoreEndpoints.CORE, CoreMessage.AUTHENTICATE)) {
+            const authenticationBean = bean.payload as ServerToClientAuthenticationBean;
             this.sid = authenticationBean.sid;
             this.uid = authenticationBean.uid;
             if (this.logging) console.log("received authentication bean with sid ", this.sid, "and uid", this.uid);
@@ -167,32 +181,32 @@ export class WebSocketManager {
             setCookie("token1", authenticationBean.token1, this.domain, authenticationBean.validity);
             this.facilitateConnect();
             return;
-        } else if (messageId === this.createMessageId("core", CoreMessage.PONG)) {
+        } else if (messageId === this.createMessageId(IOCoreEndpoints.CORE, CoreMessage.PONG)) {
             if (this.logging) console.log("PONG");
             return;
         }
 
         if (this.logging)
-            console.log("received message", messageId, "from", fromSid, "with payload", payload, "raw:", event.data);
+            console.log("received message", messageId, "from", bean.fromSid, "with payload", bean.payload, "raw:", event.data);
 
         if (!this.messageToListeners.has(messageId)) {
             if (this.defaultCallback) {
                 if (this.logging)
-                    console.log("no listeners defined, calling default listener for ", message, "and payload", payload);
-                this.defaultCallback(messageId, payload, fromSid);
+                    console.log("no listeners defined, calling default listener for ", bean.message, "and payload", bean.payload);
+                this.defaultCallback(bean);
             }
             return;
         }
         const listeners = this.messageToListeners.get(messageId);
 
         if (this.logging)
-            console.log("message", messageId, "from", fromSid, "with payload", payload, " has listeners:", listeners);
+            console.log("message", messageId, "from", bean.fromSid, "with payload", bean.payload, " has listeners:", listeners);
 
         const callbacks = Array.from(listeners!.values()).map((listener: number) =>
             this.listenerToCallback.get(listener)
         );
 
-        callbacks?.forEach((callback) => (callback ? callback(payload, fromSid) : null));
+        callbacks?.forEach((callback) => (callback ? callback(bean) : null));
     }
 
 
@@ -205,24 +219,25 @@ export class WebSocketManager {
         }
     }
 
-    send(endpoint: string, message: string, payload: any = null, toSid: string | null = null) {
+    send(coreBean: ClientToServerCoreBean) {
 
-        const _payload = this.serialiser.serialise(payload);
+        const _payload = coreBean.payloadObject ? this.serialiser.serialise(coreBean.payloadObject) : coreBean.payloadJSON;
 
-        const coreBean: IOClientToServerCoreBean = {
-            endpoint,
-            payload: _payload,
-            toSid: toSid,
-            message: message,
+        const ioCoreBean: IOClientToServerCoreBean = {
+            endpoint: coreBean.endpoint!,
+            payload: _payload!,
+            toSid: coreBean.toSid!,
+            message: coreBean.message!,
+            origin: coreBean.origin!
         }
 
-        const raw = this.serialiser.serialise(coreBean);
+        const raw = this.serialiser.serialise(ioCoreBean);
 
         if (!this.isConnected()) {
             this.queue.push(raw);
-            if (this.logging) console.log("queueing", message, "with payload", payload);
+            if (this.logging) console.log("queueing", coreBean.message, "with payload", _payload);
         } else {
-            if (this.logging) console.log("sending", message, "with payload", payload);
+            if (this.logging) console.log("sending", coreBean.message, "with payload", _payload);
             this.sendRaw(raw);
         }
     }
@@ -248,11 +263,11 @@ export class WebSocketManager {
         if (message) this.messageToListeners.get(message)?.delete(id);
     }
 
-    addListener(endpoint:string, message: string, callback: ListenerCallback): UnsubscribeCallback {
+    addListener<BEAN extends AbstractIOBean>(endpoint:string, message: string, callback: ListenerCallback<BEAN>): UnsubscribeCallback {
         const id = this.createId();
         const messageId = this.createMessageId(endpoint, message);
         if (this.logging) console.log("adding listener for", messageId, "with id", id);
-        this.listenerToCallback.set(id, callback);
+        this.listenerToCallback.set(id, callback as any);
         if (!this.messageToListeners.has(messageId)) this.messageToListeners.set(messageId, new Set());
         this.messageToListeners.get(messageId)?.add(id);
         this.listenerToMessage.set(id, messageId);

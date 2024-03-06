@@ -1,6 +1,7 @@
 import React, { FunctionComponent, ReactElement, ReactNode, cloneElement, useContext, useEffect, useState } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { ClientErrorBean, CoreMessage } from "../store/beans/Beans";
+import { ClientErrorBean, CoreMessage, IOCoreEndpoints } from "../store/beans/Beans";
+import { clientToServerCoreBeanBuilder } from "./ClientToServerCoreBeanBuilder";
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager } from "./WebSocketManager";
 import { BeanSerialisationSignature } from "./serialisation/Serialisation";
@@ -65,7 +66,12 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
             message: "" + error,
             componentStack: info?.componentStack,
         };
-        if (manager) manager.send("core", CoreMessage.CLIENT_ERROR, errorBean);
+        if (manager) manager.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.CORE)
+                .message(CoreMessage.CLIENT_ERROR)
+                .payload(errorBean)
+                .build());
     };
 
     const errorFallback = ({}: FallbackProps) => {

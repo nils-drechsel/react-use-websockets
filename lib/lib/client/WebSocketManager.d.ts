@@ -1,10 +1,13 @@
+import { AbstractIOBean } from "../store/beans/Beans";
+import { ClientToServerCoreBean } from "./ClientToServerCoreBeanBuilder";
+import { ServerToClientCoreBean } from "./ServerToClientCoreBeanBuilder";
 import Deserialiser from "./serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation";
-export interface ListenerCallback {
-    (payload: any, fromSid?: string | null): void;
+export interface ListenerCallback<BEAN extends AbstractIOBean> {
+    (coreBean: ServerToClientCoreBean<BEAN>): void;
 }
 export interface DefaultListenerCallback {
-    (message: string, payload: any, fromSid?: string | null): void;
+    (coreBean: ServerToClientCoreBean<AbstractIOBean>): void;
 }
 export interface ConnectivityCallback {
     (isConnected: boolean, isReady: boolean, sid: string | null, uid: string | null): void;
@@ -16,7 +19,7 @@ export declare class WebSocketManager {
     ws: WebSocket;
     url: string;
     messageToListeners: Map<string, Set<number>>;
-    listenerToCallback: Map<number, ListenerCallback>;
+    listenerToCallback: Map<number, ListenerCallback<AbstractIOBean>>;
     connectivityListenerToCallback: Map<number, ConnectivityCallback>;
     listenerToMessage: Map<number, string>;
     defaultCallback: DefaultListenerCallback | null;
@@ -43,11 +46,11 @@ export declare class WebSocketManager {
     private onClose;
     private onMessage;
     private resolveQueue;
-    send(endpoint: string, message: string, payload?: any, toSid?: string | null): void;
+    send(coreBean: ClientToServerCoreBean): void;
     sendRaw(raw: string): void;
     private createId;
     removeListener(id: number): void;
-    addListener(endpoint: string, message: string, callback: ListenerCallback): UnsubscribeCallback;
+    addListener<BEAN extends AbstractIOBean>(endpoint: string, message: string, callback: ListenerCallback<BEAN>): UnsubscribeCallback;
     createMessageId(endpoint: string, message: string): string;
     removeConnectivityListener(id: number): void;
     addConnectivityListener(callback: ConnectivityCallback): UnsubscribeCallback;

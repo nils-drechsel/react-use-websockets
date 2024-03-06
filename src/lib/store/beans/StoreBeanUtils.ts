@@ -1,7 +1,7 @@
 import debounce from "lodash/debounce";
 import { Dispatch, SetStateAction } from "react";
 import { passwordConformsToEntropy } from "../../client/ClientUtils";
-import { AbstractIOBean, AbstractStoreParametersBean, Comparator, ValidationBean } from "./Beans";
+import { AbstractIOBean, AbstractStoreParametersBean, Comparator, StoreAction, ValidationBean } from "./Beans";
 
 export const createStoreId = (primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null) => {
     const path = [...primaryPath, ...secondaryPath, ...(!!params ? params.getPathElements!() : [])];
@@ -177,3 +177,59 @@ export interface PartialEditRemoteStoreFunction<BEAN_TYPE extends Partial<Abstra
 export interface PostValidationCallback<VALIDATION_TYPE extends ValidationBean> {
     (validationBean: VALIDATION_TYPE): void;
 }
+
+
+export enum TimeoutCallbackState {
+    NORMAL,
+    TIMEOUT
+}
+
+
+export interface TimeoutCallback {
+    (...args: any[]): void;
+}
+
+export interface TimeoutCallbackWithState {
+    (state: TimeoutCallbackState, ...args: any[]): void;
+}
+
+export const callbackWithTimeout = 
+    (timeoutInSeconds: number, callback: TimeoutCallbackWithState): TimeoutCallback => {
+
+    let called = false;
+
+    const timeoutInMiliSeconds = timeoutInSeconds * 1000;
+
+    let interval = setTimeout(
+        () => {
+          if (called) return;
+          called = true;
+          callback(TimeoutCallbackState.TIMEOUT);
+        },
+        timeoutInMiliSeconds
+      );
+
+      return (...args2: any[]) => {
+        if (called) return;
+        called = true;
+        clearTimeout(interval);
+    
+        callback(TimeoutCallbackState.NORMAL, ...args2);
+      };
+
+}
+
+
+export interface ValidationTimeoutCallback {
+    (action: StoreAction, validation: ValidationBean): void;
+}
+
+export interface ValidationTimeoutCallbackWithState {
+    (state: TimeoutCallbackState, action: StoreAction, validation: ValidationBean): void;
+}
+
+export const valdiationCallbackWithTimeout = 
+    (timeoutInSeconds: number, callback: ValidationTimeoutCallbackWithState): ValidationTimeoutCallback => {
+
+        return callbackWithTimeout(timeoutInSeconds, callback);
+    }

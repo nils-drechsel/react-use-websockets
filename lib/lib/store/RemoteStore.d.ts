@@ -1,53 +1,71 @@
 import { UnsubscribeCallback, WebSocketManager } from "../client/WebSocketManager";
 import Deserialiser from "../client/serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
-import { AbstractIOBean, AbstractStoreParametersBean } from "./beans/Beans";
+import { AbstractIOBean, AbstractStoreParametersBean, StoreValidationMessageBean } from "./beans/Beans";
+import { ValidationTimeoutCallback, ValidationTimeoutCallbackWithState } from "./beans/StoreBeanUtils";
 declare enum SubscriberType {
     FULL = 0,
     UPDATE = 1
 }
-interface Subscriber {
+interface Subscriber<FRAGMENT extends AbstractIOBean> {
     type: SubscriberType;
-    dataCallback: (data: Map<string, AbstractIOBean>) => void;
+    dataCallback: (data: Map<string, FRAGMENT>) => void;
     metaCallback: (meta: StoreMeta) => void;
 }
 export declare enum StoreConnectionState {
-    CONNECTING = 0,
-    CONNECTED = 1,
-    READY = 2,
-    ERROR = 3
+    UNKNOWN = 0,
+    CONNECTING = 1,
+    CONNECTED = 2,
+    READY = 3,
+    ERROR = 4
 }
 export interface StoreMeta {
     state: StoreConnectionState;
     errors: Array<string> | null;
 }
-interface ClientStore {
-    meta: StoreMeta;
-    data: Map<string, AbstractIOBean> | undefined;
+export interface UpdateBeanFunction<FRAGMENT extends AbstractIOBean> {
+    (payload: FRAGMENT, callback?: ValidationTimeoutCallbackWithState): void;
 }
-export declare class RemoteStore {
-    clientStore: Map<string, ClientStore>;
-    subscribers: Map<string, Map<string, Subscriber>>;
+export interface InsertBeanFunction<FRAGMENT extends AbstractIOBean> {
+    (payload: FRAGMENT, callback?: ValidationTimeoutCallbackWithState): void;
+}
+export interface RemoveBeanFunction {
+    (key: string, callback?: ValidationTimeoutCallbackWithState): void;
+}
+interface ClientStore<FRAGMENT extends AbstractIOBean> {
+    meta: StoreMeta;
+    data: Map<string, FRAGMENT> | undefined;
+}
+export declare class RemoteStore<FRAGMENT extends AbstractIOBean> {
+    clientStore: Map<string, ClientStore<FRAGMENT>>;
+    transactionCallbacks: Map<string, ValidationTimeoutCallback>;
+    subscribers: Map<string, Map<string, Subscriber<FRAGMENT>>>;
     websocketManager: WebSocketManager;
     unsubscribeUpdateListener: UnsubscribeCallback;
     unsubscribeDisconnectListener: UnsubscribeCallback;
+    connectedListener: UnsubscribeCallback;
+    connectionErrorListener: UnsubscribeCallback;
+    validationListener: UnsubscribeCallback;
     serialiser: Serialiser;
     deserialiser: Deserialiser;
     constructor(websocketManager: WebSocketManager, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
-    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback];
+    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback];
     releaseRemoteStore(): void;
     openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): void;
     closeRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): void;
-    getData(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): Map<String, AbstractIOBean> | undefined;
+    getData(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): Map<String, FRAGMENT> | undefined;
     getStoreMeta(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): StoreMeta;
-    register(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, setData: (data: Map<string, AbstractIOBean>) => void, setMeta: (meta: StoreMeta) => void, update?: boolean): () => void;
+    register(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, setData: (data: Map<string, FRAGMENT>) => void, setMeta: (meta: StoreMeta) => void, update?: boolean): () => void;
     deregister(primaryPath: Array<string>, secondaryPath: Array<string>, id: string, params: AbstractStoreParametersBean | null): void;
-    updateBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, payload: AbstractIOBean, origin: string): void;
-    insertBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, payload: AbstractIOBean, origin: string): void;
-    removeBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, key: string, origin: string): void;
+    createTransactionId(): string;
+    addValidationCallback(transactionId: string, validationCallback: ValidationTimeoutCallbackWithState): void;
+    updateBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, payload: FRAGMENT, validationCallback?: ValidationTimeoutCallbackWithState): void;
+    insertBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, payload: FRAGMENT, validationCallback?: ValidationTimeoutCallbackWithState): void;
+    removeBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, key: string, validationCallback?: ValidationTimeoutCallbackWithState): void;
     clear(storeId: string): void;
     storeConnected(storeId: string): void;
     storeConnectionError(storeId: string, errors: Array<string>): void;
+    storeValidation(storeId: string, validationMessageBean: StoreValidationMessageBean): void;
     update(storeId: string, data: Map<string, AbstractIOBean>, initial: boolean): void;
 }
 export {};

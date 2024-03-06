@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
+import { clientToServerCoreBeanBuilder } from "../client/ClientToServerCoreBeanBuilder";
+import { ServerToClientCoreBean } from "../client/ServerToClientCoreBeanBuilder";
 import { UnsubscribeCallback, WebSocketManager } from "../client/WebSocketManager";
 import Deserialiser from "../client/serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
@@ -7,25 +9,30 @@ import {
     AbstractStoreParametersBean,
     ClientToServerStoreMessage,
     IOClientToServerStoreBean,
+    IOCoreEndpoints,
     IOServerToClientStoreBean,
     ServerToClientStoreMessage,
     StoreConnectionErrorBean,
-    StoreUpdateBean
+    StoreUpdateBean,
+    StoreValidationMessageBean
 } from "./beans/Beans";
-import { createStoreId } from "./beans/StoreBeanUtils";
+import { ValidationTimeoutCallback, ValidationTimeoutCallbackWithState, createStoreId, valdiationCallbackWithTimeout } from "./beans/StoreBeanUtils";
+
+const VALIDATION_TIMEOUT = 20;
 
 enum SubscriberType {
     FULL,
     UPDATE,
 }
 
-interface Subscriber {
+interface Subscriber<FRAGMENT extends AbstractIOBean> {
     type: SubscriberType;
-    dataCallback: (data: Map<string, AbstractIOBean>) => void;
+    dataCallback: (data: Map<string, FRAGMENT>) => void;
     metaCallback: (meta: StoreMeta) => void;
 }
 
 export enum StoreConnectionState {
+    UNKNOWN,
     CONNECTING,
     CONNECTED,
     READY,
@@ -37,17 +44,33 @@ export interface StoreMeta {
     errors: Array<string> | null;
 }
 
-interface ClientStore {
-    meta: StoreMeta;
-    data: Map<string, AbstractIOBean> | undefined;
+export interface UpdateBeanFunction<FRAGMENT extends AbstractIOBean> {
+    (payload: FRAGMENT, callback?: ValidationTimeoutCallbackWithState) : void;
 }
 
-export class RemoteStore {
-    clientStore: Map<string, ClientStore>;
-    subscribers: Map<string, Map<string, Subscriber>>;
+export interface InsertBeanFunction<FRAGMENT extends AbstractIOBean> {
+    (payload: FRAGMENT, callback?: ValidationTimeoutCallbackWithState) : void;
+}
+
+export interface RemoveBeanFunction {
+    (key: string, callback?: ValidationTimeoutCallbackWithState) : void;
+}
+
+interface ClientStore<FRAGMENT extends AbstractIOBean> {
+    meta: StoreMeta;
+    data: Map<string, FRAGMENT> | undefined;
+}
+
+export class RemoteStore<FRAGMENT extends AbstractIOBean> {
+    clientStore: Map<string, ClientStore<FRAGMENT>>;
+    transactionCallbacks: Map<string, ValidationTimeoutCallback>;
+    subscribers: Map<string, Map<string, Subscriber<FRAGMENT>>>;
     websocketManager: WebSocketManager;
     unsubscribeUpdateListener: UnsubscribeCallback;
     unsubscribeDisconnectListener: UnsubscribeCallback;
+    connectedListener: UnsubscribeCallback;
+    connectionErrorListener: UnsubscribeCallback;
+    validationListener: UnsubscribeCallback;
     serialiser: Serialiser;
     deserialiser: Deserialiser;
 
@@ -59,15 +82,19 @@ export class RemoteStore {
         this.serialiser = new Serialiser(serialisationSignatures);
         this.deserialiser = new Deserialiser(serialisationSignatures);
 
-        [this.unsubscribeUpdateListener, this.unsubscribeDisconnectListener] = this.initRemoteStore();
+        this.transactionCallbacks = new Map();
+
+        [this.unsubscribeUpdateListener, this.unsubscribeDisconnectListener, this.connectedListener, this.connectionErrorListener, this.validationListener] = this.initRemoteStore();
     }
 
-    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback] {
+    initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback] {
         return [
             this.websocketManager.addListener(
-                "store",
+                IOCoreEndpoints.STORE,
                 ServerToClientStoreMessage.UPDATE,
-                (storeBean: IOServerToClientStoreBean, _fromSid?: string | null) => {
+                (coreBean: ServerToClientCoreBean<IOServerToClientStoreBean>) => {
+
+                    const storeBean: IOServerToClientStoreBean = coreBean.payload;
 
                     const payload: StoreUpdateBean = this.deserialiser.deserialise(storeBean.payload);
 
@@ -80,9 +107,9 @@ export class RemoteStore {
                 }
             ),
             this.websocketManager.addListener(
-                "store",
+                IOCoreEndpoints.STORE,
                 ServerToClientStoreMessage.DISCONNECT_FORCEFULLY,
-                (_payload: IOServerToClientStoreBean, _fromSid?: string | null) => {
+                (_coreBean: ServerToClientCoreBean<IOServerToClientStoreBean>) => {
                     // FIXME
                     console.error("FORCEFUL DISCONNECT");
 
@@ -93,9 +120,11 @@ export class RemoteStore {
                 }
             ),
             this.websocketManager.addListener(
-                "store",
+                IOCoreEndpoints.STORE,
                 ServerToClientStoreMessage.CONNECTED,
-                (storeBean: IOServerToClientStoreBean, _fromSid?: string | null) => {
+                (coreBean: ServerToClientCoreBean<IOServerToClientStoreBean>) => {
+
+                    const storeBean: IOServerToClientStoreBean = coreBean.payload;
 
                     //const payload: StoreConnectedBean = this.deserialiser.deserialise(storeBean.payload);
                     
@@ -103,13 +132,27 @@ export class RemoteStore {
                 }
             ),
             this.websocketManager.addListener(
-                "store",
+                IOCoreEndpoints.STORE,
                 ServerToClientStoreMessage.CONNECTION_ERROR,
-                (storeBean: IOServerToClientStoreBean, _fromSid?: string | null) => {
+                (coreBean: ServerToClientCoreBean<IOServerToClientStoreBean>) => {
+
+                    const storeBean: IOServerToClientStoreBean = coreBean.payload;
 
                     const payload: StoreConnectionErrorBean = this.deserialiser.deserialise(storeBean.payload);
 
                     this.storeConnectionError(storeBean.secondaryId, payload.errors);
+                }
+            ),
+            this.websocketManager.addListener(
+                IOCoreEndpoints.STORE,
+                ServerToClientStoreMessage.VALIDATION,
+                (coreBean: ServerToClientCoreBean<IOServerToClientStoreBean>) => {
+
+                    const storeBean: IOServerToClientStoreBean = coreBean.payload;
+
+                    const payload: StoreValidationMessageBean = this.deserialiser.deserialise(storeBean.payload);
+
+                    this.storeValidation(storeBean.secondaryId, payload);
                 }
             ),
         ];
@@ -129,7 +172,12 @@ export class RemoteStore {
                 secondaryPath,
                 parametersJson: this.serialiser.serialise(params)
             };
-            this.websocketManager.send("store", ClientToServerStoreMessage.CONNECT, payload);
+            this.websocketManager.send(
+                clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.STORE)
+                .message(ClientToServerStoreMessage.CONNECT)
+                .payload(payload)
+                .build());
         }
     }
 
@@ -141,17 +189,23 @@ export class RemoteStore {
             secondaryPath,
             parametersJson: this.serialiser.serialise(params)
         };
-        this.websocketManager.send("store", ClientToServerStoreMessage.DISCONNECT, payload);
+        this.websocketManager.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.STORE)
+                .message(ClientToServerStoreMessage.DISCONNECT)
+                .payload(payload)
+                .build());
     }
 
     getData(
         primaryPath: Array<string>, 
         secondaryPath: Array<string>,
         params: AbstractStoreParametersBean | null
-    ): Map<String, AbstractIOBean> | undefined {
+    ): Map<String, FRAGMENT> | undefined {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
+
         if (!this.clientStore.has(storeId)) {
-            throw new Error("store " + storeId + " does not exist");
+            return undefined;
         }
         return this.clientStore.get(storeId)!.data;
     }
@@ -163,7 +217,7 @@ export class RemoteStore {
     ): StoreMeta {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.clientStore.has(storeId)) {
-            throw new Error("store " + storeId + " does not exist");
+            return {state: StoreConnectionState.UNKNOWN, errors: null};
         }
         return this.clientStore.get(storeId)!.meta;
     }
@@ -172,7 +226,7 @@ export class RemoteStore {
         primaryPath: Array<string>,
         secondaryPath: Array<string>,
         params: AbstractStoreParametersBean | null,
-        setData: (data: Map<string, AbstractIOBean>) => void,
+        setData: (data: Map<string, FRAGMENT>) => void,
         setMeta: (meta: StoreMeta) => void,
         update: boolean = false
     ): () => void {
@@ -182,7 +236,7 @@ export class RemoteStore {
         }
 
         const id = uuidv4();
-        const subscriber: Subscriber = {
+        const subscriber: Subscriber<FRAGMENT> = {
             type: update ? SubscriberType.UPDATE : SubscriberType.FULL,
             dataCallback: setData,
             metaCallback: setMeta,
@@ -207,42 +261,85 @@ export class RemoteStore {
         }
     }
 
+    createTransactionId():string {
+        let tid = null;
+        do {
+            tid = uuidv4();
+            if (this.transactionCallbacks.has(tid)) {
+                tid = null;
+            }
+        } while(tid === null);
+
+        return tid;
+    }
+
+    addValidationCallback(transactionId: string, validationCallback: ValidationTimeoutCallbackWithState): void {
+
+        const cb: ValidationTimeoutCallbackWithState = (state, action, validation)  => {
+            this.transactionCallbacks.delete(transactionId);
+            validationCallback(state, action, validation);
+        }
+
+        const callbackWithTimeout: ValidationTimeoutCallback = valdiationCallbackWithTimeout(VALIDATION_TIMEOUT, cb);
+        
+        this.transactionCallbacks.set(transactionId, callbackWithTimeout);
+
+    }
+
     updateBean(
         primaryPath: Array<string>, 
         secondaryPath: Array<string>,
         params: AbstractStoreParametersBean | null,
-        payload: AbstractIOBean,
-        origin: string
+        payload: FRAGMENT,
+        validationCallback?: ValidationTimeoutCallbackWithState
     ) {
+
+        const transactionId = this.createTransactionId();
 
         const storeBean: IOClientToServerStoreBean = {
             primaryPath,
             secondaryPath,
             parametersJson: this.serialiser.serialise(params),
             payloadJson: this.serialiser.serialise(payload),
-            origin,
+            transactionId,
         }
 
-        this.websocketManager.send("store", ClientToServerStoreMessage.UPDATE, storeBean);
+        if (validationCallback) this.addValidationCallback(transactionId, validationCallback);
+
+        this.websocketManager.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.STORE)
+                .message(ClientToServerStoreMessage.UPDATE)
+                .payload(storeBean)
+                .build());
     }
 
     insertBean(
         primaryPath: Array<string>, 
         secondaryPath: Array<string>,
         params: AbstractStoreParametersBean | null,
-        payload: AbstractIOBean,
-        origin: string
+        payload: FRAGMENT,
+        validationCallback?: ValidationTimeoutCallbackWithState
     ) {
+
+        const transactionId = this.createTransactionId();
 
         const storeBean: IOClientToServerStoreBean = {
             primaryPath,
             secondaryPath,
             parametersJson: this.serialiser.serialise(params),
             payloadJson: this.serialiser.serialise(payload),
-            origin,
+            transactionId,
         }
 
-        this.websocketManager.send("store", ClientToServerStoreMessage.INSERT, storeBean);
+        if (validationCallback) this.addValidationCallback(transactionId, validationCallback);
+
+        this.websocketManager.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.STORE)
+                .message(ClientToServerStoreMessage.INSERT)
+                .payload(storeBean)
+                .build());
     }    
 
     removeBean(
@@ -250,18 +347,27 @@ export class RemoteStore {
         secondaryPath: Array<string>,
         params: AbstractStoreParametersBean | null,
         key: string,
-        origin: string
+        validationCallback?: ValidationTimeoutCallbackWithState
     ) {
+
+        const transactionId = this.createTransactionId();
 
         const storeBean: IOClientToServerStoreBean = {
             primaryPath,
             secondaryPath,
             parametersJson: this.serialiser.serialise(params),
             key,
-            origin,
+            transactionId,
         }
 
-        this.websocketManager.send("store", ClientToServerStoreMessage.REMOVE, storeBean);
+        if (validationCallback) this.addValidationCallback(transactionId, validationCallback);
+
+        this.websocketManager.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.STORE)
+                .message(ClientToServerStoreMessage.REMOVE)
+                .payload(storeBean)
+                .build());
     }    
 
     clear(storeId: string) {
@@ -294,7 +400,7 @@ export class RemoteStore {
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");
 
-        storeSubscribers.forEach((subscriber: Subscriber) => {
+        storeSubscribers.forEach((subscriber: Subscriber<FRAGMENT>) => {
             subscriber.metaCallback(store.meta);
         });
     }
@@ -314,10 +420,28 @@ export class RemoteStore {
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");
 
-        storeSubscribers.forEach((subscriber: Subscriber) => {
+        storeSubscribers.forEach((subscriber: Subscriber<FRAGMENT>) => {
             subscriber.metaCallback(store.meta);
         });
     }    
+
+    storeValidation(storeId: string, validationMessageBean: StoreValidationMessageBean) {
+        if (!this.clientStore.has(storeId)) {
+            console.error(
+                "received error from store " + storeId + " without being subscribed to the store",
+                this.clientStore
+            );
+            return;
+        }
+
+        const callback = this.transactionCallbacks.get(validationMessageBean.transactionId);
+        if (!callback) {
+            console.error("received validation from store " + storeId + " with transaction " + validationMessageBean.transactionId + " but no callback was registered (anymore)");
+            return;
+        }
+
+        callback(validationMessageBean.action, validationMessageBean.validationBean);
+    }  
 
     update(storeId: string, data: Map<string, AbstractIOBean>, initial: boolean) {
         if (!this.clientStore.has(storeId)) {
@@ -343,7 +467,7 @@ export class RemoteStore {
                 if (newData.has(key)) {
                     newData.set(key, Object.assign({}, newData.get(key), value));
                 } else {
-                    newData.set(key, value);
+                    newData.set(key, value as FRAGMENT);
                 }
             }
         });
@@ -364,7 +488,7 @@ export class RemoteStore {
             }
         }
 
-        storeSubscribers.forEach((subscriber: Subscriber) => {
+        storeSubscribers.forEach((subscriber: Subscriber<FRAGMENT>) => {
             switch (subscriber.type) {
                 case SubscriberType.UPDATE:
                     console.log("PARTIAL:",update);
@@ -380,7 +504,7 @@ export class RemoteStore {
         });
 
         if (initial) {
-            storeSubscribers.forEach((subscriber: Subscriber) => {
+            storeSubscribers.forEach((subscriber: Subscriber<FRAGMENT>) => {
                 subscriber.metaCallback(store.meta);
             }); 
         }

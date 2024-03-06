@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { AbstractIOBean, AbstractStoreParametersBean, Comparator, ValidationBean } from "./Beans";
+import { AbstractIOBean, AbstractStoreParametersBean, Comparator, StoreAction, ValidationBean } from "./Beans";
 export declare const createStoreId: (primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null) => string;
 export interface UpdateFunction<TYPE extends AbstractIOBean> {
     (changeset: Partial<TYPE>): void;
@@ -39,3 +39,21 @@ export interface PartialEditRemoteStoreFunction<BEAN_TYPE extends Partial<Abstra
 export interface PostValidationCallback<VALIDATION_TYPE extends ValidationBean> {
     (validationBean: VALIDATION_TYPE): void;
 }
+export declare enum TimeoutCallbackState {
+    NORMAL = 0,
+    TIMEOUT = 1
+}
+export interface TimeoutCallback {
+    (...args: any[]): void;
+}
+export interface TimeoutCallbackWithState {
+    (state: TimeoutCallbackState, ...args: any[]): void;
+}
+export declare const callbackWithTimeout: (timeoutInSeconds: number, callback: TimeoutCallbackWithState) => TimeoutCallback;
+export interface ValidationTimeoutCallback {
+    (action: StoreAction, validation: ValidationBean): void;
+}
+export interface ValidationTimeoutCallbackWithState {
+    (state: TimeoutCallbackState, action: StoreAction, validation: ValidationBean): void;
+}
+export declare const valdiationCallbackWithTimeout: (timeoutInSeconds: number, callback: ValidationTimeoutCallbackWithState) => ValidationTimeoutCallback;

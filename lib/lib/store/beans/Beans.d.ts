@@ -4,53 +4,10 @@ export declare enum PasswordStrengthCriterium {
     NUMBERS = "NUMBERS",
     SPECIAL_CHARACTERS = "SPECIAL_CHARACTERS"
 }
-export interface ClientErrorBean extends AbstractIOBean {
-    _t?: string | null;
-    message: string;
-    componentStack?: string | null;
-}
-export interface AbstractIOBean {
-    _t?: string | null;
-}
-export interface CoreConfig extends AbstractIOBean {
-    _t?: string | null;
-    timezone: string;
-}
 export interface KeyParametersBean extends AbstractStoreParametersBean {
     getPathElements: () => Array<string>;
     _t?: string | null;
     key: string | null;
-}
-export interface NullBean extends AbstractIOBean {
-    _t?: string | null;
-}
-export interface TimestampBean extends AbstractIOBean {
-    touched: number;
-    _t?: string | null;
-    created: number;
-    modified: number;
-}
-export interface ServerMessageBean extends AbstractIOBean {
-    originId?: string | null;
-    _t?: string | null;
-    bean?: string;
-}
-export interface TemplateMasterBean extends AbstractIOBean {
-    _t?: string | null;
-}
-export interface DataBaseBean extends AbstractStoreBean {
-    uid?: string;
-    _t?: string | null;
-    timestamp?: TimestampBean;
-}
-export interface IOClientToServerCoreBean extends AbstractIOBean {
-    endpoint: string;
-    _t?: string | null;
-    toSid: string | null;
-    payload: string;
-    message: string;
-}
-export interface ClientMessageBean {
 }
 export declare enum Comparator {
     EQUAL = "EQUAL",
@@ -67,6 +24,100 @@ export interface NoParametersBean extends AbstractStoreParametersBean {
 export interface AbstractStoreParametersBean extends AbstractIOBean {
     getPathElements?: () => Array<string>;
     _t?: string | null;
+}
+export interface StoreValidationMessageBean extends AbstractIOBean {
+    validationBean: ValidationBean;
+    _t?: string | null;
+    action: StoreAction;
+    transactionId: string;
+}
+export interface AnnotationContainingBean {
+}
+export declare enum StoreAction {
+    INSERT = "INSERT",
+    UPDATE = "UPDATE",
+    REMOVE = "REMOVE"
+}
+export declare enum MessageType {
+    ERROR = "ERROR",
+    WARNING = "WARNING",
+    INFO = "INFO",
+    SUCCESS = "SUCCESS"
+}
+export interface AbstractStoreBean extends AbstractIOBean {
+    uid?: string;
+    _t?: string | null;
+    timestamp?: TimestampBean;
+}
+export interface StoreConnectedBean extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface AbstractStoreFragment extends AbstractIOBean {
+    _t?: string | null;
+}
+export declare enum IOCoreEndpoints {
+    CORE = "CORE",
+    STORE = "STORE"
+}
+export declare enum ServerStoreMessage {
+    UPDATE = "UPDATE"
+}
+export interface ConcretisedArrayBean extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface IOServerToClientStoreBean extends AbstractIOBean {
+    secondaryId: string;
+    _t?: string | null;
+    payload: string;
+    primaryId: string;
+}
+export interface IOClientToServerStoreBean extends AbstractIOBean {
+    payloadJson?: string | null;
+    _t?: string | null;
+    secondaryPath: Array<string>;
+    parametersJson: string;
+    transactionId?: string | null;
+    key?: string | null;
+    primaryPath: Array<string>;
+}
+export interface ClientErrorBean extends AbstractIOBean {
+    _t?: string | null;
+    message: string;
+    componentStack?: string | null;
+}
+export interface AbstractIOBean {
+    _t?: string | null;
+}
+export interface CoreConfig extends AbstractIOBean {
+    _t?: string | null;
+    timezone: string;
+}
+export interface NullBean extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface TimestampBean extends AbstractIOBean {
+    touched: number;
+    _t?: string | null;
+    created: number;
+    modified: number;
+}
+export interface TemplateMasterBean extends AbstractIOBean {
+    _t?: string | null;
+}
+export interface DataBaseBean extends AbstractStoreBean {
+    uid?: string;
+    _t?: string | null;
+    timestamp?: TimestampBean;
+}
+export interface IOClientToServerCoreBean extends AbstractIOBean {
+    endpoint: string;
+    _t?: string | null;
+    toSid: string | null;
+    payload: string;
+    origin: string | null;
+    message: string;
+}
+export interface ClientMessageBean {
 }
 export interface StoreConnectionErrorBean extends AbstractIOBean {
     _t?: string | null;
@@ -90,15 +141,7 @@ export interface StoreUpdateBean extends AbstractIOBean {
     initial?: boolean | null;
     payload: Map<string, AbstractIOBean>;
 }
-export interface AnnotationContainingBean {
-}
 export interface OwnerContainingBean {
-}
-export declare enum MessageType {
-    ERROR = "ERROR",
-    WARNING = "WARNING",
-    INFO = "INFO",
-    SUCCESS = "SUCCESS"
 }
 export interface ServerToClientAuthenticationBean extends AbstractIOBean {
     uid: string;
@@ -113,23 +156,12 @@ export interface MessageBean extends AbstractIOBean {
     type: MessageType;
     message: string;
 }
-export interface AbstractStoreBean extends AbstractIOBean {
-    uid?: string;
-    _t?: string | null;
-    timestamp?: TimestampBean;
-}
 export interface StoreFragment {
-}
-export interface StoreConnectedBean extends AbstractIOBean {
-    _t?: string | null;
 }
 export interface IOPingPongBean extends AbstractIOBean {
     _t?: string | null;
 }
 export interface TimestampContainingBean {
-}
-export interface AbstractStoreFragment extends AbstractIOBean {
-    _t?: string | null;
 }
 export interface ClientToServerAuthenticationBean extends AbstractIOBean {
     _t?: string | null;
@@ -143,16 +175,14 @@ export interface IOServerToClientCoreBean extends AbstractIOBean {
     endpoint: string;
     _t?: string | null;
     payload: string;
-    fromSid: string;
+    fromSid: string | null;
+    origin: string | null;
     message: string;
 }
 export interface AbstractConfigBean extends AbstractIOBean {
     uid?: string;
     _t?: string | null;
     timestamp?: TimestampBean;
-}
-export declare enum ServerStoreMessage {
-    UPDATE = "UPDATE"
 }
 export declare enum CoreMessage {
     PING = "PING",
@@ -162,9 +192,6 @@ export declare enum CoreMessage {
     MESSAGE = "MESSAGE",
     CLIENT_ERROR = "CLIENT_ERROR"
 }
-export interface ConcretisedArrayBean extends AbstractIOBean {
-    _t?: string | null;
-}
 export interface ArrayBean extends AbstractIOBean {
     _t?: string | null;
     items: Array<AbstractIOBean>;
@@ -173,35 +200,20 @@ export declare enum ServerToClientStoreMessage {
     CONNECTED = "CONNECTED",
     CONNECTION_ERROR = "CONNECTION_ERROR",
     UPDATE = "UPDATE",
-    DISCONNECT_FORCEFULLY = "DISCONNECT_FORCEFULLY"
+    DISCONNECT_FORCEFULLY = "DISCONNECT_FORCEFULLY",
+    VALIDATION = "VALIDATION"
 }
-export interface IOServerToClientStoreBean extends AbstractIOBean {
-    secondaryId: string;
-    _t?: string | null;
-    payload: string;
-    primaryId: string;
-}
-export interface IOClientToServerStoreBean extends AbstractIOBean {
-    payloadJson?: string | null;
-    _t?: string | null;
-    secondaryPath: Array<string>;
-    parametersJson: string;
-    origin?: string | null;
-    key?: string | null;
-    primaryPath: Array<string>;
+export declare enum ServerIdents {
+    MAIN = "MAIN"
 }
 export interface UidContainingBean {
 }
-export interface ValidationBean extends ServerMessageBean {
-    originId?: string | null;
+export interface ValidationBean extends AbstractIOBean {
     _t?: string | null;
     success?: boolean;
-    bean?: string;
 }
 export interface StoreValidationBean extends ValidationBean {
-    originId?: string | null;
     _t?: string | null;
     success?: boolean;
     storeUid?: string;
-    bean?: string;
 }

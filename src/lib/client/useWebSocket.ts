@@ -1,8 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
+import { AbstractIOBean } from '../store/beans/Beans';
+import { ClientToServerCoreBean } from './ClientToServerCoreBeanBuilder';
 import { WebSocketContext } from "./WebSocketContext";
 import { ConnectivityCallback, DefaultListenerCallback, ListenerCallback, UnsubscribeCallback, WebSocketManager } from './WebSocketManager';
 
-export type SendFunction = (message: string, payload: any, toSid?: string | null) => void;
+export type SendFunction = (coreBean: ClientToServerCoreBean) => void;
+
+export type ListenFunction = <BEAN extends AbstractIOBean>(endpoint: string, message: string, callback: ListenerCallback<BEAN>) => UnsubscribeCallback;
+
 
 export const useWebSocket = (id?: string | null) => {
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
@@ -16,10 +21,10 @@ export const useWebSocket = (id?: string | null) => {
 
     if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element with the correct id ("+id+") ?");
 
-    const send: SendFunction = (endpoint: string, message: string, payload: any, toSid: string | null = null) => {
-        manager!.send(endpoint, message, payload, toSid);
+    const send: SendFunction = (coreBean: ClientToServerCoreBean) => {
+        manager!.send(coreBean);
     };
-    const listen = (endpoint: string, message: string, callback: ListenerCallback): UnsubscribeCallback => {
+    const listen: ListenFunction = <BEAN extends AbstractIOBean>(endpoint: string, message: string, callback: ListenerCallback<BEAN>): UnsubscribeCallback => {
         return manager!.addListener(endpoint, message, callback);
     }
     const isConnected = (): boolean => {

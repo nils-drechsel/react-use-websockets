@@ -1,24 +1,53 @@
 import { useEffect, useState } from "react";
-import { StoreMeta } from "./RemoteStore";
+import { InsertBeanFunction, RemoveBeanFunction, StoreMeta, UpdateBeanFunction } from "./RemoteStore";
 import { AbstractIOBean, AbstractStoreParametersBean } from "./beans/Beans";
 import { createStoreId } from "./beans/StoreBeanUtils";
-import { ConnectionMetaSetter, ConnectionStateRef } from "./connectStore";
+import { ConnectionMetaRef, ConnectionMetaSetter } from "./connectStore";
 import { useGetRemoteStore } from "./useGetRemoteStore";
 
-export const useRemoteStore = (
+
+export interface RemoteStoreType<FRAGMENT extends AbstractIOBean>{
+    data: Map<string, FRAGMENT>, 
+    meta: StoreMeta,
+    updateBean: UpdateBeanFunction<FRAGMENT>,
+    insertBean: InsertBeanFunction<FRAGMENT>,
+    removeBean: RemoveBeanFunction
+}
+
+export interface RemoteStoreArrayType<FRAGMENT extends AbstractIOBean> {
+    data: Array<FRAGMENT>, 
+    meta: StoreMeta,
+    updateBean: UpdateBeanFunction<FRAGMENT>,
+    insertBean: InsertBeanFunction<FRAGMENT>,
+    removeBean: RemoveBeanFunction
+}
+
+export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
     id: string | null,
     primaryPath: Array<string>,
     secondaryPath: Array<string>,
     params?: AbstractStoreParametersBean | null,
-    callback?: (data: Map<string, AbstractIOBean> | undefined) => void,
+    callback?: (data: Map<string, FRAGMENT> | undefined) => void,
     dependency?: any,
-    connectionMetaRef?: ConnectionStateRef,
+    connectionMetaRef?: ConnectionMetaRef,
     setConnectionMeta?: ConnectionMetaSetter
-): [Map<string, any>, StoreMeta] => {
-    const remoteStore = useGetRemoteStore(id);
+): RemoteStoreType<FRAGMENT> => {
+    const remoteStore = useGetRemoteStore<FRAGMENT>(id);
 
     const [data, setData] = useState(remoteStore.getData(primaryPath, secondaryPath, params || null));
     const [storeMeta, setStoreMeta] = useState(remoteStore.getStoreMeta(primaryPath, secondaryPath, params || null));
+
+    const updateBean: UpdateBeanFunction<FRAGMENT> = (payload, callback) => {
+        remoteStore.updateBean(primaryPath, secondaryPath, params ?? null, payload, callback);
+    }
+
+    const insertBean: InsertBeanFunction<FRAGMENT> = (payload, callback) => {
+        remoteStore.insertBean(primaryPath, secondaryPath, params ?? null, payload, callback);
+    }
+
+    const removeBean: RemoveBeanFunction = (key, callback) => {
+        remoteStore.removeBean(primaryPath, secondaryPath, params ?? null, key, callback);
+    }
 
     const dependencyFulfilled = dependency === undefined || !!dependency;
 
@@ -33,12 +62,12 @@ export const useRemoteStore = (
     useEffect(() => {
 
         if (dependencyFulfilled) {
-            let setIncomingData = (incomingData: Map<string, AbstractIOBean>): void => {
+            let setIncomingData = (incomingData: Map<string, FRAGMENT>): void => {
                 setData(incomingData);
             };
 
             if (callback) {
-                setIncomingData = (incomingData: Map<string, AbstractIOBean>): void => {
+                setIncomingData = (incomingData: Map<string, FRAGMENT>): void => {
                     setData(incomingData);
                     callback(incomingData);
                 };
@@ -73,27 +102,45 @@ export const useRemoteStore = (
         };
     }, [dependencyFulfilled, storeId, paramString]);
 
-    return [data as any, storeMeta];
+    return {
+        data: data as any,
+        meta: storeMeta,
+        updateBean, 
+        insertBean, 
+        removeBean
+    }
 };
 
 
-export const useRemoteStoreArray = (
+export const useRemoteStoreArray = <FRAGMENT extends AbstractIOBean>(
     id: string | null,
     primaryPath: Array<string>,
     secondaryPath: Array<string>,
     params?: AbstractStoreParametersBean | null,
-    dependency?: any
-): [Array<any>, StoreMeta] => {
-    const [data, meta] = useRemoteStore(
+    callback?: (data: Map<string, FRAGMENT> | undefined) => void,
+    dependency?: any,
+    connectionMetaRef?: ConnectionMetaRef,
+    setConnectionMeta?: ConnectionMetaSetter
+): RemoteStoreArrayType<FRAGMENT> => {
+    const res = useRemoteStore(
         id,
         primaryPath,
         secondaryPath,
         params,
-        undefined,
-        dependency
+        callback,
+        dependency,
+        connectionMetaRef,
+        setConnectionMeta
     );
 
-    return [data ? Array.from(data.values()) : (undefined as any), meta];
+    return {
+        data: res.data ? Array.from(res.data.values()) : (undefined as any),
+        meta: res.meta,
+        updateBean: res.updateBean, 
+        insertBean: res.insertBean, 
+        removeBean: res.removeBean
+    }
+    
 };
 
 export default useRemoteStore;
