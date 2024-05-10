@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import { BeanResolver, BeanSerialisationSignature, SerialisationEntity } from "./Serialisation";
+import { BeanResolver, BeanSerialisationSignature, SerialisationEntity } from "../src/lib/client/serialisation/Serialisation.ts.2";
 
 describe("Serialisation", () => {
     it("map", () => {

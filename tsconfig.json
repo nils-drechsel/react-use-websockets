@@ -19,7 +19,7 @@
     },
     "include": [
         "src"
-    ],
+, "tests", "tests2"    ],
     "exclude": [
         "node_modules",
         "**/__tests__/*"

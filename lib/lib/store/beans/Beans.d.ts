@@ -121,6 +121,7 @@ export interface ClientMessageBean {
 }
 export interface StoreConnectionErrorBean extends AbstractIOBean {
     _t?: string | null;
+    accessDenied: boolean;
     errors: Array<string>;
 }
 export interface StoreBean {

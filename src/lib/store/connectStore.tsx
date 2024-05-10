@@ -44,17 +44,13 @@ export const connectStore = <MappedProps, OwnProps>(
 
         const storeMetas: Array<StoreMeta> = Array.from(connectionState.values());
 
-        console.log("STOREMETAS: ", storeMetas);
-
-        if (storeMetas.some(meta => meta.state === StoreConnectionState.ERROR)) {
+        if (storeMetas.some(meta => meta.state === StoreConnectionState.ERROR || (meta.state === StoreConnectionState.ACCESS_DENIED && !meta.optional))) {
             const errors: Array<string> =
                 storeMetas
-                    .filter(meta => meta.state === StoreConnectionState.ERROR)
+                    .filter(meta => meta.state === StoreConnectionState.ERROR || meta.state === StoreConnectionState.ACCESS_DENIED)
                     .filter(meta => !!meta.errors)
                     .map(meta => meta.errors as Array<string>)
                     .reduce((a,b) => a.concat(b), []);
-
-            console.log("At least one store raised an error");
 
             return showElementOnError ? showElementOnError(errors) : <div>{errors.join(";")}</div>
         }

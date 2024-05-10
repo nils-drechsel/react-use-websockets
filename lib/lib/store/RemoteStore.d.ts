@@ -1,7 +1,7 @@
 import { UnsubscribeCallback, WebSocketManager } from "../client/WebSocketManager";
 import Deserialiser from "../client/serialisation/Deserialisation";
 import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
-import { AbstractIOBean, AbstractStoreParametersBean, StoreValidationMessageBean } from "./beans/Beans";
+import { AbstractIOBean, AbstractStoreParametersBean, StoreConnectionErrorBean, StoreValidationMessageBean } from "./beans/Beans";
 import { ValidationTimeoutCallback, ValidationTimeoutCallbackWithState } from "./beans/StoreBeanUtils";
 declare enum SubscriberType {
     FULL = 0,
@@ -17,9 +17,11 @@ export declare enum StoreConnectionState {
     CONNECTING = 1,
     CONNECTED = 2,
     READY = 3,
-    ERROR = 4
+    ERROR = 4,
+    ACCESS_DENIED = 5
 }
 export interface StoreMeta {
+    optional: boolean;
     state: StoreConnectionState;
     errors: Array<string> | null;
 }
@@ -51,11 +53,11 @@ export declare class RemoteStore<FRAGMENT extends AbstractIOBean> {
     constructor(websocketManager: WebSocketManager, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
     initRemoteStore(): [UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback, UnsubscribeCallback];
     releaseRemoteStore(): void;
-    openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): void;
+    openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, optional: boolean): void;
     closeRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): void;
     getData(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): Map<String, FRAGMENT> | undefined;
-    getStoreMeta(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null): StoreMeta;
-    register(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, setData: (data: Map<string, FRAGMENT>) => void, setMeta: (meta: StoreMeta) => void, update?: boolean): () => void;
+    getStoreMeta(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, initialOptional?: boolean): StoreMeta;
+    register(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, setData: (data: Map<string, FRAGMENT>) => void, setMeta: (meta: StoreMeta) => void, update: boolean, optional: boolean): () => void;
     deregister(primaryPath: Array<string>, secondaryPath: Array<string>, id: string, params: AbstractStoreParametersBean | null): void;
     createTransactionId(): string;
     addValidationCallback(transactionId: string, validationCallback: ValidationTimeoutCallbackWithState): void;
@@ -64,7 +66,7 @@ export declare class RemoteStore<FRAGMENT extends AbstractIOBean> {
     removeBean(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, key: string, validationCallback?: ValidationTimeoutCallbackWithState): void;
     clear(storeId: string): void;
     storeConnected(storeId: string): void;
-    storeConnectionError(storeId: string, errors: Array<string>): void;
+    storeConnectionError(storeId: string, errorBean: StoreConnectionErrorBean): void;
     storeValidation(storeId: string, validationMessageBean: StoreValidationMessageBean): void;
     update(storeId: string, data: Map<string, AbstractIOBean>, initial: boolean): void;
 }

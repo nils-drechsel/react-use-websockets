@@ -1,7 +1,7 @@
+export { AbstractIOBean, StoreValidationBean, ValidationBean } from "./lib/beans/Beans";
+export { FailureCallback, SuccessCallback, ValidationCallback } from "./lib/beans/StoreBeanUtils";
 export { performClientValidation, useListen, useListenEffect } from "./lib/client/helpers";
 export { useWebSocket } from "./lib/client/useWebSocket";
-export { AbstractIOBean, StoreValidationBean, ValidationBean } from "./lib/store/beans/Beans";
-export { FailureCallback, SuccessCallback, ValidationCallback } from "./lib/store/beans/StoreBeanUtils";
 
 export { WebSocketContext } from "./lib/client/WebSocketContext";
 export { ConnectivityCallback, DefaultListenerCallback, ListenerCallback, UnsubscribeCallback, WebSocketManager } from "./lib/client/WebSocketManager";
@@ -15,19 +15,19 @@ export { ConnectionMeta, ConnectionMetaRef, ConnectionMetaSetter, connectStore }
 export { useGetRemoteStore } from "./lib/store/useGetRemoteStore";
 export { RemoteStoreArrayType, RemoteStoreType, useRemoteStore, useRemoteStoreArray } from "./lib/store/useRemoteStore";
 
-export { EditRemoteStoreFunction, PartialEditRemoteStoreFunction, PartialUpdateFunction, PostValidationCallback, UpdateFunction, updateBean, updatePartialBean } from "./lib/store/beans/StoreBeanUtils";
+export { EditRemoteStoreFunction, PartialEditRemoteStoreFunction, PartialUpdateFunction, PostValidationCallback, UpdateFunction, updateBean, updatePartialBean } from "./lib/beans/StoreBeanUtils";
 
-export { MessageBean, MessageType, TimestampBean } from "./lib/store/beans/Beans";
+export { MessageBean, MessageType, TimestampBean } from "./lib/beans/Beans";
 
-export { TimeoutCallback, TimeoutCallbackWithState, ValidationTimeoutCallback, ValidationTimeoutCallbackWithState, errorComparison, errorLength, errorNotEmpty, errorPassword, errorRegex, errorSize, validateComparison, validateLength, validateNotEmpty, validatePassword, validateRegex, validateSize } from "./lib/store/beans/StoreBeanUtils";
+export { TimeoutCallback, TimeoutCallbackWithState, ValidationTimeoutCallback, ValidationTimeoutCallbackWithState, errorComparison, errorLength, errorNotEmpty, errorPassword, errorRegex, errorSize, validateComparison, validateLength, validateNotEmpty, validatePassword, validateRegex, validateSize } from "./lib/beans/StoreBeanUtils";
 
-export { AbstractStoreParametersBean, NoParametersBean } from "./lib/store/beans/Beans";
+export { AbstractStoreParametersBean, NoParametersBean } from "./lib/beans/Beans";
 
-export { BeanSerialisationSignature, SerialisationEntity, SerialisationTarget, SingleSerialisationSignature } from "./lib/client/serialisation/Serialisation";
+export { BeanSerialisationSignature, SerialisationEntity, SerialisationTarget, SingleSerialisationSignature } from "./lib/client/serialisation/Serialisation.ts.2";
 
+export { PasswordStrengthCriterium } from "./lib/beans/Beans";
 export { calculatePasswordEntropy, passwordConformsToEntropy } from "./lib/client/ClientUtils";
 export { updateSet } from "./lib/client/helpers";
-export { PasswordStrengthCriterium } from "./lib/store/beans/Beans";
 
 export { ClientToServerCoreBean, ClientToServerCoreBeanBuilder, clientToServerCoreBeanBuilder } from "./lib/client/ClientToServerCoreBeanBuilder";
 

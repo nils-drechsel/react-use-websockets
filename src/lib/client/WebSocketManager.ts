@@ -1,9 +1,9 @@
-import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../store/beans/Beans";
+import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../beans/Beans";
 import { ClientToServerCoreBean, clientToServerCoreBeanBuilder } from "./ClientToServerCoreBeanBuilder";
 import { ServerToClientCoreBean, serverToClientCoreBeanBuilder } from "./ServerToClientCoreBeanBuilder";
 import { getCookie, setCookie } from "./cookie";
 import Deserialiser from "./serialisation/Deserialisation";
-import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation";
+import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation.ts.2";
 
 export interface ListenerCallback<BEAN extends AbstractIOBean> {
     (coreBean: ServerToClientCoreBean<BEAN>): void;

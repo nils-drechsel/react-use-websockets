@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { AbstractIOBean, AbstractStoreParametersBean } from "../beans/Beans";
+import { createStoreId } from "../beans/StoreBeanUtils";
 import { InsertBeanFunction, RemoveBeanFunction, StoreMeta, UpdateBeanFunction } from "./RemoteStore";
-import { AbstractIOBean, AbstractStoreParametersBean } from "./beans/Beans";
-import { createStoreId } from "./beans/StoreBeanUtils";
 import { ConnectionMetaRef, ConnectionMetaSetter } from "./connectStore";
 import { useGetRemoteStore } from "./useGetRemoteStore";
 
@@ -30,7 +30,8 @@ export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
     callback?: (data: Map<string, FRAGMENT> | undefined) => void,
     dependency?: any,
     connectionMetaRef?: ConnectionMetaRef,
-    setConnectionMeta?: ConnectionMetaSetter
+    setConnectionMeta?: ConnectionMetaSetter,
+    optional?: boolean
 ): RemoteStoreType<FRAGMENT> => {
     const remoteStore = useGetRemoteStore<FRAGMENT>(id);
 
@@ -88,7 +89,7 @@ export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
                 }
             };
 
-            const deregister = remoteStore.register(primaryPath, secondaryPath, params || null, setIncomingData, setMeta);
+            const deregister = remoteStore.register(primaryPath, secondaryPath, params || null, setIncomingData, setMeta, false, optional ?? false);
 
             return () => {
                 deregister();
@@ -120,7 +121,8 @@ export const useRemoteStoreArray = <FRAGMENT extends AbstractIOBean>(
     callback?: (data: Map<string, FRAGMENT> | undefined) => void,
     dependency?: any,
     connectionMetaRef?: ConnectionMetaRef,
-    setConnectionMeta?: ConnectionMetaSetter
+    setConnectionMeta?: ConnectionMetaSetter,
+    optional?: boolean
 ): RemoteStoreArrayType<FRAGMENT> => {
     const res = useRemoteStore(
         id,
@@ -130,7 +132,8 @@ export const useRemoteStoreArray = <FRAGMENT extends AbstractIOBean>(
         callback,
         dependency,
         connectionMetaRef,
-        setConnectionMeta
+        setConnectionMeta,
+        optional
     );
 
     return {

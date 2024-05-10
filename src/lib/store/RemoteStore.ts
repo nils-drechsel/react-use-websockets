@@ -1,9 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import { clientToServerCoreBeanBuilder } from "../client/ClientToServerCoreBeanBuilder";
-import { ServerToClientCoreBean } from "../client/ServerToClientCoreBeanBuilder";
-import { UnsubscribeCallback, WebSocketManager } from "../client/WebSocketManager";
-import Deserialiser from "../client/serialisation/Deserialisation";
-import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
 import {
     AbstractIOBean,
     AbstractStoreParametersBean,
@@ -15,8 +10,13 @@ import {
     StoreConnectionErrorBean,
     StoreUpdateBean,
     StoreValidationMessageBean
-} from "./beans/Beans";
-import { ValidationTimeoutCallback, ValidationTimeoutCallbackWithState, createStoreId, valdiationCallbackWithTimeout } from "./beans/StoreBeanUtils";
+} from "../beans/Beans";
+import { ValidationTimeoutCallback, ValidationTimeoutCallbackWithState, createStoreId, valdiationCallbackWithTimeout } from "../beans/StoreBeanUtils";
+import { clientToServerCoreBeanBuilder } from "../client/ClientToServerCoreBeanBuilder";
+import { ServerToClientCoreBean } from "../client/ServerToClientCoreBeanBuilder";
+import { UnsubscribeCallback, WebSocketManager } from "../client/WebSocketManager";
+import Deserialiser from "../client/serialisation/Deserialisation";
+import Serialiser, { BeanSerialisationSignature } from "../client/serialisation/Serialisation.ts.2";
 
 const VALIDATION_TIMEOUT = 20;
 
@@ -36,10 +36,12 @@ export enum StoreConnectionState {
     CONNECTING,
     CONNECTED,
     READY,
-    ERROR
+    ERROR,
+    ACCESS_DENIED
 }
 
 export interface StoreMeta {
+    optional: boolean;
     state: StoreConnectionState;
     errors: Array<string> | null;
 }
@@ -140,7 +142,7 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
 
                     const payload: StoreConnectionErrorBean = this.deserialiser.deserialise(storeBean.payload);
 
-                    this.storeConnectionError(storeBean.secondaryId, payload.errors);
+                    this.storeConnectionError(storeBean.secondaryId, payload);
                 }
             ),
             this.websocketManager.addListener(
@@ -162,10 +164,10 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
         this.unsubscribeUpdateListener();
     }
 
-    openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null) {
+    openRemoteStore(primaryPath: Array<string>, secondaryPath: Array<string>, params: AbstractStoreParametersBean | null, optional: boolean) {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.clientStore.has(storeId)) {
-            this.clientStore.set(storeId, { data: undefined, meta: {state: StoreConnectionState.CONNECTING, errors: null} });
+            this.clientStore.set(storeId, { data: undefined, meta: {state: StoreConnectionState.CONNECTING, errors: null, optional} });
 
             const payload: IOClientToServerStoreBean = {
                 primaryPath,
@@ -213,11 +215,12 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
     getStoreMeta(
         primaryPath: Array<string>, 
         secondaryPath: Array<string>,
-        params: AbstractStoreParametersBean | null
+        params: AbstractStoreParametersBean | null,
+        initialOptional?: boolean
     ): StoreMeta {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.clientStore.has(storeId)) {
-            return {state: StoreConnectionState.UNKNOWN, errors: null};
+            return {state: StoreConnectionState.UNKNOWN, errors: null, optional: initialOptional ?? false};
         }
         return this.clientStore.get(storeId)!.meta;
     }
@@ -228,7 +231,8 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
         params: AbstractStoreParametersBean | null,
         setData: (data: Map<string, FRAGMENT>) => void,
         setMeta: (meta: StoreMeta) => void,
-        update: boolean = false
+        update: boolean,
+        optional: boolean
     ): () => void {
         const storeId = createStoreId(primaryPath, secondaryPath, params);
         if (!this.subscribers.has(storeId)) {
@@ -243,7 +247,7 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
         };
         this.subscribers.get(storeId)!.set(id, subscriber);
 
-        this.openRemoteStore(primaryPath, secondaryPath, params);
+        this.openRemoteStore(primaryPath, secondaryPath, params, optional);
 
         const returnDeregisterCallback = () => this.deregister(primaryPath, secondaryPath, id, params);
 
@@ -392,9 +396,9 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
 
         const store = this.clientStore.get(storeId)!;
         if (store.data) {
-            store.meta = {state: StoreConnectionState.READY, errors:null};
+            store.meta = {state: StoreConnectionState.READY, errors:null, optional: store.meta.optional};
         } else {
-            store.meta = {state: StoreConnectionState.CONNECTED, errors:null};
+            store.meta = {state: StoreConnectionState.CONNECTED, errors:null, optional: store.meta.optional};
         }
 
         const storeSubscribers = this.subscribers.get(storeId);
@@ -405,7 +409,7 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
         });
     }
 
-    storeConnectionError(storeId: string, errors: Array<string>) {
+    storeConnectionError(storeId: string, errorBean: StoreConnectionErrorBean) {
         if (!this.clientStore.has(storeId)) {
             console.error(
                 "received error from store " + storeId + " without being subscribed to the store",
@@ -414,8 +418,13 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
             return;
         }
 
+        const errors = errorBean.errors;
+        const accessDenied = errorBean.accessDenied;
+
         const store = this.clientStore.get(storeId)!;
-        store.meta = {state: StoreConnectionState.ERROR, errors};
+        store.meta = accessDenied 
+            ? {state: StoreConnectionState.ERROR, errors, optional: store.meta.optional}
+            : {state: StoreConnectionState.ACCESS_DENIED, errors, optional: store.meta.optional}
 
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");
@@ -474,7 +483,7 @@ export class RemoteStore<FRAGMENT extends AbstractIOBean> {
         
         store.data = newData;
 
-        store.meta = {state: StoreConnectionState.READY, errors: null};
+        store.meta = {state: StoreConnectionState.READY, errors: null, optional: store.meta.optional};
 
         const storeSubscribers = this.subscribers.get(storeId);
         if (!storeSubscribers) throw new Error("store has no subscribers");

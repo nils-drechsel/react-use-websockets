@@ -1,10 +1,10 @@
 import React, { FunctionComponent, ReactElement, ReactNode, cloneElement, useContext, useEffect, useState } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { ClientErrorBean, CoreMessage, IOCoreEndpoints } from "../store/beans/Beans";
+import { ClientErrorBean, CoreMessage, IOCoreEndpoints } from "../beans/Beans";
 import { clientToServerCoreBeanBuilder } from "./ClientToServerCoreBeanBuilder";
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager } from "./WebSocketManager";
-import { BeanSerialisationSignature } from "./serialisation/Serialisation";
+import { BeanSerialisationSignature } from "./serialisation/Serialisation.ts.2";
 
 interface Props {
     id: string;

@@ -1,4 +1,4 @@
-import { PasswordStrengthCriterium } from "../store/beans/Beans";
+import { PasswordStrengthCriterium } from "../beans/Beans";
 
 
 export const getPasswordStrengthPoolSize = (criterium: PasswordStrengthCriterium) => {

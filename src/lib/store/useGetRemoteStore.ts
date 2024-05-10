@@ -1,7 +1,7 @@
 import { useContext } from "react";
+import { AbstractIOBean } from "../beans/Beans";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
-import { AbstractIOBean } from "./beans/Beans";
 
 export const useGetRemoteStore = <FRAGMENT extends AbstractIOBean>(id: string | null): RemoteStore<FRAGMENT> => {
 

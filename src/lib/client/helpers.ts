@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { AbstractIOBean, ValidationBean } from '../store/beans/Beans';
-import { FailureCallback, SuccessCallback, ValidationCallback } from '../store/beans/StoreBeanUtils';
+import { AbstractIOBean, ValidationBean } from '../beans/Beans';
+import { FailureCallback, SuccessCallback, ValidationCallback } from '../beans/StoreBeanUtils';
 import { UnsubscribeCallback } from './WebSocketManager';
 import { useWebSocket } from './useWebSocket';
 

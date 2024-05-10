@@ -1,5 +1,5 @@
 import React, { FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useState } from "react";
-import { BeanSerialisationSignature } from "../client/serialisation/Serialisation";
+import { BeanSerialisationSignature } from "../client/serialisation/Serialisation.ts.2";
 import { useWebSocket } from "../client/useWebSocket";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";

@@ -1,6 +1,6 @@
 import debounce from "lodash/debounce";
 import { Dispatch, SetStateAction } from "react";
-import { passwordConformsToEntropy } from "../../client/ClientUtils";
+import { passwordConformsToEntropy } from "../client/ClientUtils";
 import { AbstractIOBean, AbstractStoreParametersBean, Comparator, StoreAction, ValidationBean } from "./Beans";
 
 export const createStoreId = (primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null) => {

@@ -1,10 +1,10 @@
 {
     "name": "react-use-websockets",
-    "version": "2.3.2",
+    "version": "2.3.4",
     "description": "",
     "main": "lib/index.js",
     "scripts": {
-        "test": "mocha -r ts-node/register src/**/*.spec.ts",
+        "test": "mocha -r ts-node/register tests/**/*.test.ts",
         "build": "tsc"
     },
     "repository": {

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { AbstractIOBean } from '../store/beans/Beans';
+import { AbstractIOBean } from '../beans/Beans';
 import { ClientToServerCoreBean } from './ClientToServerCoreBeanBuilder';
 import { WebSocketContext } from "./WebSocketContext";
 import { ConnectivityCallback, DefaultListenerCallback, ListenerCallback, UnsubscribeCallback, WebSocketManager } from './WebSocketManager';
