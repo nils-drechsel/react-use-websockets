@@ -1,13 +1,14 @@
-import { AbstractIOBean, FragmentList, FragmentType, } from "../../beans/Beans";
+import { AbstractIOBean, FragmentList, FragmentType, createFragment, createFragmentList, } from "../../beans/Beans";
+import { serialise } from "../serialisation/Serialisation";
 
 
 
 
 export const fragmentalise = (existingBean: AbstractIOBean, modifiedBean: AbstractIOBean): FragmentList => {
 
-    const result: FragmentList = {
+    const result: FragmentList = createFragmentList({
         fragments: []
-    }
+    });
 
     traverseBean(existingBean, modifiedBean, [], result);
 
@@ -82,6 +83,37 @@ const traverseMap = (existingMap: Map<string, any>, modifiedMap: Map<string, any
 
 }
 
+const traverseArray = (existingArray: Array<any>, modifiedArray: Array<any>, path: Array<string>, fragmentList: FragmentList) => {
+
+    for (let index = 0; index < existingArray.length; index++) {
+        const existingObj = existingArray[index] !== undefined
+            ? existingArray[index]
+            : null;
+
+        const modifiedObjIsRemoved = modifiedArray.length <= index
+        const modifiedObjIsUndefined = !modifiedObjIsRemoved && modifiedArray[index] === undefined
+
+        const modifiedObj: any = !modifiedObjIsRemoved
+            ? (modifiedObjIsUndefined ? null : modifiedArray[index])
+            : undefined;
+
+        compare (existingObj, modifiedObj, [...path, "" + index], fragmentList)
+
+        if (modifiedObjIsRemoved) break;
+    }
+
+    modifiedArray.forEach((modifiedObj, index) => {
+
+        if (modifiedObj === undefined) {
+            return;
+        }
+
+        if (!(existingArray.length > index)) {
+            created(modifiedObj, [...path, "" + index], fragmentList);
+        }
+    });
+
+}
 
 
 
@@ -106,13 +138,16 @@ const compare = (existingObj: any, modifiedObj: any, path: Array<string>, fragme
     } else if (existingObj instanceof Set) {
 
         if (!(modifiedObj instanceof Set) || !areEqualSets(existingObj, modifiedObj)) {
-            modified([...modifiedObj], path, fragmentList);
+            modified(modifiedObj, path, fragmentList);
         }
 
     } else if (Array.isArray(existingObj)) {
 
-        if (!(Array.isArray(modifiedObj)) || !areEqualArrays(existingObj, modifiedObj)) {
+
+        if (!Array.isArray(modifiedObj)) {
             modified(modifiedObj, path, fragmentList);
+        } else {
+            traverseArray(existingObj, modifiedObj, path, fragmentList);
         }
 
     } else if (existingObj && typeof existingObj === "object" && !isRichType(existingObj)) {
@@ -146,9 +181,6 @@ const areEqualSets = (obj0: Set<any>, obj1: Set<any>): boolean => {
     return obj0.size === obj1.size && setIntersection(obj0, obj1).size === obj0.size;
 }
 
-const areEqualArrays = (obj0: Array<any>, obj1: Array<any>): boolean => {
-    return obj0.length === obj1.length && obj0.every((value, index) => value === obj1[index]);
-}
 
 
 const areEqualValues = (obj0: any, obj1: any): boolean => {
@@ -168,31 +200,31 @@ const areEqualValues = (obj0: any, obj1: any): boolean => {
 
 const removed = (path: Array<string>, fragmentList: FragmentList) => {
 
-    fragmentList.fragments.push({
+    fragmentList.fragments.push(createFragment({
         type: FragmentType.REMOVE,
         path: path,
-    })
+    }))
 
 }
 
 
 const modified = (value: any, path: Array<string>, fragmentList: FragmentList) => {
 
-    fragmentList.fragments.push({
+    fragmentList.fragments.push(createFragment({
         type: FragmentType.MODIFY,
         path: path,
-        jsonPayload: JSON.stringify(value)
-    })
+        jsonPayload: serialise(value)
+    }))
 
 }
 
 const created = (value: any, path: Array<string>, fragmentList: FragmentList) => {
 
-    fragmentList.fragments.push({
+    fragmentList.fragments.push(createFragment({
         type: FragmentType.CREATE,
         path: path,
-        jsonPayload: JSON.stringify(value)
-    })
+        jsonPayload: serialise(value)
+    }))
 
 }
 

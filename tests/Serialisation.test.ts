@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import "mocha";
 import { serialise } from "../src/lib/client/serialisation/Serialisation";
 
@@ -47,8 +48,8 @@ describe("Serialisation", () => {
 
 
         const json = serialise(bean);
-        console.log("JSON", json);
-        
+        expect(typeof json === "string").to.be.true;
+
     });
 
 
@@ -97,9 +98,12 @@ describe("Serialisation", () => {
 
 
         const json = serialise(bean);
-        console.log("JSON: ", json);
+
+        expect(typeof json === "string").to.be.true;
+
 
     });
+
 
 
 

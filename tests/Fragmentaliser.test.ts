@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import { fragmentToString, fragmentalise } from "../src/lib/client/Fragments/Fragmentaliser";
+import { fragmentalise } from "../src/lib/client/Fragments/Fragmentaliser";
 
 describe("Fragmentalisation", () => {
     it("beans should be equal", () => {
@@ -86,9 +86,7 @@ describe("Fragmentalisation", () => {
 
         const fragments0 = fragmentalise(bean0, bean1);
 
-        fragmentToString(fragments0);
-
-        expect(fragments0.fragments.length === 11).to.be.true;
+        expect(fragments0.fragments.length === 5).to.be.true;
     });
 
 

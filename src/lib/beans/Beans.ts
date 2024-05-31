@@ -13,7 +13,7 @@ export interface KeyParametersBean extends AbstractStoreParametersBean {
     key: string | null,
 }
 
-export const createKeyParametersBean = () => ({_t: "KeyParametersBean"})
+export const createKeyParametersBean = (content?: Omit<KeyParametersBean, "_t">) => (Object.assign({_t: "KeyParametersBean"}, content));
 
 export interface Fragment extends AbstractIOBean {
     path: Array<string>,
@@ -22,7 +22,7 @@ export interface Fragment extends AbstractIOBean {
     type: FragmentType,
 }
 
-export const createFragment = () => ({_t: "Fragment"})
+export const createFragment = (content?: Omit<Fragment, "_t">) => (Object.assign({_t: "Fragment"}, content));
 
 export enum Comparator {
     EQUAL = "EQUAL",
@@ -38,7 +38,7 @@ export interface NoParametersBean extends AbstractStoreParametersBean {
     _t: string,
 }
 
-export const createNoParametersBean = () => ({_t: "NoParametersBean"})
+export const createNoParametersBean = (content?: Omit<NoParametersBean, "_t">) => (Object.assign({_t: "NoParametersBean"}, content));
 
 export interface AbstractStoreParametersBean extends AbstractIOBean {
     getPathElements?: () => Array<string>,
@@ -52,14 +52,14 @@ export interface StoreValidationMessageBean extends AbstractIOBean {
     transactionId: string,
 }
 
-export const createStoreValidationMessageBean = () => ({_t: "StoreValidationMessageBean"})
+export const createStoreValidationMessageBean = (content?: Omit<StoreValidationMessageBean, "_t">) => (Object.assign({_t: "StoreValidationMessageBean"}, content));
 
 export interface FragmentList extends AbstractIOBean {
     _t: string,
     fragments: Array<Fragment>,
 }
 
-export const createFragmentList = () => ({_t: "FragmentList"})
+export const createFragmentList = (content?: Omit<FragmentList, "_t">) => (Object.assign({_t: "FragmentList"}, content));
 
 export interface AnnotationContainingBean {
 }
@@ -89,7 +89,7 @@ export interface StoreConnectedBean extends AbstractIOBean {
     _t: string,
 }
 
-export const createStoreConnectedBean = () => ({_t: "StoreConnectedBean"})
+export const createStoreConnectedBean = (content?: Omit<StoreConnectedBean, "_t">) => (Object.assign({_t: "StoreConnectedBean"}, content));
 
 export interface AbstractStoreFragment extends AbstractIOBean {
     _t?: string,
@@ -108,7 +108,7 @@ export interface ConcretisedArrayBean extends AbstractIOBean {
     _t: string,
 }
 
-export const createConcretisedArrayBean = () => ({_t: "ConcretisedArrayBean"})
+export const createConcretisedArrayBean = (content?: Omit<ConcretisedArrayBean, "_t">) => (Object.assign({_t: "ConcretisedArrayBean"}, content));
 
 export interface IOServerToClientStoreBean extends AbstractIOBean {
     secondaryId: string,
@@ -117,7 +117,7 @@ export interface IOServerToClientStoreBean extends AbstractIOBean {
     primaryId: string,
 }
 
-export const createIOServerToClientStoreBean = () => ({_t: "IOServerToClientStoreBean"})
+export const createIOServerToClientStoreBean = (content?: Omit<IOServerToClientStoreBean, "_t">) => (Object.assign({_t: "IOServerToClientStoreBean"}, content));
 
 export interface IOClientToServerStoreBean extends AbstractIOBean {
     payloadJson?: string | null,
@@ -129,7 +129,7 @@ export interface IOClientToServerStoreBean extends AbstractIOBean {
     primaryPath: Array<string>,
 }
 
-export const createIOClientToServerStoreBean = () => ({_t: "IOClientToServerStoreBean"})
+export const createIOClientToServerStoreBean = (content?: Omit<IOClientToServerStoreBean, "_t">) => (Object.assign({_t: "IOClientToServerStoreBean"}, content));
 
 export interface ClientErrorBean extends AbstractIOBean {
     _t: string,
@@ -137,7 +137,7 @@ export interface ClientErrorBean extends AbstractIOBean {
     componentStack?: string | null,
 }
 
-export const createClientErrorBean = () => ({_t: "ClientErrorBean"})
+export const createClientErrorBean = (content?: Omit<ClientErrorBean, "_t">) => (Object.assign({_t: "ClientErrorBean"}, content));
 
 export interface AbstractIOBean {
     _t?: string,
@@ -148,13 +148,13 @@ export interface CoreConfig extends AbstractIOBean {
     timezone: string,
 }
 
-export const createCoreConfig = () => ({_t: "CoreConfig"})
+export const createCoreConfig = (content?: Omit<CoreConfig, "_t">) => (Object.assign({_t: "CoreConfig"}, content));
 
 export interface NullBean extends AbstractIOBean {
     _t: string,
 }
 
-export const createNullBean = () => ({_t: "NullBean"})
+export const createNullBean = (content?: Omit<NullBean, "_t">) => (Object.assign({_t: "NullBean"}, content));
 
 export interface TimestampBean extends AbstractIOBean {
     touched: number,
@@ -163,13 +163,13 @@ export interface TimestampBean extends AbstractIOBean {
     modified: number,
 }
 
-export const createTimestampBean = () => ({_t: "TimestampBean"})
+export const createTimestampBean = (content?: Omit<TimestampBean, "_t">) => (Object.assign({_t: "TimestampBean"}, content));
 
 export interface TemplateMasterBean extends AbstractIOBean {
     _t: string,
 }
 
-export const createTemplateMasterBean = () => ({_t: "TemplateMasterBean"})
+export const createTemplateMasterBean = (content?: Omit<TemplateMasterBean, "_t">) => (Object.assign({_t: "TemplateMasterBean"}, content));
 
 export interface DataBaseBean extends AbstractStoreBean {
     uid?: string,
@@ -188,7 +188,7 @@ export interface IOClientToServerCoreBean extends AbstractIOBean {
     message: string,
 }
 
-export const createIOClientToServerCoreBean = () => ({_t: "IOClientToServerCoreBean"})
+export const createIOClientToServerCoreBean = (content?: Omit<IOClientToServerCoreBean, "_t">) => (Object.assign({_t: "IOClientToServerCoreBean"}, content));
 
 export interface ClientMessageBean {
 }
@@ -199,7 +199,7 @@ export interface StoreConnectionErrorBean extends AbstractIOBean {
     errors: Array<string>,
 }
 
-export const createStoreConnectionErrorBean = () => ({_t: "StoreConnectionErrorBean"})
+export const createStoreConnectionErrorBean = (content?: Omit<StoreConnectionErrorBean, "_t">) => (Object.assign({_t: "StoreConnectionErrorBean"}, content));
 
 export interface StoreBean {
 }
@@ -223,7 +223,7 @@ export interface StoreUpdateBean extends AbstractIOBean {
     payload: Map<string,AbstractIOBean>,
 }
 
-export const createStoreUpdateBean = () => ({_t: "StoreUpdateBean"})
+export const createStoreUpdateBean = (content?: Omit<StoreUpdateBean, "_t">) => (Object.assign({_t: "StoreUpdateBean"}, content));
 
 export interface OwnerContainingBean {
 }
@@ -237,7 +237,7 @@ export interface ServerToClientAuthenticationBean extends AbstractIOBean {
     sid: string,
 }
 
-export const createServerToClientAuthenticationBean = () => ({_t: "ServerToClientAuthenticationBean"})
+export const createServerToClientAuthenticationBean = (content?: Omit<ServerToClientAuthenticationBean, "_t">) => (Object.assign({_t: "ServerToClientAuthenticationBean"}, content));
 
 export interface MessageBean extends AbstractIOBean {
     _t: string,
@@ -245,7 +245,7 @@ export interface MessageBean extends AbstractIOBean {
     message: string,
 }
 
-export const createMessageBean = () => ({_t: "MessageBean"})
+export const createMessageBean = (content?: Omit<MessageBean, "_t">) => (Object.assign({_t: "MessageBean"}, content));
 
 export interface StoreFragment {
 }
@@ -254,7 +254,7 @@ export interface IOPingPongBean extends AbstractIOBean {
     _t: string,
 }
 
-export const createIOPingPongBean = () => ({_t: "IOPingPongBean"})
+export const createIOPingPongBean = (content?: Omit<IOPingPongBean, "_t">) => (Object.assign({_t: "IOPingPongBean"}, content));
 
 export interface TimestampContainingBean {
 }
@@ -265,13 +265,13 @@ export interface ClientToServerAuthenticationBean extends AbstractIOBean {
     token1: string | null,
 }
 
-export const createClientToServerAuthenticationBean = () => ({_t: "ClientToServerAuthenticationBean"})
+export const createClientToServerAuthenticationBean = (content?: Omit<ClientToServerAuthenticationBean, "_t">) => (Object.assign({_t: "ClientToServerAuthenticationBean"}, content));
 
 export interface FolderPseudoBean extends AbstractIOBean {
     _t: string,
 }
 
-export const createFolderPseudoBean = () => ({_t: "FolderPseudoBean"})
+export const createFolderPseudoBean = (content?: Omit<FolderPseudoBean, "_t">) => (Object.assign({_t: "FolderPseudoBean"}, content));
 
 export interface IOServerToClientCoreBean extends AbstractIOBean {
     endpoint: string,
@@ -282,7 +282,7 @@ export interface IOServerToClientCoreBean extends AbstractIOBean {
     message: string,
 }
 
-export const createIOServerToClientCoreBean = () => ({_t: "IOServerToClientCoreBean"})
+export const createIOServerToClientCoreBean = (content?: Omit<IOServerToClientCoreBean, "_t">) => (Object.assign({_t: "IOServerToClientCoreBean"}, content));
 
 export interface AbstractConfigBean extends AbstractIOBean {
     uid?: string,
@@ -304,7 +304,7 @@ export interface ArrayBean extends AbstractIOBean {
     items: Array<AbstractIOBean>,
 }
 
-export const createArrayBean = () => ({_t: "ArrayBean"})
+export const createArrayBean = (content?: Omit<ArrayBean, "_t">) => (Object.assign({_t: "ArrayBean"}, content));
 
 export enum ServerToClientStoreMessage {
     CONNECTED = "CONNECTED",

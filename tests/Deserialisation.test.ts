@@ -1,6 +1,6 @@
+import { expect } from "chai";
 import "mocha";
 import { deserialise } from "../src/lib/client/serialisation/Deserialisation";
-import { serialise } from "../src/lib/client/serialisation/Serialisation";
 
 describe("Deserialisation", () => {
     it("from server", () => {
@@ -10,9 +10,27 @@ describe("Deserialisation", () => {
 
         const bean = deserialise(json);
 
-        const json1 = serialise(bean);
 
-        console.log("JSON", json1);
+        expect(typeof bean === "object").to.be.true;
+
+
+
+
+    });
+
+    it("from serve 2", () => {
+
+
+        const json = "{\"testContainer\":[\"_array\",[\"_map\",[\"key0\",{\"_t\":\"TestBean1\",\"testSetInteger\":[\"_set\",8,15],\"testString1\":\"ts1\"}]]],\"_t\":\"TestBean0\",\"testString\":\"ts0\"}";
+    
+        const bean = deserialise(json);
+
+        expect(typeof bean === "object").to.be.true;
+
+        //console.log(serialise(bean));
+
+
+
 
 
     });
