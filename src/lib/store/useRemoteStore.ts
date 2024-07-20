@@ -1,58 +1,60 @@
 import { useEffect, useState } from "react";
-import { AbstractIOBean, AbstractStoreParametersBean } from "../beans/Beans";
+import { AbstractStoreBean, AbstractStoreParametersBean, createNoParametersBean } from "../beans/Beans";
 import { createStoreId } from "../beans/StoreBeanUtils";
 import { InsertBeanFunction, RemoveBeanFunction, StoreMeta, UpdateBeanFunction } from "./RemoteStore";
 import { ConnectionMetaRef, ConnectionMetaSetter } from "./connectStore";
 import { useGetRemoteStore } from "./useGetRemoteStore";
 
 
-export interface RemoteStoreType<FRAGMENT extends AbstractIOBean>{
-    data: Map<string, FRAGMENT>, 
+export interface RemoteStoreType<BEAN extends AbstractStoreBean>{
+    data: Map<string, BEAN>, 
     meta: StoreMeta,
-    updateBean: UpdateBeanFunction<FRAGMENT>,
-    insertBean: InsertBeanFunction<FRAGMENT>,
+    updateBean: UpdateBeanFunction<BEAN>,
+    insertBean: InsertBeanFunction<BEAN>,
     removeBean: RemoveBeanFunction
 }
 
-export interface RemoteStoreArrayType<FRAGMENT extends AbstractIOBean> {
-    data: Array<FRAGMENT>, 
+export interface RemoteStoreArrayType<BEAN extends AbstractStoreBean> {
+    data: Array<BEAN>, 
     meta: StoreMeta,
-    updateBean: UpdateBeanFunction<FRAGMENT>,
-    insertBean: InsertBeanFunction<FRAGMENT>,
+    updateBean: UpdateBeanFunction<BEAN>,
+    insertBean: InsertBeanFunction<BEAN>,
     removeBean: RemoveBeanFunction
 }
 
-export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
+export const useRemoteStore = <BEAN extends AbstractStoreBean>(
     id: string | null,
     primaryPath: Array<string>,
-    secondaryPath: Array<string>,
-    params?: AbstractStoreParametersBean | null,
-    callback?: (data: Map<string, FRAGMENT> | undefined) => void,
+    params?: AbstractStoreParametersBean | null,
+    callback?: (data: Map<string, BEAN> | undefined) => void,
     dependency?: any,
     connectionMetaRef?: ConnectionMetaRef,
     setConnectionMeta?: ConnectionMetaSetter,
     optional?: boolean
-): RemoteStoreType<FRAGMENT> => {
-    const remoteStore = useGetRemoteStore<FRAGMENT>(id);
+): RemoteStoreType<BEAN> => {
 
-    const [data, setData] = useState(remoteStore.getData(primaryPath, secondaryPath, params || null));
-    const [storeMeta, setStoreMeta] = useState(remoteStore.getStoreMeta(primaryPath, secondaryPath, params || null));
+    const parametersBean = params ?? createNoParametersBean();
 
-    const updateBean: UpdateBeanFunction<FRAGMENT> = (payload, callback) => {
-        remoteStore.updateBean(primaryPath, secondaryPath, params ?? null, payload, callback);
+    const remoteStore = useGetRemoteStore<BEAN>(id);
+
+    const [data, setData] = useState(remoteStore.getData(primaryPath, parametersBean));
+    const [storeMeta, setStoreMeta] = useState(remoteStore.getStoreMeta(primaryPath, parametersBean));
+
+    const updateBean: UpdateBeanFunction<BEAN> = (payload) => {
+        remoteStore.updateBean(primaryPath, parametersBean, payload);
     }
 
-    const insertBean: InsertBeanFunction<FRAGMENT> = (payload, callback) => {
-        remoteStore.insertBean(primaryPath, secondaryPath, params ?? null, payload, callback);
+    const insertBean: InsertBeanFunction<BEAN> = (payload) => {
+        remoteStore.insertBean(primaryPath, parametersBean, payload, );
     }
 
-    const removeBean: RemoveBeanFunction = (key, callback) => {
-        remoteStore.removeBean(primaryPath, secondaryPath, params ?? null, key, callback);
+    const removeBean: RemoveBeanFunction = (key) => {
+        remoteStore.removeBean(primaryPath, parametersBean ?? null, key);
     }
 
     const dependencyFulfilled = dependency === undefined || !!dependency;
 
-    const storeId = createStoreId(primaryPath, secondaryPath, params);
+    const storeId = createStoreId(primaryPath, params);
 
     const paramString = params ? JSON.stringify(params) : null;
 
@@ -63,12 +65,12 @@ export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
     useEffect(() => {
 
         if (dependencyFulfilled) {
-            let setIncomingData = (incomingData: Map<string, FRAGMENT>): void => {
+            let setIncomingData = (incomingData: Map<string, BEAN>): void => {
                 setData(incomingData);
             };
 
             if (callback) {
-                setIncomingData = (incomingData: Map<string, FRAGMENT>): void => {
+                setIncomingData = (incomingData: Map<string, BEAN>): void => {
                     setData(incomingData);
                     callback(incomingData);
                 };
@@ -89,7 +91,7 @@ export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
                 }
             };
 
-            const deregister = remoteStore.register(primaryPath, secondaryPath, params || null, setIncomingData, setMeta, false, optional ?? false);
+            const deregister = remoteStore.register(primaryPath, parametersBean, setIncomingData, setMeta, optional ?? false);
 
             return () => {
                 deregister();
@@ -113,21 +115,19 @@ export const useRemoteStore = <FRAGMENT extends AbstractIOBean>(
 };
 
 
-export const useRemoteStoreArray = <FRAGMENT extends AbstractIOBean>(
+export const useRemoteStoreArray = <BEAN extends AbstractStoreBean>(
     id: string | null,
     primaryPath: Array<string>,
-    secondaryPath: Array<string>,
     params?: AbstractStoreParametersBean | null,
-    callback?: (data: Map<string, FRAGMENT> | undefined) => void,
+    callback?: (data: Map<string, BEAN> | undefined) => void,
     dependency?: any,
     connectionMetaRef?: ConnectionMetaRef,
     setConnectionMeta?: ConnectionMetaSetter,
     optional?: boolean
-): RemoteStoreArrayType<FRAGMENT> => {
+): RemoteStoreArrayType<BEAN> => {
     const res = useRemoteStore(
         id,
         primaryPath,
-        secondaryPath,
         params,
         callback,
         dependency,

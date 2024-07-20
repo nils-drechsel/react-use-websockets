@@ -1,17 +1,15 @@
 import React, { FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useState } from "react";
-import { BeanSerialisationSignature } from "../client/serialisation/Serialisation.ts.2";
 import { useWebSocket } from "../client/useWebSocket";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
 
 interface Props {
     id: string;
-    serialisationSignatures?: Map<string, BeanSerialisationSignature>;
     showElementWhileConnecting?: ReactElement | null;
     children: ReactNode;
 }
 
-export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children, serialisationSignatures, showElementWhileConnecting }) => {
+export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children, showElementWhileConnecting }) => {
     const remoteStoreMap: Map<string, RemoteStore<any>> = useContext(RemoteStoreContext);
 
     const { manager } = useWebSocket(id);
@@ -19,7 +17,7 @@ export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children, se
     const [store, setStore] = useState<RemoteStore<any> | null>(null);
 
     useEffect(() => {
-        const store = new RemoteStore(manager, serialisationSignatures);
+        const store = new RemoteStore(manager);
 
         setStore(store);
 

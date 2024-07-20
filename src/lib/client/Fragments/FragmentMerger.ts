@@ -1,10 +1,10 @@
-import { AbstractIOBean, FragmentList, FragmentType } from "../../beans/Beans";
+import { AbstractStoreBean, FragmentList, FragmentType } from "../../beans/Beans";
 import { deserialise } from "../serialisation/Deserialisation";
 
 
 
 
-export const mergeFragments = <BEAN extends AbstractIOBean>(bean: BEAN, fragmentList: FragmentList): BEAN => {
+export const mergeFragments = <BEAN extends AbstractStoreBean>(bean: BEAN | undefined, fragmentList: FragmentList): BEAN | undefined => {
 
     bean = structuredClone(bean);
 
@@ -15,9 +15,20 @@ export const mergeFragments = <BEAN extends AbstractIOBean>(bean: BEAN, fragment
 
         fragment.path.forEach((p, index) => {
 
+            if (fragment.type === FragmentType.CREATE_BEAN) {
+                bean = deserialise(fragment.jsonPayload as string);
+                return;
+            }
+
+            if (fragment.type === FragmentType.REMOVE_BEAN) {
+                bean = undefined;
+                return;
+            }
+
+
             if (index === fragment.path.length - 1) {
 
-                if (fragment.type === FragmentType.CREATE || fragment.type === FragmentType.MODIFY) {
+                if (fragment.type === FragmentType.CREATE_ITEM || fragment.type === FragmentType.MODIFY_ITEM) {
 
                     if (base instanceof Map) {
                         base.set(p, deserialise(fragment.jsonPayload as string));
@@ -25,7 +36,7 @@ export const mergeFragments = <BEAN extends AbstractIOBean>(bean: BEAN, fragment
 
                         const i = parseInt(p);
 
-                        if (fragment.type === FragmentType.CREATE) {
+                        if (fragment.type === FragmentType.CREATE_ITEM) {
                             if (i !== base.length) throw new Error("fragment array index " + i + " doesn't match base array");
                             base.push(deserialise(fragment.jsonPayload as string));
                         } else {
@@ -69,7 +80,6 @@ export const mergeFragments = <BEAN extends AbstractIOBean>(bean: BEAN, fragment
 
     });
 
-    
     return bean;
 
 }

@@ -1,10 +1,10 @@
 import debounce from "lodash/debounce";
 import { Dispatch, SetStateAction } from "react";
 import { passwordConformsToEntropy } from "../client/ClientUtils";
-import { AbstractIOBean, AbstractStoreParametersBean, Comparator, StoreAction, ValidationBean } from "./Beans";
+import { AbstractIOBean, AbstractStoreParametersBean, Comparator } from "./Beans";
 
-export const createStoreId = (primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null) => {
-    const path = [...primaryPath, ...secondaryPath, ...(!!params ? params.getPathElements!() : [])];
+export const createStoreId = (primaryPath: Array<string>, params?: AbstractStoreParametersBean | null) => {
+    const path = [...primaryPath, ...(!!params ? params.getPathElements!() : [])];
     return path.join("/");
 };
 
@@ -154,28 +154,12 @@ export const errorSize = (size: number, fieldName: string, errorMessage: string 
     return fieldName + " needs at least " + size + " characters";
 };
 
-export interface FailureCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
-    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void;
-}
-
-export interface SuccessCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
-    (validation: VALIDATION_TYPE, bean: BEAN_TYPE): void;
-}
-
-export interface ValidationCallback<BEAN_TYPE, VALIDATION_TYPE extends ValidationBean> {
-    (bean: BEAN_TYPE, partial?: boolean): VALIDATION_TYPE;
-}
-
 export interface EditRemoteStoreFunction<BEAN_TYPE extends AbstractIOBean> {
     (payload: BEAN_TYPE): void;
 }
 
 export interface PartialEditRemoteStoreFunction<BEAN_TYPE extends Partial<AbstractIOBean>> {
     (payload: BEAN_TYPE): void;
-}
-
-export interface PostValidationCallback<VALIDATION_TYPE extends ValidationBean> {
-    (validationBean: VALIDATION_TYPE): void;
 }
 
 
@@ -218,18 +202,3 @@ export const callbackWithTimeout =
       };
 
 }
-
-
-export interface ValidationTimeoutCallback {
-    (action: StoreAction, validation: ValidationBean): void;
-}
-
-export interface ValidationTimeoutCallbackWithState {
-    (state: TimeoutCallbackState, action: StoreAction, validation: ValidationBean): void;
-}
-
-export const valdiationCallbackWithTimeout = 
-    (timeoutInSeconds: number, callback: ValidationTimeoutCallbackWithState): ValidationTimeoutCallback => {
-
-        return callbackWithTimeout(timeoutInSeconds, callback);
-    }

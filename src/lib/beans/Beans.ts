@@ -7,6 +7,25 @@ export enum PasswordStrengthCriterium {
     SPECIAL_CHARACTERS = "SPECIAL_CHARACTERS",
 }
 
+export interface ClientErrorBean extends AbstractIOBean {
+    _t: string,
+    message: string,
+    componentStack?: string | null,
+}
+
+export const createClientErrorBean = (content?: Omit<ClientErrorBean, "_t">) => (Object.assign({_t: "ClientErrorBean"}, content));
+
+export interface AbstractIOBean {
+    _t: string,
+}
+
+export interface CoreConfig extends AbstractIOBean {
+    _t: string,
+    timezone: string,
+}
+
+export const createCoreConfig = (content?: Omit<CoreConfig, "_t">) => (Object.assign({_t: "CoreConfig"}, content));
+
 export interface KeyParametersBean extends AbstractStoreParametersBean {
     getPathElements: () => Array<string>,
     _t: string,
@@ -14,6 +33,44 @@ export interface KeyParametersBean extends AbstractStoreParametersBean {
 }
 
 export const createKeyParametersBean = (content?: Omit<KeyParametersBean, "_t">) => (Object.assign({_t: "KeyParametersBean"}, content));
+
+export interface NullBean extends AbstractIOBean {
+    _t: string,
+}
+
+export const createNullBean = (content?: Omit<NullBean, "_t">) => (Object.assign({_t: "NullBean"}, content));
+
+export interface TimestampBean extends AbstractIOBean {
+    touched: number,
+    _t: string,
+    created: number,
+    modified: number,
+}
+
+export const createTimestampBean = (content?: Omit<TimestampBean, "_t">) => (Object.assign({_t: "TimestampBean"}, content));
+
+export interface TemplateMasterBean extends AbstractIOBean {
+    _t: string,
+}
+
+export const createTemplateMasterBean = (content?: Omit<TemplateMasterBean, "_t">) => (Object.assign({_t: "TemplateMasterBean"}, content));
+
+export interface DataBaseBean extends AbstractStoreBean {
+    uid: string,
+    _t: string,
+    version: string,
+}
+
+export interface IOClientToServerCoreBean extends AbstractIOBean {
+    endpoint: string,
+    payload: string,
+    toSid?: string | null,
+    _t: string,
+    origin?: string | null,
+    message: string,
+}
+
+export const createIOClientToServerCoreBean = (content?: Omit<IOClientToServerCoreBean, "_t">) => (Object.assign({_t: "IOClientToServerCoreBean"}, content));
 
 export interface Fragment extends AbstractIOBean {
     path: Array<string>,
@@ -41,156 +98,8 @@ export interface NoParametersBean extends AbstractStoreParametersBean {
 export const createNoParametersBean = (content?: Omit<NoParametersBean, "_t">) => (Object.assign({_t: "NoParametersBean"}, content));
 
 export interface AbstractStoreParametersBean extends AbstractIOBean {
-    getPathElements?: () => Array<string>,
-    _t?: string,
-}
-
-export interface StoreValidationMessageBean extends AbstractIOBean {
-    validationBean: ValidationBean,
+    getPathElements: () => Array<string>,
     _t: string,
-    action: StoreAction,
-    transactionId: string,
-}
-
-export const createStoreValidationMessageBean = (content?: Omit<StoreValidationMessageBean, "_t">) => (Object.assign({_t: "StoreValidationMessageBean"}, content));
-
-export interface FragmentList extends AbstractIOBean {
-    _t: string,
-    fragments: Array<Fragment>,
-}
-
-export const createFragmentList = (content?: Omit<FragmentList, "_t">) => (Object.assign({_t: "FragmentList"}, content));
-
-export interface AnnotationContainingBean {
-}
-
-export enum StoreAction {
-    INSERT = "INSERT",
-    UPDATE = "UPDATE",
-    REMOVE = "REMOVE",
-}
-
-export enum MessageType {
-    ERROR = "ERROR",
-    WARNING = "WARNING",
-    INFO = "INFO",
-    SUCCESS = "SUCCESS",
-}
-
-export interface AbstractStoreBean extends AbstractIOBean {
-    uid?: string,
-    _t?: string,
-    createdTimestamp?: number,
-    modifiedTimestamp?: number,
-    touchedTimestamp?: number,
-}
-
-export interface StoreConnectedBean extends AbstractIOBean {
-    _t: string,
-}
-
-export const createStoreConnectedBean = (content?: Omit<StoreConnectedBean, "_t">) => (Object.assign({_t: "StoreConnectedBean"}, content));
-
-export interface AbstractStoreFragment extends AbstractIOBean {
-    _t?: string,
-}
-
-export enum IOCoreEndpoints {
-    CORE = "CORE",
-    STORE = "STORE",
-}
-
-export enum ServerStoreMessage {
-    UPDATE = "UPDATE",
-}
-
-export interface ConcretisedArrayBean extends AbstractIOBean {
-    _t: string,
-}
-
-export const createConcretisedArrayBean = (content?: Omit<ConcretisedArrayBean, "_t">) => (Object.assign({_t: "ConcretisedArrayBean"}, content));
-
-export interface IOServerToClientStoreBean extends AbstractIOBean {
-    secondaryId: string,
-    _t: string,
-    payload: string,
-    primaryId: string,
-}
-
-export const createIOServerToClientStoreBean = (content?: Omit<IOServerToClientStoreBean, "_t">) => (Object.assign({_t: "IOServerToClientStoreBean"}, content));
-
-export interface IOClientToServerStoreBean extends AbstractIOBean {
-    payloadJson?: string | null,
-    _t: string,
-    secondaryPath: Array<string>,
-    parametersJson: string,
-    transactionId?: string | null,
-    key?: string | null,
-    primaryPath: Array<string>,
-}
-
-export const createIOClientToServerStoreBean = (content?: Omit<IOClientToServerStoreBean, "_t">) => (Object.assign({_t: "IOClientToServerStoreBean"}, content));
-
-export interface ClientErrorBean extends AbstractIOBean {
-    _t: string,
-    message: string,
-    componentStack?: string | null,
-}
-
-export const createClientErrorBean = (content?: Omit<ClientErrorBean, "_t">) => (Object.assign({_t: "ClientErrorBean"}, content));
-
-export interface AbstractIOBean {
-    _t?: string,
-}
-
-export interface CoreConfig extends AbstractIOBean {
-    _t: string,
-    timezone: string,
-}
-
-export const createCoreConfig = (content?: Omit<CoreConfig, "_t">) => (Object.assign({_t: "CoreConfig"}, content));
-
-export interface NullBean extends AbstractIOBean {
-    _t: string,
-}
-
-export const createNullBean = (content?: Omit<NullBean, "_t">) => (Object.assign({_t: "NullBean"}, content));
-
-export interface TimestampBean extends AbstractIOBean {
-    touched: number,
-    _t: string,
-    created: number,
-    modified: number,
-}
-
-export const createTimestampBean = (content?: Omit<TimestampBean, "_t">) => (Object.assign({_t: "TimestampBean"}, content));
-
-export interface TemplateMasterBean extends AbstractIOBean {
-    _t: string,
-}
-
-export const createTemplateMasterBean = (content?: Omit<TemplateMasterBean, "_t">) => (Object.assign({_t: "TemplateMasterBean"}, content));
-
-export interface DataBaseBean extends AbstractStoreBean {
-    uid?: string,
-    _t?: string,
-    createdTimestamp?: number,
-    modifiedTimestamp?: number,
-    touchedTimestamp?: number,
-}
-
-export interface IOClientToServerCoreBean extends AbstractIOBean {
-    endpoint: string,
-    _t: string,
-    toSid: string | null,
-    payload: string,
-    origin: string | null,
-    message: string,
-}
-
-export const createIOClientToServerCoreBean = (content?: Omit<IOClientToServerCoreBean, "_t">) => (Object.assign({_t: "IOClientToServerCoreBean"}, content));
-
-export interface ClientMessageBean {
 }
 
 export interface StoreConnectionErrorBean extends AbstractIOBean {
@@ -204,11 +113,6 @@ export const createStoreConnectionErrorBean = (content?: Omit<StoreConnectionErr
 export interface StoreBean {
 }
 
-export interface ClientOriginatedBean extends AbstractIOBean {
-    originId?: string,
-    _t?: string,
-}
-
 export enum ClientToServerStoreMessage {
     CONNECT = "CONNECT",
     DISCONNECT = "DISCONNECT",
@@ -217,15 +121,26 @@ export enum ClientToServerStoreMessage {
     UPDATE = "UPDATE",
 }
 
-export interface StoreUpdateBean extends AbstractIOBean {
+export interface FragmentList extends AbstractIOBean {
+    fromVersion: string | null,
     _t: string,
-    initial?: boolean | null,
-    payload: Map<string,AbstractIOBean>,
+    fragments: Array<Fragment>,
+    toVersion: string | null,
 }
 
-export const createStoreUpdateBean = (content?: Omit<StoreUpdateBean, "_t">) => (Object.assign({_t: "StoreUpdateBean"}, content));
+export const createFragmentList = (content?: Omit<FragmentList, "_t">) => (Object.assign({_t: "FragmentList"}, content));
 
-export interface OwnerContainingBean {
+export enum StoreAction {
+    INSERT = "INSERT",
+    UPDATE = "UPDATE",
+    REMOVE = "REMOVE",
+}
+
+export enum MessageType {
+    ERROR = "ERROR",
+    WARNING = "WARNING",
+    INFO = "INFO",
+    SUCCESS = "SUCCESS",
 }
 
 export interface ServerToClientAuthenticationBean extends AbstractIOBean {
@@ -241,23 +156,29 @@ export const createServerToClientAuthenticationBean = (content?: Omit<ServerToCl
 
 export interface MessageBean extends AbstractIOBean {
     _t: string,
-    type: MessageType,
     message: string,
+    type: MessageType,
 }
 
 export const createMessageBean = (content?: Omit<MessageBean, "_t">) => (Object.assign({_t: "MessageBean"}, content));
 
-export interface StoreFragment {
+export interface AbstractStoreBean extends AbstractIOBean {
+    uid: string,
+    _t: string,
+    version: string,
 }
+
+export interface StoreConnectedBean extends AbstractIOBean {
+    _t: string,
+}
+
+export const createStoreConnectedBean = (content?: Omit<StoreConnectedBean, "_t">) => (Object.assign({_t: "StoreConnectedBean"}, content));
 
 export interface IOPingPongBean extends AbstractIOBean {
     _t: string,
 }
 
 export const createIOPingPongBean = (content?: Omit<IOPingPongBean, "_t">) => (Object.assign({_t: "IOPingPongBean"}, content));
-
-export interface TimestampContainingBean {
-}
 
 export interface ClientToServerAuthenticationBean extends AbstractIOBean {
     _t: string,
@@ -275,19 +196,44 @@ export const createFolderPseudoBean = (content?: Omit<FolderPseudoBean, "_t">) =
 
 export interface IOServerToClientCoreBean extends AbstractIOBean {
     endpoint: string,
-    _t: string,
     payload: string,
-    fromSid: string | null,
+    _t: string,
     origin: string | null,
+    fromSid: string | null,
     message: string,
 }
 
 export const createIOServerToClientCoreBean = (content?: Omit<IOServerToClientCoreBean, "_t">) => (Object.assign({_t: "IOServerToClientCoreBean"}, content));
 
+export interface GTest extends AbstractIOBean {
+    _t: string,
+    testset: Set<number>,
+}
+
+export const createGTest = (content?: Omit<GTest, "_t">) => (Object.assign({_t: "GTest"}, content));
+
+export enum IOCoreEndpoints {
+    CORE = "CORE",
+    STORE = "STORE",
+}
+
+export interface AbstractTimestampStoreBean extends AbstractStoreBean {
+    uid: string,
+    _t: string,
+    createdTimestamp: number,
+    modifiedTimestamp: number,
+    version: string,
+    touchedTimestamp: number,
+}
+
 export interface AbstractConfigBean extends AbstractIOBean {
-    uid?: string,
-    _t?: string,
-    timestamp?: TimestampBean,
+    uid: string,
+    _t: string,
+    timestamp: TimestampBean,
+}
+
+export enum ServerStoreMessage {
+    UPDATE = "UPDATE",
 }
 
 export enum CoreMessage {
@@ -299,6 +245,12 @@ export enum CoreMessage {
     CLIENT_ERROR = "CLIENT_ERROR",
 }
 
+export interface ConcretisedArrayBean extends AbstractIOBean {
+    _t: string,
+}
+
+export const createConcretisedArrayBean = (content?: Omit<ConcretisedArrayBean, "_t">) => (Object.assign({_t: "ConcretisedArrayBean"}, content));
+
 export interface ArrayBean extends AbstractIOBean {
     _t: string,
     items: Array<AbstractIOBean>,
@@ -309,6 +261,7 @@ export const createArrayBean = (content?: Omit<ArrayBean, "_t">) => (Object.assi
 export enum ServerToClientStoreMessage {
     CONNECTED = "CONNECTED",
     CONNECTION_ERROR = "CONNECTION_ERROR",
+    POPULATE = "POPULATE",
     UPDATE = "UPDATE",
     DISCONNECT_FORCEFULLY = "DISCONNECT_FORCEFULLY",
     VALIDATION = "VALIDATION",
@@ -319,16 +272,50 @@ export enum ServerIdents {
 }
 
 export enum FragmentType {
-    CREATE = "c",
-    MODIFY = "m",
-    REMOVE = "r",
+    CREATE_ITEM = "c",
+    MODIFY_ITEM = "m",
+    REMOVE_ITEM = "r",
+    CREATE_BEAN = "b",
+    REMOVE_BEAN = "d",
 }
 
-export interface UidContainingBean {
+export interface IOServerToClientStoreBean extends AbstractIOBean {
+    payload: string,
+    _t: string,
+    primaryId: string,
 }
 
-export interface ValidationBean extends AbstractIOBean {
-    _t?: string,
-    success?: boolean,
+export const createIOServerToClientStoreBean = (content?: Omit<IOServerToClientStoreBean, "_t">) => (Object.assign({_t: "IOServerToClientStoreBean"}, content));
+
+export interface IOClientToServerStoreBean extends AbstractIOBean {
+    payloadJson?: string | null,
+    _t: string,
+    parametersJson: string,
+    key?: string | null,
+    primaryPath: Array<string>,
+}
+
+export const createIOClientToServerStoreBean = (content?: Omit<IOClientToServerStoreBean, "_t">) => (Object.assign({_t: "IOClientToServerStoreBean"}, content));
+
+export interface FragmentAction extends AbstractIOBean {
+    _t: string,
+    fragments?: FragmentList | null,
+    type: FragmentActionType,
+    bean?: AbstractIOBean | null,
+}
+
+export const createFragmentAction = (content?: Omit<FragmentAction, "_t">) => (Object.assign({_t: "FragmentAction"}, content));
+
+export interface FragmentUpdateBean extends AbstractIOBean {
+    _t: string,
+    items: Map<string,FragmentList>,
+}
+
+export const createFragmentUpdateBean = (content?: Omit<FragmentUpdateBean, "_t">) => (Object.assign({_t: "FragmentUpdateBean"}, content));
+
+export enum FragmentActionType {
+    ADD = "ADD",
+    UPDATE = "UPDATE",
+    REMOVE = "REMOVE",
 }
 

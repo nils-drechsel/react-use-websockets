@@ -1,13 +1,15 @@
-import { AbstractIOBean, FragmentList, FragmentType, createFragment, createFragmentList, } from "../../beans/Beans";
+import { AbstractIOBean, AbstractStoreBean, FragmentList, FragmentType, createFragment, createFragmentList } from "../../beans/Beans";
 import { serialise } from "../serialisation/Serialisation";
 
 
 
 
-export const fragmentalise = (existingBean: AbstractIOBean, modifiedBean: AbstractIOBean): FragmentList => {
+export const fragmentalise = (existingBean: AbstractStoreBean, modifiedBean: AbstractStoreBean): FragmentList => {
 
     const result: FragmentList = createFragmentList({
-        fragments: []
+        fragments: [],
+        fromVersion: existingBean.version,
+        toVersion: modifiedBean.version,
     });
 
     traverseBean(existingBean, modifiedBean, [], result);
@@ -201,7 +203,7 @@ const areEqualValues = (obj0: any, obj1: any): boolean => {
 const removed = (path: Array<string>, fragmentList: FragmentList) => {
 
     fragmentList.fragments.push(createFragment({
-        type: FragmentType.REMOVE,
+        type: FragmentType.REMOVE_ITEM,
         path: path,
     }))
 
@@ -211,7 +213,7 @@ const removed = (path: Array<string>, fragmentList: FragmentList) => {
 const modified = (value: any, path: Array<string>, fragmentList: FragmentList) => {
 
     fragmentList.fragments.push(createFragment({
-        type: FragmentType.MODIFY,
+        type: FragmentType.MODIFY_ITEM,
         path: path,
         jsonPayload: serialise(value)
     }))
@@ -221,7 +223,7 @@ const modified = (value: any, path: Array<string>, fragmentList: FragmentList) =
 const created = (value: any, path: Array<string>, fragmentList: FragmentList) => {
 
     fragmentList.fragments.push(createFragment({
-        type: FragmentType.CREATE,
+        type: FragmentType.CREATE_ITEM,
         path: path,
         jsonPayload: serialise(value)
     }))

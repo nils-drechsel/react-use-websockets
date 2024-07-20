@@ -1,6 +1,4 @@
-import { Dispatch, SetStateAction, useEffect } from 'react';
-import { AbstractIOBean, ValidationBean } from '../beans/Beans';
-import { FailureCallback, SuccessCallback, ValidationCallback } from '../beans/StoreBeanUtils';
+import { useEffect } from 'react';
 import { UnsubscribeCallback } from './WebSocketManager';
 import { useWebSocket } from './useWebSocket';
 
@@ -38,15 +36,4 @@ export const useListen = (id: string | null, endpoint: string, message: string)
         return unsubscribe;
     };
 
-}
-
-
-export const performClientValidation = <BEAN_TYPE extends AbstractIOBean, VALIDATION_TYPE extends ValidationBean>(bean: BEAN_TYPE, validationCallback: ValidationCallback<BEAN_TYPE, VALIDATION_TYPE>, setValidation: Dispatch<SetStateAction<VALIDATION_TYPE>>, onSuccess: SuccessCallback<BEAN_TYPE, VALIDATION_TYPE>, onFailure: FailureCallback<BEAN_TYPE, VALIDATION_TYPE>): void => {
-    const validation = validationCallback(bean);
-    setValidation(validation);
-    if (validation?.success) {
-        onSuccess(validation, bean);
-    } else {
-        onFailure(validation, bean);
-    }
 }

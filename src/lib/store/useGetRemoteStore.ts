@@ -1,13 +1,13 @@
 import { useContext } from "react";
-import { AbstractIOBean } from "../beans/Beans";
+import { AbstractStoreBean } from "../beans/Beans";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
 
-export const useGetRemoteStore = <FRAGMENT extends AbstractIOBean>(id: string | null): RemoteStore<FRAGMENT> => {
+export const useGetRemoteStore = <BEAN extends AbstractStoreBean>(id: string | null): RemoteStore<BEAN> => {
 
-    const remoteStoreMap: Map<string, RemoteStore<FRAGMENT>> = useContext(RemoteStoreContext);
+    const remoteStoreMap: Map<string, RemoteStore<BEAN>> = useContext(RemoteStoreContext);
 
-    let store: RemoteStore<FRAGMENT> | undefined = undefined;
+    let store: RemoteStore<BEAN> | undefined = undefined;
     if (id) {
         store = remoteStoreMap.get(id);
     } else {

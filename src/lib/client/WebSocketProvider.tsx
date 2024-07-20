@@ -1,10 +1,9 @@
-import React, { FunctionComponent, ReactElement, ReactNode, cloneElement, useContext, useEffect, useState } from "react";
+import React, { cloneElement, FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useState } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { ClientErrorBean, CoreMessage, IOCoreEndpoints } from "../beans/Beans";
-import { clientToServerCoreBeanBuilder } from "./ClientToServerCoreBeanBuilder";
+import { ClientErrorBean, CoreMessage, createClientErrorBean, IOCoreEndpoints } from "../beans/Beans";
+import { clientToServerCoreBeanBuilder } from "./IOClientToServerCoreBeanBuilder";
 import { WebSocketContext } from "./WebSocketContext";
 import { WebSocketManager } from "./WebSocketManager";
-import { BeanSerialisationSignature } from "./serialisation/Serialisation.ts.2";
 
 interface Props {
     id: string;
@@ -15,7 +14,6 @@ interface Props {
     reconnect?: boolean;
     showElementWhileConnecting?: ReactElement | null;
     ping?: number;
-    serialisationSignatures?: Map<string, BeanSerialisationSignature>;
     children: ReactNode;
 }
 
@@ -28,7 +26,6 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
     reconnect,
     showElementWhileConnecting,
     children,
-    serialisationSignatures,
 }) => {
     const managerMap: Map<string, WebSocketManager> = useContext(WebSocketContext);
 
@@ -41,7 +38,6 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
             reconnect,
             ping,
             logging || false,
-            serialisationSignatures
         );
 
         setManager(manager);
@@ -62,10 +58,10 @@ export const WebSocketProvider: FunctionComponent<Props> = ({
     const [, setUid] = useState(null as string | null);
 
     const onError = (error: any, info: any) => {
-        const errorBean: ClientErrorBean = {
+        const errorBean: ClientErrorBean = createClientErrorBean({
             message: "" + error,
             componentStack: info?.componentStack,
-        };
+        });
         if (manager) manager.send(
             clientToServerCoreBeanBuilder()
                 .endpoint(IOCoreEndpoints.CORE)

@@ -1,9 +1,9 @@
-import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../beans/Beans";
-import { ClientToServerCoreBean, clientToServerCoreBeanBuilder } from "./ClientToServerCoreBeanBuilder";
+import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, createClientToServerAuthenticationBean, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../beans/Beans";
+import { clientToServerCoreBeanBuilder } from "./IOClientToServerCoreBeanBuilder";
 import { ServerToClientCoreBean, serverToClientCoreBeanBuilder } from "./ServerToClientCoreBeanBuilder";
 import { getCookie, setCookie } from "./cookie";
-import Deserialiser from "./serialisation/Deserialisation";
-import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation.ts.2";
+import { deserialise } from "./serialisation/Deserialisation";
+import { serialise } from "./serialisation/Serialisation";
 
 export interface ListenerCallback<BEAN extends AbstractIOBean> {
     (coreBean: ServerToClientCoreBean<BEAN>): void;
@@ -39,8 +39,6 @@ export class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
-    serialiser: Serialiser;
-    deserialiser: Deserialiser;
 
     constructor(
         url: string,
@@ -48,7 +46,6 @@ export class WebSocketManager {
         reconnect = false,
         ping = 5,
         logging = true,
-        serialisationSignatures?: Map<string, BeanSerialisationSignature>
     ) {
         this.url = url;
         this.reconnect = reconnect;
@@ -65,9 +62,6 @@ export class WebSocketManager {
         this.queue = [];
         this.logging = logging;
 
-        this.serialiser = new Serialiser(serialisationSignatures);
-        this.deserialiser = new Deserialiser(serialisationSignatures);
-
         this.ws = new WebSocket(url);
         this.initListeners();
         this.sid = null as any;
@@ -80,7 +74,7 @@ export class WebSocketManager {
                 clientToServerCoreBeanBuilder()
                 .endpoint(IOCoreEndpoints.CORE)
                 .message(CoreMessage.PING)
-                .payloadJSON("{}")
+                .payload("{}")
                 .build());
         }, ping * 60 * 1000) as unknown as number;
     }
@@ -113,10 +107,10 @@ export class WebSocketManager {
     private onConnect(_event?: Event) {
         if (this.logging) console.log("ws connection established");
 
-        const authenticationBean: ClientToServerAuthenticationBean = {
+        const authenticationBean: ClientToServerAuthenticationBean = createClientToServerAuthenticationBean({
             token0: getCookie("token0"),
             token1: getCookie("token1"),
-        };
+        });
 
         this.send(
             clientToServerCoreBeanBuilder()
@@ -158,13 +152,13 @@ export class WebSocketManager {
     private onMessage(event: MessageEvent) {
         const raw: string = event.data;
 
-        const coreBean: IOServerToClientCoreBean = this.deserialiser.deserialise(raw);
+        const coreBean: IOServerToClientCoreBean = deserialise(raw);
 
         const bean: ServerToClientCoreBean<AbstractIOBean> = 
             serverToClientCoreBeanBuilder()
                 .endpoint(coreBean.endpoint)
                 .message(coreBean.message)
-                .payload(this.deserialiser.deserialise(coreBean.payload))
+                .payload(deserialise(coreBean.payload))
                 .origin(coreBean.origin ?? undefined)
                 .fromSid(coreBean.fromSid ?? undefined)
                 .build();
@@ -219,25 +213,14 @@ export class WebSocketManager {
         }
     }
 
-    send(coreBean: ClientToServerCoreBean) {
-
-        const _payload = coreBean.payloadObject ? this.serialiser.serialise(coreBean.payloadObject) : coreBean.payloadJSON;
-
-        const ioCoreBean: IOClientToServerCoreBean = {
-            endpoint: coreBean.endpoint!,
-            payload: _payload!,
-            toSid: coreBean.toSid!,
-            message: coreBean.message!,
-            origin: coreBean.origin!
-        }
-
-        const raw = this.serialiser.serialise(ioCoreBean);
+    send(coreBean: IOClientToServerCoreBean) {
+        const raw = serialise(coreBean);
 
         if (!this.isConnected()) {
             this.queue.push(raw);
-            if (this.logging) console.log("queueing", coreBean.message, "with payload", _payload);
+            if (this.logging) console.log("queueing", coreBean.message, "with payload", coreBean.payload);
         } else {
-            if (this.logging) console.log("sending", coreBean.message, "with payload", _payload);
+            if (this.logging) console.log("sending", coreBean.message, "with payload", coreBean.payload);
             this.sendRaw(raw);
         }
     }

@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { AbstractIOBean } from '../beans/Beans';
-import { ClientToServerCoreBean } from './ClientToServerCoreBeanBuilder';
+import { AbstractIOBean, IOClientToServerCoreBean } from '../beans/Beans';
 import { WebSocketContext } from "./WebSocketContext";
 import { ConnectivityCallback, DefaultListenerCallback, ListenerCallback, UnsubscribeCallback, WebSocketManager } from './WebSocketManager';
 
-export type SendFunction = (coreBean: ClientToServerCoreBean) => void;
+export type SendFunction = (coreBean: IOClientToServerCoreBean) => void;
 
 export type ListenFunction = <BEAN extends AbstractIOBean>(endpoint: string, message: string, callback: ListenerCallback<BEAN>) => UnsubscribeCallback;
 
@@ -21,7 +20,7 @@ export const useWebSocket = (id?: string | null) => {
 
     if (!manager) throw Error("manager is null, did you provide a <WebSocketProvider> element with the correct id ("+id+") ?");
 
-    const send: SendFunction = (coreBean: ClientToServerCoreBean) => {
+    const send: SendFunction = (coreBean: IOClientToServerCoreBean) => {
         manager!.send(coreBean);
     };
     const listen: ListenFunction = <BEAN extends AbstractIOBean>(endpoint: string, message: string, callback: ListenerCallback<BEAN>): UnsubscribeCallback => {

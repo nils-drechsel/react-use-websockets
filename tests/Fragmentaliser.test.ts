@@ -18,7 +18,12 @@ describe("Fragmentalisation", () => {
             set0: (() => {const m = new Set(); m.add("key0"); m.add("key1"); return m;})(),
             array0: ["a","b","c"],
             null0: null,
-            undefined0: undefined
+            undefined0: undefined,
+            uid: "uid0",
+            version: "v0",
+            createdTimestamp: 0,
+            modifiedTimestamp: 0,
+            touchedTimestamp: 0,
         }
 
         const fragments0 = fragmentalise(bean0, bean0);
@@ -41,7 +46,12 @@ describe("Fragmentalisation", () => {
             set0: (() => {const m = new Set(); m.add("key0"); m.add("key1"); return m;})(),
             array0: ["a","b","c"],
             null0: null,
-            undefined0: undefined
+            undefined0: undefined,
+            uid: "uid0",
+            version: "v0",
+            createdTimestamp: 0,
+            modifiedTimestamp: 0,
+            touchedTimestamp: 0,
         }
 
         const bean1 = {
@@ -57,12 +67,17 @@ describe("Fragmentalisation", () => {
             set0: (() => {const m = new Set(); m.add("key2"); m.add("key3"); return m;})(),
             array0: ["a","b","d"],
             null0: undefined,
-            undefined0: null
+            undefined0: null,
+            uid: "uid0",
+            version: "v1",
+            createdTimestamp: 1,
+            modifiedTimestamp: 1,
+            touchedTimestamp: 1,
         }
 
         const fragments0 = fragmentalise(bean0, bean1);
 
-        expect(fragments0.fragments.length === 11).to.be.true;
+        expect(fragments0.fragments.length === 15).to.be.true;
     });
 
 
@@ -74,6 +89,11 @@ describe("Fragmentalisation", () => {
                 map0: (() => {const m = new Map(); m.set("key0", "value0"); m.set("key1", "value1"); return m;})(),
                 map1: (() => {const m = new Map(); m.set("key0", "value0"); m.set("key1", "value1"); return m;})(),
             },
+            uid: "uid0",
+            version: "v0",
+            createdTimestamp: 0,
+            modifiedTimestamp: 0,
+            touchedTimestamp: 0,
         }
 
         const bean1 = {
@@ -82,11 +102,16 @@ describe("Fragmentalisation", () => {
                 map0: (() => {const m = new Map(); m.set("key1", "value0"); m.set("key2", "value1"); return m;})(),
                 map2: (() => {const m = new Map(); m.set("key0", "value0"); m.set("key1", "value1"); return m;})(),
             },
+            uid: "uid0",
+            version: "v1",
+            createdTimestamp: 0,
+            modifiedTimestamp: 0,
+            touchedTimestamp: 0,
         }
 
         const fragments0 = fragmentalise(bean0, bean1);
 
-        expect(fragments0.fragments.length === 5).to.be.true;
+        expect(fragments0.fragments.length === 6).to.be.true;
     });
 
 
