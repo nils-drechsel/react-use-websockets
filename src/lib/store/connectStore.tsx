@@ -54,10 +54,11 @@ export const connectStore = <MappedProps, OwnProps>(
 
             return showElementOnError ? showElementOnError(errors) : <div>{errors.join(";")}</div>
         }
-        
+
         if (storeMetas.some(meta => meta.state !== StoreConnectionState.READY)) {
             return (showElementWhileConnecting as any) || null;
         }
+
         return <WrappedComponent {...props} {...newProps} />
     }
 }

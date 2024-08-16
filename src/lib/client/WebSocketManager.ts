@@ -1,4 +1,5 @@
-import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, createClientToServerAuthenticationBean, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../beans/Beans";
+import { AbstractIOBean, ClientToServerAuthenticationBean, CoreMessage, createClientToServerAuthenticationBean, createIOPingPongBean, IOClientToServerCoreBean, IOCoreEndpoints, IOServerToClientCoreBean, ServerToClientAuthenticationBean } from "../beans/Beans";
+import { SessionError } from "../store/RemoteStore";
 import { clientToServerCoreBeanBuilder } from "./IOClientToServerCoreBeanBuilder";
 import { ServerToClientCoreBean, serverToClientCoreBeanBuilder } from "./ServerToClientCoreBeanBuilder";
 import { getCookie, setCookie } from "./cookie";
@@ -74,7 +75,7 @@ export class WebSocketManager {
                 clientToServerCoreBeanBuilder()
                 .endpoint(IOCoreEndpoints.CORE)
                 .message(CoreMessage.PING)
-                .payload("{}")
+                .payload(createIOPingPongBean())
                 .build());
         }, ping * 60 * 1000) as unknown as number;
     }
@@ -158,7 +159,7 @@ export class WebSocketManager {
             serverToClientCoreBeanBuilder()
                 .endpoint(coreBean.endpoint)
                 .message(coreBean.message)
-                .payload(deserialise(coreBean.payload))
+                .payload(coreBean.payload)
                 .origin(coreBean.origin ?? undefined)
                 .fromSid(coreBean.fromSid ?? undefined)
                 .build();
@@ -193,14 +194,19 @@ export class WebSocketManager {
         }
         const listeners = this.messageToListeners.get(messageId);
 
-        if (this.logging)
-            console.log("message", messageId, "from", bean.fromSid, "with payload", bean.payload, " has listeners:", listeners);
-
         const callbacks = Array.from(listeners!.values()).map((listener: number) =>
             this.listenerToCallback.get(listener)
         );
 
-        callbacks?.forEach((callback) => (callback ? callback(bean) : null));
+        try {
+            callbacks?.forEach((callback) => (callback ? callback(bean) : null));
+        } catch (e) {
+            if (e instanceof SessionError) {
+                console.error(e.message)
+            } else {
+                throw e;
+            }
+        }
     }
 
 

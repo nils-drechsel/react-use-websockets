@@ -10,11 +10,11 @@ interface Props {
 }
 
 export const RemoteStoreProvider: FunctionComponent<Props> = ({ id, children, showElementWhileConnecting }) => {
-    const remoteStoreMap: Map<string, RemoteStore<any>> = useContext(RemoteStoreContext);
+    const remoteStoreMap: Map<string, RemoteStore> = useContext(RemoteStoreContext);
 
     const { manager } = useWebSocket(id);
 
-    const [store, setStore] = useState<RemoteStore<any> | null>(null);
+    const [store, setStore] = useState<RemoteStore | null>(null);
 
     useEffect(() => {
         const store = new RemoteStore(manager);

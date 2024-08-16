@@ -35,9 +35,10 @@ export const useRemoteStore = <BEAN extends AbstractStoreBean>(
 
     const parametersBean = params ?? createNoParametersBean();
 
-    const remoteStore = useGetRemoteStore<BEAN>(id);
+    const remoteStore = useGetRemoteStore(id);
 
     const [data, setData] = useState(remoteStore.getData(primaryPath, parametersBean));
+
     const [storeMeta, setStoreMeta] = useState(remoteStore.getStoreMeta(primaryPath, parametersBean));
 
     const updateBean: UpdateBeanFunction<BEAN> = (payload) => {
@@ -54,9 +55,9 @@ export const useRemoteStore = <BEAN extends AbstractStoreBean>(
 
     const dependencyFulfilled = dependency === undefined || !!dependency;
 
-    const storeId = createStoreId(primaryPath, params);
+    const storeId = createStoreId(primaryPath, parametersBean);
 
-    const paramString = params ? JSON.stringify(params) : null;
+    const paramString = JSON.stringify(params);
 
     if (connectionMetaRef && connectionMetaRef.current && !connectionMetaRef.current.has(storeId)) {
         connectionMetaRef.current.set(storeId, storeMeta);

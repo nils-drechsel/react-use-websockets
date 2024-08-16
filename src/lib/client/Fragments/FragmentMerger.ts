@@ -8,23 +8,26 @@ export const mergeFragments = <BEAN extends AbstractStoreBean>(bean: BEAN | unde
 
     bean = structuredClone(bean);
 
+    console.log("starting bean", bean);
 
     fragmentList.fragments.forEach(fragment => {
 
         let base = bean;
 
+        if (fragment.type === FragmentType.CREATE_BEAN) {
+            bean = deserialise(fragment.jsonPayload as string);
+            console.log("creating new bean", bean);
+            return;
+        }
+
+        if (fragment.type === FragmentType.REMOVE_BEAN) {
+            bean = undefined;
+            console.log("removing bean");
+            return;
+        }
+
+
         fragment.path.forEach((p, index) => {
-
-            if (fragment.type === FragmentType.CREATE_BEAN) {
-                bean = deserialise(fragment.jsonPayload as string);
-                return;
-            }
-
-            if (fragment.type === FragmentType.REMOVE_BEAN) {
-                bean = undefined;
-                return;
-            }
-
 
             if (index === fragment.path.length - 1) {
 
@@ -79,6 +82,9 @@ export const mergeFragments = <BEAN extends AbstractStoreBean>(bean: BEAN | unde
         });
 
     });
+
+    console.log("resulting bean", bean);
+
 
     return bean;
 

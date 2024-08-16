@@ -1,4 +1,4 @@
-import { AbstractIOBean } from "../store/beans/Beans";
+import { AbstractIOBean } from "../beans/Beans";
 export interface ServerToClientCoreBean<BEAN extends AbstractIOBean> {
     endpoint: string;
     message: string;

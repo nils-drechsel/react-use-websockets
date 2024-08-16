@@ -1,5 +1,4 @@
 import { AbstractIOBean, AbstractStoreParametersBean, createIOClientToServerStoreBean, IOClientToServerStoreBean } from "../beans/Beans";
-import { serialise } from "./serialisation/Serialisation";
 
 
 
@@ -16,23 +15,21 @@ export class ClientToServerStoreBeanBuilder {
         this.coreBean.primaryPath = primaryPath;
         return this;
     }
+    public storeSessionId(storeSessionId: string): ClientToServerStoreBeanBuilder {
+        this.coreBean.storeSessionId = storeSessionId;
+        return this;
+    }
 
-    public payload(payload: string | AbstractIOBean): ClientToServerStoreBeanBuilder {
+    public payload(payload: AbstractIOBean): ClientToServerStoreBeanBuilder {
         if (typeof(payload) == "string") {
-            this.coreBean.payloadJson = payload;
-        } else {
-            this.coreBean.payloadJson = serialise(payload);
-        }
+            this.coreBean.payload = payload;
+        } 
         
         return this;
     }
 
-    public parameters(payload: string | AbstractStoreParametersBean): ClientToServerStoreBeanBuilder {
-        if (typeof(payload) == "string") {
-            this.coreBean.parametersJson = payload;
-        } else {
-            this.coreBean.parametersJson = serialise(payload);
-        }
+    public parameters(payload: AbstractStoreParametersBean): ClientToServerStoreBeanBuilder {
+        this.coreBean.parameters = payload;
         
         return this;
     }
@@ -50,8 +47,9 @@ export class ClientToServerStoreBeanBuilder {
     }
 
     private sanityCheck() {
+        if (!this.coreBean.storeSessionId) throw new Error("storeSessionId cannot be undefined");
         if (!this.coreBean.primaryPath) throw new Error("primaryPath cannot be undefined");
-        if (!this.coreBean.parametersJson) throw new Error("parameters cannot be undefined");
+        if (!this.coreBean.parameters) throw new Error("parameters cannot be undefined");
     }
 
 

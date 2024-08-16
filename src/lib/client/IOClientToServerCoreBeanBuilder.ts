@@ -1,5 +1,4 @@
 import { AbstractIOBean, createIOClientToServerCoreBean, IOClientToServerCoreBean } from "../beans/Beans";
-import { serialise } from "./serialisation/Serialisation";
 
 
 
@@ -17,17 +16,10 @@ export class IOClientToServerCoreBeanBuilder {
         return this;
     }
 
-    public payload(payload: string | AbstractIOBean): IOClientToServerCoreBeanBuilder {
-        if (typeof(payload) == "string") {
-            this.coreBean.payload = payload;
-        } else {
-            this.coreBean.payload = serialise(payload);
-        }
-        
+    public payload(payload: AbstractIOBean): IOClientToServerCoreBeanBuilder {
+        this.coreBean.payload = payload;
         return this;
     }
-
-
 
     public message(message: string): IOClientToServerCoreBeanBuilder {
         this.coreBean.message = message;

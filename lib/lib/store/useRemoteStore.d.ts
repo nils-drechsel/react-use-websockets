@@ -1,20 +1,20 @@
+import { AbstractStoreBean, AbstractStoreParametersBean } from "../beans/Beans";
 import { InsertBeanFunction, RemoveBeanFunction, StoreMeta, UpdateBeanFunction } from "./RemoteStore";
-import { AbstractIOBean, AbstractStoreParametersBean } from "./beans/Beans";
 import { ConnectionMetaRef, ConnectionMetaSetter } from "./connectStore";
-export interface RemoteStoreType<FRAGMENT extends AbstractIOBean> {
-    data: Map<string, FRAGMENT>;
+export interface RemoteStoreType<BEAN extends AbstractStoreBean> {
+    data: Map<string, BEAN>;
     meta: StoreMeta;
-    updateBean: UpdateBeanFunction<FRAGMENT>;
-    insertBean: InsertBeanFunction<FRAGMENT>;
+    updateBean: UpdateBeanFunction<BEAN>;
+    insertBean: InsertBeanFunction<BEAN>;
     removeBean: RemoveBeanFunction;
 }
-export interface RemoteStoreArrayType<FRAGMENT extends AbstractIOBean> {
-    data: Array<FRAGMENT>;
+export interface RemoteStoreArrayType<BEAN extends AbstractStoreBean> {
+    data: Array<BEAN>;
     meta: StoreMeta;
-    updateBean: UpdateBeanFunction<FRAGMENT>;
-    insertBean: InsertBeanFunction<FRAGMENT>;
+    updateBean: UpdateBeanFunction<BEAN>;
+    insertBean: InsertBeanFunction<BEAN>;
     removeBean: RemoveBeanFunction;
 }
-export declare const useRemoteStore: <FRAGMENT extends AbstractIOBean>(id: string | null, primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null, callback?: ((data: Map<string, FRAGMENT> | undefined) => void) | undefined, dependency?: any, connectionMetaRef?: ConnectionMetaRef, setConnectionMeta?: ConnectionMetaSetter, optional?: boolean) => RemoteStoreType<FRAGMENT>;
-export declare const useRemoteStoreArray: <FRAGMENT extends AbstractIOBean>(id: string | null, primaryPath: Array<string>, secondaryPath: Array<string>, params?: AbstractStoreParametersBean | null, callback?: ((data: Map<string, FRAGMENT> | undefined) => void) | undefined, dependency?: any, connectionMetaRef?: ConnectionMetaRef, setConnectionMeta?: ConnectionMetaSetter, optional?: boolean) => RemoteStoreArrayType<FRAGMENT>;
+export declare const useRemoteStore: <BEAN extends AbstractStoreBean>(id: string | null, primaryPath: Array<string>, params?: AbstractStoreParametersBean | null, callback?: ((data: Map<string, BEAN> | undefined) => void) | undefined, dependency?: any, connectionMetaRef?: ConnectionMetaRef, setConnectionMeta?: ConnectionMetaSetter, optional?: boolean) => RemoteStoreType<BEAN>;
+export declare const useRemoteStoreArray: <BEAN extends AbstractStoreBean>(id: string | null, primaryPath: Array<string>, params?: AbstractStoreParametersBean | null, callback?: ((data: Map<string, BEAN> | undefined) => void) | undefined, dependency?: any, connectionMetaRef?: ConnectionMetaRef, setConnectionMeta?: ConnectionMetaSetter, optional?: boolean) => RemoteStoreArrayType<BEAN>;
 export default useRemoteStore;

@@ -1,8 +1,5 @@
-import { AbstractIOBean } from "../store/beans/Beans";
-import { ClientToServerCoreBean } from "./ClientToServerCoreBeanBuilder";
+import { AbstractIOBean, IOClientToServerCoreBean } from "../beans/Beans";
 import { ServerToClientCoreBean } from "./ServerToClientCoreBeanBuilder";
-import Deserialiser from "./serialisation/Deserialisation";
-import Serialiser, { BeanSerialisationSignature } from "./serialisation/Serialisation";
 export interface ListenerCallback<BEAN extends AbstractIOBean> {
     (coreBean: ServerToClientCoreBean<BEAN>): void;
 }
@@ -33,9 +30,7 @@ export declare class WebSocketManager {
     uid: string;
     domain: string;
     unsubscribeInterval: number;
-    serialiser: Serialiser;
-    deserialiser: Deserialiser;
-    constructor(url: string, domain: string, reconnect?: boolean, ping?: number, logging?: boolean, serialisationSignatures?: Map<string, BeanSerialisationSignature>);
+    constructor(url: string, domain: string, reconnect?: boolean, ping?: number, logging?: boolean);
     isConnected(): boolean;
     isReady(): boolean;
     sleep(ms: number): Promise<unknown>;
@@ -46,7 +41,7 @@ export declare class WebSocketManager {
     private onClose;
     private onMessage;
     private resolveQueue;
-    send(coreBean: ClientToServerCoreBean): void;
+    send(coreBean: IOClientToServerCoreBean): void;
     sendRaw(raw: string): void;
     private createId;
     removeListener(id: number): void;

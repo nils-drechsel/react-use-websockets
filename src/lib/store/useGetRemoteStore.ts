@@ -1,13 +1,12 @@
 import { useContext } from "react";
-import { AbstractStoreBean } from "../beans/Beans";
 import { RemoteStore } from "./RemoteStore";
 import RemoteStoreContext from "./RemoteStoreContext";
 
-export const useGetRemoteStore = <BEAN extends AbstractStoreBean>(id: string | null): RemoteStore<BEAN> => {
+export const useGetRemoteStore = (id: string | null): RemoteStore => {
 
-    const remoteStoreMap: Map<string, RemoteStore<BEAN>> = useContext(RemoteStoreContext);
+    const remoteStoreMap: Map<string, RemoteStore> = useContext(RemoteStoreContext);
 
-    let store: RemoteStore<BEAN> | undefined = undefined;
+    let store: RemoteStore | undefined = undefined;
     if (id) {
         store = remoteStoreMap.get(id);
     } else {

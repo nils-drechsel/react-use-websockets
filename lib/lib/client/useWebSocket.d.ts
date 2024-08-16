@@ -1,7 +1,6 @@
-import { AbstractIOBean } from '../store/beans/Beans';
-import { ClientToServerCoreBean } from './ClientToServerCoreBeanBuilder';
+import { AbstractIOBean, IOClientToServerCoreBean } from '../beans/Beans';
 import { ConnectivityCallback, DefaultListenerCallback, ListenerCallback, UnsubscribeCallback, WebSocketManager } from './WebSocketManager';
-export type SendFunction = (coreBean: ClientToServerCoreBean) => void;
+export type SendFunction = (coreBean: IOClientToServerCoreBean) => void;
 export type ListenFunction = <BEAN extends AbstractIOBean>(endpoint: string, message: string, callback: ListenerCallback<BEAN>) => UnsubscribeCallback;
 export declare const useWebSocket: (id?: string | null) => {
     manager: WebSocketManager;

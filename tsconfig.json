@@ -6,7 +6,7 @@
         "noUnusedParameters": true,
         "experimentalDecorators": true,
         "noFallthroughCasesInSwitch": true,
-        "target": "es6",
+        "target": "es2022",
         "module": "commonjs",
         "declaration": true,
         "outDir": "./lib",
@@ -15,11 +15,10 @@
         "esModuleInterop": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
-        "lib": ["es2017", "DOM"],
+        "lib": ["es2022", "DOM"],
     },
     "include": [
-        "src"
-, "tests", "tests2"    ],
+        "src"],
     "exclude": [
         "node_modules",
         "**/__tests__/*"
