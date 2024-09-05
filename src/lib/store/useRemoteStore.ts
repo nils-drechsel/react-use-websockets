@@ -22,6 +22,15 @@ export interface RemoteStoreArrayType<BEAN extends AbstractStoreBean> {
     removeBean: RemoveBeanFunction
 }
 
+export interface RemoteStoreSingletonType<BEAN extends AbstractStoreBean> {
+    data: BEAN, 
+    meta: StoreMeta,
+    updateBean: UpdateBeanFunction<BEAN>,
+    insertBean: InsertBeanFunction<BEAN>,
+    removeBean: RemoveBeanFunction
+}
+
+
 export const useRemoteStore = <BEAN extends AbstractStoreBean>(
     id: string | null,
     primaryPath: Array<string>,
@@ -139,6 +148,37 @@ export const useRemoteStoreArray = <BEAN extends AbstractStoreBean>(
 
     return {
         data: res.data ? Array.from(res.data.values()) : (undefined as any),
+        meta: res.meta,
+        updateBean: res.updateBean, 
+        insertBean: res.insertBean, 
+        removeBean: res.removeBean
+    }
+    
+};
+
+export const useRemoteStoreSingleton = <BEAN extends AbstractStoreBean>(
+    id: string | null,
+    primaryPath: Array<string>,
+    params?: AbstractStoreParametersBean | null,
+    callback?: (data: Map<string, BEAN> | undefined) => void,
+    dependency?: any,
+    connectionMetaRef?: ConnectionMetaRef,
+    setConnectionMeta?: ConnectionMetaSetter,
+    optional?: boolean
+): RemoteStoreSingletonType<BEAN> => {
+    const res = useRemoteStore(
+        id,
+        primaryPath,
+        params,
+        callback,
+        dependency,
+        connectionMetaRef,
+        setConnectionMeta,
+        optional
+    );
+
+    return {
+        data: res.data && res.data.size === 1 ? Array.from(res.data.values())[0] : (undefined as any),
         meta: res.meta,
         updateBean: res.updateBean, 
         insertBean: res.insertBean, 

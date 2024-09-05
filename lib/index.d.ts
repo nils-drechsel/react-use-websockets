@@ -10,7 +10,8 @@ export { InsertBeanFunction, RemoteStore, RemoveBeanFunction, UpdateBeanFunction
 export { RemoteStoreContext } from "./lib/store/RemoteStoreContext";
 export { RemoteStoreProvider } from "./lib/store/RemoteStoreProvider";
 export { useGetRemoteStore } from "./lib/store/useGetRemoteStore";
-export { RemoteStoreArrayType, RemoteStoreType, useRemoteStore, useRemoteStoreArray } from "./lib/store/useRemoteStore";
+export { RemoteStoreArrayType, RemoteStoreType, useRemoteStore, useRemoteStoreArray, useRemoteStoreSingleton } from "./lib/store/useRemoteStore";
+export { MultiRemoteStoreArrayType, MultiRemoteStoreType, useMultiRemoteStoreArray, useMultiRemoteStoreSingleton, useMultiRemoteStores } from "./lib/store/useRemoteStores";
 export { EditRemoteStoreFunction, PartialEditRemoteStoreFunction, PartialUpdateFunction, UpdateFunction, updateBean, updatePartialBean } from "./lib/beans/StoreBeanUtils";
 export { MessageBean, MessageType, TimestampBean } from "./lib/beans/Beans";
 export { TimeoutCallback, TimeoutCallbackWithState, errorComparison, errorLength, errorNotEmpty, errorPassword, errorRegex, errorSize, validateComparison, validateLength, validateNotEmpty, validatePassword, validateRegex, validateSize } from "./lib/beans/StoreBeanUtils";

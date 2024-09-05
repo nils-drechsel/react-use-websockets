@@ -35,9 +35,7 @@ export interface NoParametersBean extends AbstractStoreParametersBean {
     getPathElements: () => Array<string>;
     _t: string;
 }
-export declare const createNoParametersBean: (content?: Omit<NoParametersBean, "_t">) => {
-    _t: string;
-} & Omit<NoParametersBean, "_t">;
+export declare const createNoParametersBean: (content?: Omit<NoParametersBean, "_t">) => NoParametersBean;
 export interface AbstractStoreParametersBean extends AbstractIOBean {
     getPathElements: () => Array<string>;
     _t: string;

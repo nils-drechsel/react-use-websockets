@@ -55,7 +55,7 @@ export declare class RemoteStore {
     releaseRemoteStore(): void;
     openRemoteStore(primaryPath: Array<string>, params: AbstractStoreParametersBean, optional: boolean): void;
     closeRemoteStore(primaryPath: Array<string>, params: AbstractStoreParametersBean): void;
-    getData(primaryPath: Array<string>, params: AbstractStoreParametersBean | null): Map<String, AbstractStoreBean> | undefined;
+    getData(primaryPath: Array<string>, params: AbstractStoreParametersBean | null): Map<string, AbstractStoreBean> | undefined;
     getStoreMeta(primaryPath: Array<string>, params: AbstractStoreParametersBean | null, initialOptional?: boolean): StoreMeta;
     register<BEAN extends AbstractStoreBean>(primaryPath: Array<string>, params: AbstractStoreParametersBean, setData: (data: Map<string, BEAN>) => void, setMeta: (meta: StoreMeta) => void, optional: boolean): () => void;
     deregister(primaryPath: Array<string>, id: string, params: AbstractStoreParametersBean): void;

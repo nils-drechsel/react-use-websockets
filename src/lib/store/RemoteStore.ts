@@ -222,7 +222,7 @@ export class RemoteStore {
     getData(
         primaryPath: Array<string>, 
         params: AbstractStoreParametersBean | null
-    ): Map<String, AbstractStoreBean> | undefined {
+    ): Map<string, AbstractStoreBean> | undefined {
         const storeId = createStoreId(primaryPath, params);
 
         if (!this.clientStore.has(storeId)) {
