@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AbstractStoreBean, AbstractStoreParametersBean, createNoParametersBean } from "../beans/Beans";
 import { createStoreId } from "../beans/StoreBeanUtils";
-import { InsertBeanFunction, RemoveBeanFunction, StoreMeta, UpdateBeanFunction } from "./RemoteStore";
+import { BeanEditor, InsertBeanFunction, RemoveBeanFunction, StoreMeta, UpdateBeanFunction } from "./RemoteStore";
 import { ConnectionMetaRef, ConnectionMetaSetter } from "./connectStore";
 import { useGetRemoteStore } from "./useGetRemoteStore";
 
@@ -50,12 +50,14 @@ export const useRemoteStore = <BEAN extends AbstractStoreBean>(
 
     const [storeMeta, setStoreMeta] = useState(remoteStore.getStoreMeta(primaryPath, parametersBean));
 
-    const updateBean: UpdateBeanFunction<BEAN> = (payload) => {
-        remoteStore.updateBean(primaryPath, parametersBean, payload);
+    const updateBean: UpdateBeanFunction<BEAN> = (uid, editor: BeanEditor<BEAN>) => {
+        if (!data) throw new Error("store has not yet received any data or has been cleared: " + primaryPath);
+        if (!data.has(uid)) throw new Error("uid: " + uid + " does not exist in store " + primaryPath);
+        remoteStore.updateBean(primaryPath, parametersBean, editor(data.get(uid)! as BEAN));
     }
 
     const insertBean: InsertBeanFunction<BEAN> = (payload) => {
-        remoteStore.insertBean(primaryPath, parametersBean, payload, );
+        remoteStore.insertBean(primaryPath, parametersBean, payload);
     }
 
     const removeBean: RemoveBeanFunction = (key) => {

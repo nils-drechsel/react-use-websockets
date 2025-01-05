@@ -67,7 +67,12 @@ export const useMultiRemoteStores = <BEAN extends AbstractStoreBean>(
     const [storeMetas, setStoreMetas] = useState(remap(primaryPaths, (key, value) => remoteStore.getStoreMeta(value, parameterBeans.get(key)!)));
 
     const updateBean: Map<string, UpdateBeanFunction<BEAN>> = 
-        remap(primaryPaths, (key, value) => (payload) => remoteStore.updateBean(value, parameterBeans.get(key)!, payload));
+        remap(primaryPaths, (key, value) => (uid, fn) => {
+
+            if (!data.get(key)) throw new Error("store has not yet received any data or has been cleared: " + primaryPaths.get(key));
+            if (!data.get(key)!.has(uid)) throw new Error("uid: " + uid + " does not exist in store " + primaryPaths.get(key));
+            remoteStore.updateBean(value, parameterBeans.get(key)!, fn(data.get(key)!.get(uid)! as BEAN));
+        });
 
     const insertBean: Map<string, InsertBeanFunction<BEAN>> = 
         remap(primaryPaths, (key, value) => (payload) => remoteStore.insertBean(value, parameterBeans.get(key)!, payload));

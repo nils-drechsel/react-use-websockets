@@ -23,8 +23,11 @@ export interface StoreMeta {
     state: StoreConnectionState;
     errors: Array<string> | null;
 }
+export interface BeanEditor<BEAN> {
+    (old: BEAN): BEAN;
+}
 export interface UpdateBeanFunction<BEAN extends AbstractStoreBean> {
-    (payload: BEAN): void;
+    (uid: string, editor: BeanEditor<BEAN>): void;
 }
 export interface InsertBeanFunction<BEAN extends AbstractStoreBean> {
     (payload: BEAN): void;

@@ -38,3 +38,4 @@ export interface TimeoutCallbackWithState {
     (state: TimeoutCallbackState, ...args: any[]): void;
 }
 export declare const callbackWithTimeout: (timeoutInSeconds: number, callback: TimeoutCallbackWithState) => TimeoutCallback;
+export declare const createUid: () => string;

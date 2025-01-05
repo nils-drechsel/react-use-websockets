@@ -1,4 +1,5 @@
 import debounce from "lodash/debounce";
+import { nanoid } from "nanoid";
 import { Dispatch, SetStateAction } from "react";
 import { passwordConformsToEntropy } from "../client/ClientUtils";
 import { AbstractIOBean, AbstractStoreParametersBean, Comparator } from "./Beans";
@@ -201,4 +202,9 @@ export const callbackWithTimeout =
         callback(TimeoutCallbackState.NORMAL, ...args2);
       };
 
+}
+
+
+export const createUid = ():string => {
+    return nanoid();
 }

@@ -10,9 +10,13 @@ import {
     IOServerToClientStoreBean,
     ServerToClientStoreMessage,
     StoreConnectionErrorBean,
-    createIOClientToServerStoreBean
+    TransactionBean,
+    TransactionItemAction,
+    createIOClientToServerStoreBean,
+    createTransactionBean,
+    createTransactionItem
 } from "../beans/Beans";
-import { createStoreId } from '../beans/StoreBeanUtils';
+import { createStoreId, createUid } from '../beans/StoreBeanUtils';
 import { mergeFragments } from "../client/Fragments/FragmentMerger";
 import { clientToServerCoreBeanBuilder } from "../client/IOClientToServerCoreBeanBuilder";
 import { clientToServerStoreBeanBuilder } from "../client/IOClientToServerStoreBeanBuilder";
@@ -56,8 +60,12 @@ export interface StoreMeta {
     errors: Array<string> | null;
 }
 
+export interface BeanEditor<BEAN> {
+    (old:BEAN): BEAN
+}
+
 export interface UpdateBeanFunction<BEAN extends AbstractStoreBean> {
-    (payload: BEAN) : void;
+    ( uid: string, editor: BeanEditor<BEAN>) : void;
 }
 
 export interface InsertBeanFunction<BEAN extends AbstractStoreBean> {
@@ -79,7 +87,6 @@ interface BeanCache<BEAN extends AbstractStoreBean> {
     current: BEAN;
 }
 
-
 export class RemoteStore {
     clientStore: Map<string, ClientStore<AbstractStoreBean>>;
     subscribers: Map<string, Map<string, Subscriber<AbstractStoreBean>>>;
@@ -89,6 +96,8 @@ export class RemoteStore {
     connectedListener: UnsubscribeCallback;
     connectionErrorListener: UnsubscribeCallback;
     unsubscribePopulationListener: UnsubscribeCallback;
+
+    transaction: TransactionBean | null = null;
 
     constructor(websocketManager: WebSocketManager) {
         this.clientStore = new Map();
@@ -306,12 +315,22 @@ export class RemoteStore {
                 .storeSessionId(this.clientStore.get(storeId)!.storeSessionId)
                 .build();
 
-        this.websocketManager.send(
-            clientToServerCoreBeanBuilder()
-                .endpoint(IOCoreEndpoints.STORE)
-                .message(ClientToServerStoreMessage.UPDATE)
-                .payload(storeBean)
-                .build());
+        if (this.transaction) {
+
+            this.transaction.items.push(createTransactionItem({
+                action: TransactionItemAction.UPDATE,
+                payload: storeBean
+            }));
+
+        } else {
+
+            this.websocketManager.send(
+                clientToServerCoreBeanBuilder()
+                    .endpoint(IOCoreEndpoints.STORE)
+                    .message(ClientToServerStoreMessage.UPDATE)
+                    .payload(storeBean)
+                    .build());
+        }
     }
 
     insertBean(
@@ -334,12 +353,23 @@ export class RemoteStore {
                 .storeSessionId(this.clientStore.get(storeId)!.storeSessionId)
                 .build();
 
-        this.websocketManager.send(
-            clientToServerCoreBeanBuilder()
-                .endpoint(IOCoreEndpoints.STORE)
-                .message(ClientToServerStoreMessage.INSERT)
-                .payload(storeBean)
-                .build());
+        if (this.transaction) {
+
+            this.transaction.items.push(createTransactionItem({
+                action: TransactionItemAction.INSERT,
+                payload: storeBean
+            }));
+
+        } else {
+        
+            this.websocketManager.send(
+                clientToServerCoreBeanBuilder()
+                    .endpoint(IOCoreEndpoints.STORE)
+                    .message(ClientToServerStoreMessage.INSERT)
+                    .payload(storeBean)
+                    .build());
+
+        }
     }    
 
     removeBean(
@@ -363,12 +393,22 @@ export class RemoteStore {
                 .storeSessionId(this.clientStore.get(storeId)!.storeSessionId)
                 .build();
 
-        this.websocketManager.send(
-            clientToServerCoreBeanBuilder()
-                .endpoint(IOCoreEndpoints.STORE)
-                .message(ClientToServerStoreMessage.REMOVE)
-                .payload(storeBean)
-                .build());
+        if (this.transaction) {
+
+            this.transaction.items.push(createTransactionItem({
+                action: TransactionItemAction.REMOVE,
+                payload: storeBean
+            }));
+
+        } else {
+
+            this.websocketManager.send(
+                clientToServerCoreBeanBuilder()
+                    .endpoint(IOCoreEndpoints.STORE)
+                    .message(ClientToServerStoreMessage.REMOVE)
+                    .payload(storeBean)
+                    .build());
+        }
     }    
 
 
@@ -665,4 +705,30 @@ export class RemoteStore {
             }); 
         }
     }
+
+
+    public startTransaction():void {
+        this.transaction = createTransactionBean({
+            id: createUid(),
+            items: []
+        })
+    }
+
+    public endTransaction():void {
+
+        this.websocketManager.send(
+            clientToServerCoreBeanBuilder()
+                .endpoint(IOCoreEndpoints.STORE)
+                .message(ClientToServerStoreMessage.TRANSACTION)
+                .payload(this.transaction)
+                .build());
+        
+        this.transaction = null;
+    }
+
+    public cancelTransaction():void {
+        this.transaction = null;
+    }
+
+
 }
